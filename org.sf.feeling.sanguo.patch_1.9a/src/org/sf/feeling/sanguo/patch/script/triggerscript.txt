@@ -1,0 +1,23 @@
+Trigger Custom_General_Name-10001
+    WhenToTest CharacterTurnEnd
+    Condition FactionLeaderTrait winCity1000 >= 2
+          and Trait Custom_General_Name >= 1
+          and Trait Custom_General_Name < 2
+    Affects Custom_General_Name  500  Chance  100
+
+Trigger Custom_General_Name-10002
+    WhenToTest CharacterTurnEnd
+    Condition FactionLeaderTrait winCity1000 >= 4
+          and Trait Custom_General_Name >= 1
+          and Trait Custom_General_Name < 3
+    Affects Custom_General_Name  500  Chance  50
+    
+Trigger Custom_General_Name-10003
+    WhenToTest CharacterTurnEnd
+    Condition FactionLeaderTrait winCity1000 >= 6
+          and Trait Custom_General_Name >= 1
+          and Trait Custom_General_Name < 4
+    Affects Custom_General_Name  500  Chance  30
+   
+
+   

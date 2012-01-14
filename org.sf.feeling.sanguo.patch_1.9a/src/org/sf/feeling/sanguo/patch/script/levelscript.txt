@@ -1,0 +1,35 @@
+Trait Custom_General_Name
+    Characters family
+    NoGoingBackLevel  1
+    Level Custom_General_Name-1
+        Description Custom_General_Name-1_desc
+        EffectsDescription Custom_General_Name-1_effects_desc
+        GainMessage Custom_General_Name-1_gain_desc
+        Epithet Custom_General_Name-1_epithet_desc
+        Threshold  1000
+        Effect Fertility  -8
+        Effect SenateStanding  5
+    Level Custom_General_Name-2
+        Description Custom_General_Name-2_desc
+        EffectsDescription Custom_General_Name-2_effects_desc
+        GainMessage Custom_General_Name-2_gain_desc
+        Epithet Custom_General_Name-2_epithet_desc
+        Threshold  2000
+        Effect Fertility  -8
+        Effect Influence  1
+    Level Custom_General_Name-3
+        Description Custom_General_Name-3_desc
+        EffectsDescription Custom_General_Name-3_effects_desc
+        GainMessage Custom_General_Name-3_gain_desc
+        Epithet Custom_General_Name-3_epithet_desc
+        Threshold  3000
+        Effect Fertility  -8
+        Effect Influence  2
+    Level Custom_General_Name-4
+        Description Custom_General_Name-4_desc
+        EffectsDescription Custom_General_Name-4_effects_desc
+        GainMessage Custom_General_Name-4_gain_desc
+        Epithet Custom_General_Name-4_epithet_desc
+        Threshold  4000
+        Effect Fertility  -8
+        Effect Influence  3

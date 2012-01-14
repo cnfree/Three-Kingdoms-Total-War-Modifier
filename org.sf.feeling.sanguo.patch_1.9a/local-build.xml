@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     Sanguo Patch Build
+     
+     cnfree
+     ====================================================================== -->
+<project name="Sanguo Patch Build" default="all">
+
+	<!-- ================================= 
+          target: all              
+         ================================= -->
+	<target name="all" depends="clean">
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: init                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="init">
+		<tstamp />
+	
+		<property name="sanguo.patch.dist" value="./../org.sf.feeling.sanguo.patch/dist" />
+		<property name="dist.dir" value="dist" />
+		<property name="dist.version" value="${DSTAMP}" />
+		<property name="dist.src" value="${dist.dir}/org.sf.feeling.sanguo.patch_1.0.0.v${dist.version}.src.zip" />
+		<property name="dist.jar" value="${dist.dir}/org.sf.feeling.sanguo.patch_1.0.0.v${dist.version}.jar" />
+		<property name="dist.zip" value="${dist.dir}/org.sf.feeling.sanguo.patch_1.0.0.v${dist.version}.zip" />
+		<property name="build.temp" value="temp" />
+		<delete dir="${build.temp}" />
+		<delete dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}" />
+			
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: prepare                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="prepare" depends="init">
+		<copy todir="${build.temp}/src">
+			<fileset dir="src" />
+		</copy>
+		<copy todir="${build.temp}/lib">
+			<fileset dir="lib" />
+		</copy>
+		<copy todir="${build.temp}/META-INF">
+			<fileset dir="META-INF" />
+		</copy>
+		<copy todir="${build.temp}/build">
+			<fileset dir="build" />
+		</copy>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-sanguo-patch-src                     
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-sanguo-patch-src" depends="prepare">
+		<delete file="${dist.src}" />
+		<zip destfile="${dist.src}" >
+			<fileset dir="${build.temp}">
+				<exclude name="META-INF/" />
+				<exclude name="build/" />
+			</fileset>
+		</zip>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-sanguo-patch-jar                     
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-sanguo-patch-jar" depends="prepare">
+		<mkdir dir="${build.temp}/classes" />
+		<javac srcdir="${build.temp}/src" destdir="${build.temp}/classes" source="1.4" target="1.4" debug="true" encoding="utf-8" debuglevel="source,lines">
+			<classpath>
+				<fileset dir="lib" includes="*.jar" />
+			</classpath>
+		</javac>
+		<copy todir="${build.temp}/classes">
+			<fileset dir="${build.temp}/src" excludes="**/*.java"/>
+		</copy>
+		<delete file="${dist.jar}" />
+		<jar destfile="${dist.jar}" manifest="${build.temp}/META-INF/MANIFEST.MF" >
+			<fileset dir="${build.temp}/classes" includes="**/*.*" />
+			<fileset dir="${build.temp}/" includes="*.*" />
+		</jar>
+		<delete dir="${build.temp}/classes" />
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: dist-sanguo-patch-zip                    
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-sanguo-patch-zip" depends="prepare">
+		<mkdir dir="${build.temp}/patch-zip" />
+		<copy todir="${build.temp}/patch-zip">
+			<fileset dir="${build.temp}/lib"/>
+			<fileset dir="${build.temp}/build" />
+		</copy>
+		<rename dest="${build.temp}/patch-zip/patch.jar" src="${dist.jar}"/>
+		<zip destfile="${dist.zip}" >
+			<fileset dir="${build.temp}/patch-zip" />
+		</zip>
+		<delete dir="${build.temp}/patch-zip" />
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: clean                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="clean" depends="dist-sanguo-patch-src, dist-sanguo-patch-jar, dist-sanguo-patch-zip">
+		<delete dir="${build.temp}" />
+	</target>
+
+</project>
+

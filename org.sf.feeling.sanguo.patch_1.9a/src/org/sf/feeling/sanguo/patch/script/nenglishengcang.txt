@@ -1,0 +1,8 @@
+;------------------------------------------
+Trigger NengLiShenCang1100-Patch
+    WhenToTest CharacterTurnEnd
+
+    Condition IsGeneral
+          and Trait NengLiShenCang1100 = 1
+
+    Affects NengLiShenCang1200  1000  Chance  100
