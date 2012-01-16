@@ -450,7 +450,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character\\s+)("
 									+ generalInCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -546,7 +546,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character\\s+)("
 									+ generalOutCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1016,7 +1016,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher2 = pattern2.matcher( line );
 					if ( matcher2.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character\\s+)("
 									+ generalCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1165,7 +1165,7 @@ public class UnitUtil
 								Pattern.CASE_INSENSITIVE );
 						Matcher matcher = pattern.matcher( line );
 						if ( matcher.find( )
-								&& line.split( "(?i)(\\s+)("
+								&& line.split( "(?i)(character\\s+)("
 										+ generalCode
 										+ ")(\\s*)(,)" ).length == 2 )
 						{
@@ -1618,7 +1618,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character\\s+)("
 									+ generalCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1658,7 +1658,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character\\s+)("
 									+ leader
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1935,7 +1935,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character\\s+)("
 									+ leader
 									+ ")(\\s*)(,)" ).length == 2 )
 					{

@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import net.sf.feeling.dds.model.DDSImageFile;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -728,16 +726,6 @@ public class GeneralEditPage extends SimpleTabPage
 								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
 										true )
-										.scaledTo( 160, 210 );
-								imageCanvas.setImageData( imageData );
-								soldierImage = imageData;
-							}
-							else if ( imageFile.getName( )
-									.toLowerCase( )
-									.endsWith( ".dds" ) )
-							{
-								DDSImageFile file = new DDSImageFile( imageFile );
-								ImageData imageData = file.getData( )
 										.scaledTo( 160, 210 );
 								imageCanvas.setImageData( imageData );
 								soldierImage = imageData;

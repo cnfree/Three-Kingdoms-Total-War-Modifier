@@ -883,7 +883,7 @@ public class BakUtil
 				if ( propertiesFile.exists( ) )
 					propertiesFile.delete( );
 				Patch.getInstance( ).select( Patch.getInstance( )
-						.getPageCount( ) - 3 );
+						.getPageCount( ) - 5 );
 			}
 		}
 		else

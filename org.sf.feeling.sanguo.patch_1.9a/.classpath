@@ -5,7 +5,7 @@
 	<classpathentry kind="lib" path="lib/org.eclipse.ui.forms.jar" sourcepath="/org.eclipse.ui.forms"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.jface.jar" sourcepath="/org.eclipse.jface"/>
 	<classpathentry kind="lib" path="lib/pinyin.jar"/>
-	<classpathentry kind="lib" path="lib/org.sf.feeling.swt.win32.extension.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/fastdebug"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.6.0_23"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.sf.feeling.swt.win32.extension"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

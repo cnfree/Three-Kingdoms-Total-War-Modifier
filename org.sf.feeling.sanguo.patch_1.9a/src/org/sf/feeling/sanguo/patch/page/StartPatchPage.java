@@ -379,6 +379,9 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					changeUnitRestoreApply.setEnabled( true );
+					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+							&& generalInCombo.getSelectionIndex( ) != -1
+							&& generalOutCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -401,7 +404,9 @@ public class StartPatchPage extends SimpleTabPage
 					UnitUtil.switchGeneral( generalInCode, generalOutCode );
 					MapUtil.initMap( );
 					refreshPage( );
-					changeUnitApply.setEnabled( true );
+					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+							&& generalInCombo.getSelectionIndex( ) != -1
+							&& generalOutCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -586,6 +591,9 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					changeUnitRestoreApply.setEnabled( true );
+					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+							&& generalChangeCombo.getSelectionIndex( ) != -1
+							&& factionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -615,7 +623,9 @@ public class StartPatchPage extends SimpleTabPage
 							Integer.toString( posYSpinner.getSelection( ) ) );
 					MapUtil.initMap( );
 					refreshPage( );
-					changeUnitApply.setEnabled( true );
+					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+							&& generalChangeCombo.getSelectionIndex( ) != -1
+							&& factionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -726,6 +736,9 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					generalAgeRestoreApply.setEnabled( true );
+					generalAgeApply.setEnabled( generalAgeBtn.getSelection( )
+							&& generalCombo.getSelectionIndex( ) != -1
+							&& generalAgeCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -750,7 +763,9 @@ public class StartPatchPage extends SimpleTabPage
 								generalAgeCombo.getText( ) );
 					}
 					refreshPage( );
-					generalAgeApply.setEnabled( true );
+					generalAgeApply.setEnabled( generalAgeBtn.getSelection( )
+							&& generalCombo.getSelectionIndex( ) != -1
+							&& generalAgeCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -815,6 +830,8 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					factionAgeRestoreApply.setEnabled( true );
+					factionAgeApply.setEnabled( factionAgeBtn.getSelection( )
+							&& factionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -838,7 +855,8 @@ public class StartPatchPage extends SimpleTabPage
 						GeneralAgeUtil.convertFactionAges( (String[]) factions.toArray( new String[0] ) );
 					}
 					refreshPage( );
-					factionAgeApply.setEnabled( true );
+					factionAgeApply.setEnabled( factionAgeBtn.getSelection( )
+							&& factionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -1023,7 +1041,8 @@ public class StartPatchPage extends SimpleTabPage
 			generalChange = (String) nonRelativeGeneralList.get( index );
 
 		generalMap = UnitUtil.getAvailableGenerals( );
-
+		nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
+		
 		removeComboItems( generalInCombo );
 		removeComboItems( generalOutCombo );
 		removeComboItems( generalCombo );

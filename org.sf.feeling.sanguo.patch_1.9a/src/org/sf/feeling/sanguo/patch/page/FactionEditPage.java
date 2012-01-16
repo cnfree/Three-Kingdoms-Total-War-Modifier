@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import net.sf.feeling.dds.model.DDSImageFile;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
@@ -40,7 +38,9 @@ import org.sf.feeling.sanguo.patch.util.FileConstants;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
+import org.sf.feeling.swt.win32.extension.graphics.DDSLoader;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
+import org.sf.feeling.swt.win32.extension.graphics.dds.jogl.DDSImage;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 
 public class FactionEditPage extends SimpleTabPage
@@ -480,10 +480,8 @@ public class FactionEditPage extends SimpleTabPage
 						texture.getStandard_texture( ) + ".dds" );
 				try
 				{
-					DDSImageFile ddsFile = new DDSImageFile( file );
-
-					ImageData imageData = ddsFile.getData( );
-
+					DDSImage ddsImage = DDSLoader.loadDDSImage( new FileInputStream( file ) );
+					ImageData imageData = DDSLoader.getImageData( ddsImage );
 					int pixel = imageData.getPixel( 126, 140 );
 					for ( int x = 125; x < 125 + 53; x++ )
 					{
@@ -493,11 +491,8 @@ public class FactionEditPage extends SimpleTabPage
 						}
 					}
 
-					System.out.println( imageData.getPixel( 126, 140 ) );
-
-					Image oldImage = new Image( null,
-							(ImageData) imageData.clone( ) );
-					GC gc = new GC( oldImage );
+					Image image = new Image( null, imageData );
+					GC gc = new GC( image );
 					gc.setAdvanced( true );
 					gc.setAntialias( SWT.ON );
 					FontData fontData = new FontData( battleBannerFontCombo.getText( ),
@@ -523,27 +518,15 @@ public class FactionEditPage extends SimpleTabPage
 									true );
 						}
 					}
-
-					ImageData oldImageData = oldImage.getImageData( );
-					imageCanvas.setImageData( oldImageData );
+					imageCanvas.setImageData( image.getImageData( ) );
 					gc.dispose( );
-					oldImage.dispose( );
-
-					imageCanvas.setImageData( oldImageData );
-
-					for ( int i = 0; i < oldImageData.data.length; i = i + 4 )
-					{
-						imageData.data[i] = oldImageData.data[i + 2];
-						imageData.data[i + 1] = oldImageData.data[i + 1];
-						imageData.data[i + 2] = oldImageData.data[i + 0];
-					}
+					image.dispose( );
 				}
 				catch ( IOException e1 )
 				{
 					e1.printStackTrace( );
 				}
 			}
-
 		};
 		battleBannerText.addModifyListener( battleModifyListener );
 
