@@ -82,8 +82,10 @@ public class Patch
 		dialog.setFilterExtensions( new String[]{
 			"*.exe"
 		} ); // Windows
-		File file = new File( ShellFolder.LOCAL_APPDATA.getAbsolutePath( shell.handle )
-				+ "\\三国全面战争修改器\\1.9a\\patch.ini" );
+		File file = new File( System.getProperties( )
+				.getProperty( "user.home" ) //$NON-NLS-1$
+				+ File.separator
+				+ "\\.sanguo_patch\\1.9a\\patch.ini" );
 		if ( file.exists( ) )
 		{
 			Properties properties = FileUtil.loadProperties( file );
