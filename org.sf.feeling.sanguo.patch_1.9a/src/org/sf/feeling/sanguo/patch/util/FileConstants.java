@@ -101,7 +101,11 @@ public class FileConstants
 			+ "\\alexander\\data\\ui\\unit_info";
 	public final static String uiAncillariesPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\ui\\ancillaries";
-
+	public final static String stratBannerPath = Patch.GAME_ROOT
+			+ "\\Data\\banners";
+	public final static String battleBannerPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\models\\textures";
+	
 	public static boolean testFile( )
 	{
 		if ( !unitFile.exists( ) )
