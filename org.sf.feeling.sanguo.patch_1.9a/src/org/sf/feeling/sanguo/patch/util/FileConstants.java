@@ -113,7 +113,21 @@ public class FileConstants
 			+ "\\Data\\banners";
 	public final static String battleBannerPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\models\\textures";
+	public final static String factionMapsPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander";
 
+	public final static String[] cultures = new String[]{
+			"barbarian",
+			"carthaginian",
+			"eastern",
+			"egyptian",
+			"greek",
+			"roman"
+	};
+
+	public final static String uiPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\ui";
+	
 	public static boolean testFile( )
 	{
 		if ( !unitFile.exists( ) )
@@ -196,11 +210,11 @@ public class FileConstants
 		{
 			return false;
 		}
-		else if( !descrBannersFile.exists( ) )
+		else if ( !descrBannersFile.exists( ) )
 		{
 			return false;
 		}
-		else if( !descrFactionsFile.exists( ) )
+		else if ( !descrFactionsFile.exists( ) )
 		{
 			return false;
 		}

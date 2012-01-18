@@ -11,6 +11,7 @@
 
 package org.sf.feeling.sanguo.patch.widget;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.ACC;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleControlAdapter;
@@ -132,6 +133,15 @@ public class ImageCanvas extends Canvas {
 	}
 
 	private void paint(GC gc) {
+		try
+		{
+			gc.setAdvanced( true );
+			gc.setAntialias( SWT.ON );
+			gc.setInterpolation( SWT.HIGH );
+		}
+		catch ( Exception e )
+		{
+		}
 		if (sourceImage != null && !sourceImage.isDisposed()) {
 			if (((float) getSize().x / getSize().y) >= ((float) sourceImage
 					.getImageData().width / sourceImage.getImageData().height)) {

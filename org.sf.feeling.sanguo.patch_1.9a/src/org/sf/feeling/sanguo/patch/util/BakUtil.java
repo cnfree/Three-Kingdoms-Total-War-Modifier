@@ -118,6 +118,25 @@ public class BakUtil
 		}
 	};
 
+	private static FileFilter mapFilter = new FileFilter( ) {
+
+		public boolean accept( File file )
+		{
+			if ( file.isDirectory( )
+					|| file.getName( ).toLowerCase( ).endsWith( ".tga" ) )
+			{
+				String faction = file.getName( )
+						.toUpperCase( )
+						.replaceAll( "(?i)map_", "" )
+						.replaceAll( "(?i)\\.tga", "" )
+						.trim( );
+				if ( MapUtil.factionMap.containsKey( faction ) )
+					return true;
+			}
+			return false;
+		}
+	};
+
 	public static void bakData( String comment )
 	{
 		if ( checkBakFolder( ) )
@@ -346,6 +365,27 @@ public class BakUtil
 
 							java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream( new BufferedOutputStream( new FileOutputStream( defalutResourceBakFile ) ) );
 							zos.setLevel( Deflater.BEST_SPEED );
+
+							zipResourceFile( zos,
+									FileConstants.factionMapsPath,
+									mapFilter,
+									true );
+
+							for ( int i = 0; i < FileConstants.cultures.length; i++ )
+							{
+								String haredpage = FileConstants.uiPath
+										+ "\\"
+										+ FileConstants.cultures[i]
+										+ "\\interface\\sharedpage_01.tga";
+								String stratpage = FileConstants.uiPath
+										+ "\\"
+										+ FileConstants.cultures[i]
+										+ "\\interface\\stratpage_02.tga";
+
+								zipResourceFile( zos, haredpage, true );
+								zipResourceFile( zos, stratpage, true );
+							}
+
 							zipResourceFile( zos,
 									FileConstants.customPortraitPath,
 									true );

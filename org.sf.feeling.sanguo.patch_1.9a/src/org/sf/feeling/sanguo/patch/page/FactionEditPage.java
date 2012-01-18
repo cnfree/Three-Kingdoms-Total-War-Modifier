@@ -5,6 +5,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -38,6 +39,7 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.sf.feeling.sanguo.patch.model.FactionDescription;
 import org.sf.feeling.sanguo.patch.model.FactionTexture;
+import org.sf.feeling.sanguo.patch.model.General;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.BattleUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
@@ -50,6 +52,7 @@ import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.graphics.dds.jogl.DDSImage;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
+import org.sf.feeling.swt.win32.internal.extension.util.ColorCache;
 
 public class FactionEditPage extends SimpleTabPage
 {
@@ -102,6 +105,14 @@ public class FactionEditPage extends SimpleTabPage
 	private ImageData startImage;
 
 	private SortMap factionDescriptionMap;
+
+	private CCombo leaderCombo;
+
+	private CCombo leaderFontCombo;
+
+	private CCombo leaderFontSizeCombo;
+
+	private SortMap generalMap;
 
 	public void buildUI( Composite parent )
 	{
@@ -259,7 +270,6 @@ public class FactionEditPage extends SimpleTabPage
 								.toCharArray( );
 						Point fontSize = gc.stringExtent( "" + chars[0] );
 						gc.setTextAntialias( SWT.ON );
-						gc.setLineWidth( 10 );
 						gc.drawText( "" + chars[0],
 								( 18 - fontSize.x ) / 2 + 21,
 								29,
@@ -513,7 +523,7 @@ public class FactionEditPage extends SimpleTabPage
 					GC gc = new GC( image );
 					gc.setAdvanced( true );
 					gc.setAntialias( SWT.ON );
-					gc.setTextAntialias( SWT.ON);
+					gc.setTextAntialias( SWT.ON );
 					gc.setLineWidth( 10 );
 					FontData fontData = new FontData( battleBannerFontCombo.getText( ),
 							Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
@@ -575,14 +585,14 @@ public class FactionEditPage extends SimpleTabPage
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置开场画面头像：" );
 		startImageCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 				SWT.READ_ONLY );
-		startImageCombo.setText( "宽：108像素，高：108像素" );
+		startImageCombo.setText( "宽：112像素，高：112像素" );
 		startImageCombo.addFocusListener( new FocusAdapter( ) {
 
 			public void focusLost( FocusEvent e )
 			{
 				if ( startImageCombo.getText( ).length( ) == 0 )
 				{
-					startImageCombo.setText( "宽：108像素，高：108像素" );
+					startImageCombo.setText( "宽：112像素，高：112像素" );
 				}
 			}
 		} );
@@ -662,6 +672,50 @@ public class FactionEditPage extends SimpleTabPage
 				}
 			}
 		} );
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置势力君主：" );
+		leaderCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		leaderCombo.setLayoutData( gd );
+		ModifyListener leaderModifyListener = new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				modifyLeader( );
+			}
+
+		};
+		leaderCombo.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				modifyLeader( );
+			}
+
+		} );
+
+		leaderFontCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
+		leaderFontCombo.setItems( fontNames );
+		leaderFontCombo.setText( "黑体" );
+		gd = new GridData( );
+		gd.widthHint = 80;
+		leaderFontCombo.setLayoutData( gd );
+		leaderFontCombo.addModifyListener( leaderModifyListener );
+
+		leaderFontSizeCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		for ( int i = 8; i < 72; i++ )
+		{
+			leaderFontSizeCombo.add( "" + i );
+		}
+		leaderFontSizeCombo.setText( "24" );
+
+		gd = new GridData( );
+		gd.widthHint = 60;
+		leaderFontSizeCombo.setLayoutData( gd );
+		leaderFontSizeCombo.addModifyListener( leaderModifyListener );
 
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 5;
@@ -823,13 +877,168 @@ public class FactionEditPage extends SimpleTabPage
 
 	private void refreshPage( )
 	{
+		generalMap = UnitUtil.getAvailableGenerals( );
 		factionDescriptionMap = BattleUtil.getFactionDescriptionMap( );
 		factionMap = UnitUtil.getFactionMap( );
+		int index = startImageCombo.getSelectionIndex( );
+		startImageCombo.removeAll( );
 		for ( int i = 0; i < factionDescriptionMap.size( ); i++ )
 		{
 			String faction = (String) factionMap.get( (String) factionMap.getKeyList( )
 					.get( i ) );
 			startImageCombo.add( faction );
+		}
+
+		if ( index != -1 && index < startImageCombo.getItemCount( ) )
+			startImageCombo.select( index );
+
+		index = leaderCombo.getSelectionIndex( );
+		leaderCombo.removeAll( );
+		for ( int i = 0; i < generalMap.size( ); i++ )
+		{
+			String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+			leaderCombo.add( generalName );
+		}
+
+		if ( index != -1 && index < startImageCombo.getItemCount( ) )
+			leaderCombo.select( index );
+	}
+
+	private void modifyLeader( )
+	{
+		if ( leaderCombo.getSelectionIndex( ) > -1 )
+		{
+			String leader = (String) generalMap.getKeyList( )
+					.get( leaderCombo.getSelectionIndex( ) );
+			String portrait = ( (General) UnitUtil.getGeneralModels( )
+					.get( leader ) ).getPortrait( );
+			String faction = idText.getText( );
+
+			try
+			{
+				File file = new File( FileConstants.factionMapsPath, "map_"
+						+ faction.toLowerCase( )
+						+ ".tga" );
+				InputStream is = null;
+				if ( !file.exists( ) )
+				{
+					is = FactionEditPage.class.getResourceAsStream( "/map_faction.tga" );
+				}
+				else
+				{
+					is = new FileInputStream( file );
+				}
+				ImageData imageData = TgaLoader.loadImage( is, true, true );
+				int x, y;
+				for ( x = 291; x < imageData.width; x++ )
+				{
+					for ( y = 0; y < imageData.height; y++ )
+					{
+						imageData.setPixel( x, y, imageData.getPixel( 290, y ) );
+						imageData.setAlpha( x, y, imageData.getAlpha( 290, y ) );
+					}
+				}
+
+				Image image = new Image( null, imageData );
+				GC gc = new GC( image );
+				gc.setAdvanced( true );
+				gc.setAntialias( SWT.ON );
+				gc.setTextAntialias( SWT.ON );
+				gc.setInterpolation( SWT.HIGH );
+
+				ImageData portraitImageData = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( new File( FileConstants.customPortraitPath
+						+ "\\"
+						+ portrait
+						+ "\\portrait_young.tga" ) ) ),
+						false );
+				Image portraitImage = new Image( null, portraitImageData );
+				gc.drawImage( portraitImage,
+						0,
+						0,
+						portraitImageData.width,
+						portraitImageData.height,
+						308 + ( 74 - portraitImageData.width ) / 2,
+						28,
+						portraitImageData.width,
+						portraitImageData.height );
+
+				gc.setTextAntialias( SWT.ON );
+
+				FontData fontData = new FontData( leaderFontCombo.getText( ),
+						Integer.parseInt( leaderFontSizeCombo.getText( ) ),
+						SWT.BOLD );
+				Font font = new Font( null, fontData );
+				gc.setFont( font );
+				Color color = (Color) ColorCache.getInstance( ).getColor( 255,
+						255,
+						155 );
+				RGB rgb = color.getRGB( );
+				gc.setForeground( color );
+
+				Point fontSize = gc.stringExtent( "君主" );
+				gc.drawText( "君主",
+						( 74 - fontSize.x ) / 2 + 308,
+						28 + portraitImageData.height + 5,
+						false );
+
+				String name = ChangeCode.toShort( (String) generalMap.get( leader ) );
+				if ( name.indexOf( '（' ) > -1 )
+					name = name.substring( 0, name.indexOf( '（' ) );
+				Point fontSize1 = gc.stringExtent( name );
+				for ( ; true; )
+				{
+					if ( fontSize1.x > fontSize.x + 5 )
+					{
+						fontData.height = fontData.height - 1;
+						font.dispose( );
+						font = new Font( null, fontData );
+						gc.setFont( font );
+						fontSize1 = gc.stringExtent( name );
+					}
+					else
+					{
+						break;
+					}
+				}
+				gc.drawText( name, ( 74 - fontSize1.x ) / 2 + 308, 28
+						+ portraitImageData.height
+						+ 5
+						+ fontSize.y
+						+ 5, false );
+
+				imageData = image.getImageData( );
+				int posX = 308 + ( 74 - portraitImageData.width ) / 2;
+				int posY = 28;
+				for ( x = posX; x < posX + portraitImageData.width; x++ )
+				{
+					for ( y = posY; y < posY + portraitImageData.height; y++ )
+					{
+						imageData.setAlpha( x, y, 255 );
+					}
+				}
+
+				posX = ( 74 - fontSize.x ) / 2 + 308;
+				posY = 28 + portraitImageData.height + 5;
+
+				for ( x = posX - 5; x < imageData.width; x++ )
+				{
+					for ( y = posY; y < imageData.height; y++ )
+					{
+						if ( imageData.palette.getRGB( imageData.getPixel( x, y ) )
+								.equals( rgb ) )
+						{
+							imageData.setAlpha( x, y, 255 );
+						}
+					}
+
+				}
+
+				imageCanvas.setImageData( imageData );
+			}
+			catch ( IOException e1 )
+			{
+				e1.printStackTrace( );
+			}
 		}
 	}
 }
