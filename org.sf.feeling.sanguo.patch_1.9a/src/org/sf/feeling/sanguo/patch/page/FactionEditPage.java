@@ -1,6 +1,7 @@
 
 package org.sf.feeling.sanguo.patch.page;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,6 +10,8 @@ import java.util.HashSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -19,17 +22,21 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
+import org.sf.feeling.sanguo.patch.model.FactionDescription;
 import org.sf.feeling.sanguo.patch.model.FactionTexture;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.BattleUtil;
@@ -39,6 +46,7 @@ import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
 import org.sf.feeling.swt.win32.extension.graphics.DDSLoader;
+import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.graphics.dds.jogl.DDSImage;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
@@ -46,7 +54,7 @@ import org.sf.feeling.swt.win32.extension.util.SortMap;
 public class FactionEditPage extends SimpleTabPage
 {
 
-	private final SortMap factionMap = UnitUtil.getFactionMap( );
+	private SortMap factionMap = UnitUtil.getFactionMap( );
 
 	ModifyListener nameListener = new ModifyListener( ) {
 
@@ -87,6 +95,14 @@ public class FactionEditPage extends SimpleTabPage
 
 	private CCombo stratBannerFontSizeCombo;
 
+	private CCombo startImageCombo;
+
+	private Button startImageButton;
+
+	private ImageData startImage;
+
+	private SortMap factionDescriptionMap;
+
 	public void buildUI( Composite parent )
 	{
 		super.buildUI( parent );
@@ -99,7 +115,7 @@ public class FactionEditPage extends SimpleTabPage
 
 		createTitle( );
 		createPatchArea( );
-		// initPage( );
+		initPage( );
 	}
 
 	private void createPatchArea( )
@@ -242,6 +258,8 @@ public class FactionEditPage extends SimpleTabPage
 								.trim( ) )
 								.toCharArray( );
 						Point fontSize = gc.stringExtent( "" + chars[0] );
+						gc.setTextAntialias( SWT.ON );
+						gc.setLineWidth( 10 );
 						gc.drawText( "" + chars[0],
 								( 18 - fontSize.x ) / 2 + 21,
 								29,
@@ -495,6 +513,8 @@ public class FactionEditPage extends SimpleTabPage
 					GC gc = new GC( image );
 					gc.setAdvanced( true );
 					gc.setAntialias( SWT.ON );
+					gc.setTextAntialias( SWT.ON);
+					gc.setLineWidth( 10 );
 					FontData fontData = new FontData( battleBannerFontCombo.getText( ),
 							Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
 							SWT.BOLD );
@@ -552,6 +572,97 @@ public class FactionEditPage extends SimpleTabPage
 		battleBannerFontSizeCombo.setLayoutData( gd );
 		battleBannerFontSizeCombo.addModifyListener( battleModifyListener );
 
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置开场画面头像：" );
+		startImageCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
+		startImageCombo.setText( "宽：108像素，高：108像素" );
+		startImageCombo.addFocusListener( new FocusAdapter( ) {
+
+			public void focusLost( FocusEvent e )
+			{
+				if ( startImageCombo.getText( ).length( ) == 0 )
+				{
+					startImageCombo.setText( "宽：108像素，高：108像素" );
+				}
+			}
+		} );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 2;
+		startImageCombo.setLayoutData( gd );
+		startImageCombo.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				startImage = null;
+				if ( startImageCombo.getSelectionIndex( ) != -1 )
+				{
+					String generalCode = (String) factionMap.getKeyList( )
+							.get( startImageCombo.getSelectionIndex( ) );
+					setStartImage( generalCode );
+					if ( startImage != null )
+						imageCanvas.setImageData( startImage );
+				}
+			}
+		} );
+
+		startImageButton = WidgetUtil.getToolkit( ).createButton( patchClient,
+				SWT.PUSH,
+				true );
+		gd = new GridData( );
+		gd.horizontalAlignment = SWT.FILL;
+		startImageButton.setLayoutData( gd );
+		startImageButton.setText( "自定义" );
+		startImageButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				FileDialog dialog = new FileDialog( Display.getDefault( )
+						.getActiveShell( ), SWT.NONE );
+				dialog.setFilterExtensions( new String[]{
+					"*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tga"
+				} ); // Windows
+				dialog.setFilterNames( new String[]{
+					"图片"
+				} );
+				String path = dialog.open( );
+				if ( path != null && new File( path ).exists( ) )
+				{
+					startImageCombo.clearSelection( );
+					startImageCombo.setText( path );
+					startImage = null;
+					File imageFile = new File( startImageCombo.getText( )
+							.trim( ) );
+					if ( imageFile.exists( ) && imageFile.isFile( ) )
+					{
+						try
+						{
+							if ( imageFile.getName( )
+									.toLowerCase( )
+									.endsWith( ".tga" ) )
+							{
+								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+										true,
+										true );
+								startImage = computeStartImage( imageData );
+								imageCanvas.setImageData( startImage );
+							}
+							else
+							{
+								ImageLoader loader = new ImageLoader( );
+								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
+								startImage = computeStartImage( imageData );
+								imageCanvas.setImageData( startImage );
+							}
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+			}
+		} );
+
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 5;
 		Composite buttonGroup = WidgetUtil.getToolkit( )
@@ -589,6 +700,101 @@ public class FactionEditPage extends SimpleTabPage
 		patchSection.setClient( patchClient );
 	}
 
+	protected ImageData computeStartImage( ImageData imageData )
+	{
+		Image image = new Image( null, imageData );
+		float ratio = 1.0f;
+		if ( imageData.width > imageData.height )
+		{
+			if ( imageData.height > 112 )
+			{
+				ratio = 112 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 112 * ratio / imageData.width;
+			}
+		}
+		else
+		{
+			if ( imageData.width > 112 )
+			{
+				ratio = 112 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 112 * ratio / imageData.width;
+			}
+		}
+
+		ImageData resizeImageData = GraphicsUtil.resize( image,
+				(int) ( imageData.width * ratio + 0.5f ),
+				(int) ( imageData.height * ratio + 0.5f ) );
+
+		image.dispose( );
+
+		int offsetX = 0;
+		int offsetY = 0;
+
+		if ( resizeImageData.width > resizeImageData.height )
+		{
+			offsetX = ( 112 - resizeImageData.width ) / 2;
+		}
+		else
+		{
+			offsetY = ( 112 - resizeImageData.height ) / 2;
+		}
+
+		try
+		{
+			ImageData tgaData = TgaLoader.loadImage( FactionEditPage.class.getResourceAsStream( "/log.tga" ),
+					true );
+			byte[] data = tgaData.data;
+
+			for ( int x = 8; x < 120; x++ )
+			{
+				for ( int y = 8; y < 120; y++ )
+				{
+					int posX = x - 8 - offsetX;
+					int posY = y - 8 - offsetY;
+
+					if ( Math.pow( 64 - x, 2 ) + Math.pow( 64 - y, 2 ) <= 57 * 57 )
+					{
+						RGB rgb = resizeImageData.palette.getRGB( resizeImageData.getPixel( posX,
+								posY ) );
+						int index = ( y * 128 + x ) * 4;
+						data[index + 1] = (byte) rgb.blue;
+						data[index + 2] = (byte) rgb.green;
+						data[index + 3] = (byte) rgb.red;
+					}
+				}
+			}
+			return tgaData;
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace( );
+		}
+		return null;
+	}
+
+	protected void setStartImage( String factionCode )
+	{
+		String logo = ( (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+				.get( factionCode ) ).getLoading_logo( );
+		try
+		{
+			ImageData image = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( new File( FileConstants.dataFile,
+					logo ) ) ),
+					true );
+			startImage = image;
+		}
+		catch ( Exception e1 )
+		{
+			e1.printStackTrace( );
+		}
+	}
+
 	private void createTitle( )
 	{
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
@@ -604,4 +810,26 @@ public class FactionEditPage extends SimpleTabPage
 		return "编辑势力";
 	}
 
+	private void initPage( )
+	{
+		factionDescriptionMap = BattleUtil.getFactionDescriptionMap( );
+	}
+
+	public void refresh( )
+	{
+		super.refresh( );
+		refreshPage( );
+	}
+
+	private void refreshPage( )
+	{
+		factionDescriptionMap = BattleUtil.getFactionDescriptionMap( );
+		factionMap = UnitUtil.getFactionMap( );
+		for ( int i = 0; i < factionDescriptionMap.size( ); i++ )
+		{
+			String faction = (String) factionMap.get( (String) factionMap.getKeyList( )
+					.get( i ) );
+			startImageCombo.add( faction );
+		}
+	}
 }

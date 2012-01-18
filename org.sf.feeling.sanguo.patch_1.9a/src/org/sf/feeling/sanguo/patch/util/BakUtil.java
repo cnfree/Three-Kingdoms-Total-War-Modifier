@@ -72,14 +72,37 @@ public class BakUtil
 			FileConstants.projectTileFile,
 			FileConstants.desc_MountFile,
 			FileConstants.modelStratFile,
+			FileConstants.descrBannersFile,
+			FileConstants.descrFactionsFile,
 	};
 
-	private static FileFilter filter = new FileFilter( ) {
+	private static FileFilter tgaFilter = new FileFilter( ) {
 
 		public boolean accept( File file )
 		{
 			if ( file.isDirectory( )
 					|| file.getName( ).toLowerCase( ).endsWith( ".tga" ) )
+			{
+				for ( int i = 0; i < file.getName( ).length( ); i++ )
+				{
+					char ch = file.getName( ).charAt( i );
+					if ( ch >= 255 )
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+	};
+
+	private static FileFilter ddsFilter = new FileFilter( ) {
+
+		public boolean accept( File file )
+		{
+			if ( file.isDirectory( )
+					|| file.getName( ).toLowerCase( ).endsWith( ".dds" ) )
 			{
 				for ( int i = 0; i < file.getName( ).length( ); i++ )
 				{
@@ -206,13 +229,13 @@ public class BakUtil
 	private static void zipResourceFile( ZipOutputStream zos,
 			String absolutePath, boolean showInfo ) throws IOException
 	{
-		zipResourceFile( zos, absolutePath, filter, showInfo );
+		zipResourceFile( zos, absolutePath, tgaFilter, showInfo );
 	}
 
 	private static void zipResourceFile( java.util.zip.ZipOutputStream zos,
 			String absolutePath, boolean showInfo ) throws IOException
 	{
-		zipResourceFile( zos, absolutePath, filter, showInfo );
+		zipResourceFile( zos, absolutePath, tgaFilter, showInfo );
 	}
 
 	private static void setCurrentVersion( String currentVersion )
@@ -269,7 +292,7 @@ public class BakUtil
 						recursiveZip( zos,
 								resourceFile,
 								entryPath,
-								filter,
+								tgaFilter,
 								showInfo );
 					}
 				}
@@ -325,9 +348,6 @@ public class BakUtil
 							zos.setLevel( Deflater.BEST_SPEED );
 							zipResourceFile( zos,
 									FileConstants.customPortraitPath,
-									true );
-							zipResourceFile( zos,
-									FileConstants.captainBannerPath,
 									true );
 
 							List unitList = new ArrayList( );
@@ -388,6 +408,20 @@ public class BakUtil
 									true );
 							zipResourceFile( zos,
 									FileConstants.uiAncillariesPath,
+									true );
+							zipResourceFile( zos,
+									FileConstants.captainBannerPath,
+									true );
+							zipResourceFile( zos,
+									FileConstants.stratBannerPath,
+									ddsFilter,
+									true );
+							zipResourceFile( zos,
+									FileConstants.battleBannerPath,
+									ddsFilter,
+									true );
+							zipResourceFile( zos,
+									FileConstants.menuSymbolsPath,
 									true );
 
 							zos.close( );

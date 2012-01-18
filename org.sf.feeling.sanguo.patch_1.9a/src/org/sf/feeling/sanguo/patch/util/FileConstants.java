@@ -7,18 +7,26 @@ import org.sf.feeling.sanguo.patch.Patch;
 
 public class FileConstants
 {
-	public static String dataPath = Patch.GAME_ROOT
-	+ "\\alexander\\data";
+
+	public static String dataPath = Patch.GAME_ROOT + "\\alexander\\data";
 	public static File dataFile = new File( dataPath );
-	
+
+	public static String menuSymbolsPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\menu\\symbols";
+	public static File menuSymbolsFile = new File( menuSymbolsPath );
+
 	public static String descrBannersPath = Patch.GAME_ROOT
-	+ "\\alexander\\data\\descr_banners.txt";
+			+ "\\alexander\\data\\descr_banners.txt";
 	public static File descrBannersFile = new File( descrBannersPath );
+
+	public static String descrFactionsPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\descr_sm_factions.txt";
+	public static File descrFactionsFile = new File( descrFactionsPath );
 
 	public static String captainBannerPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\ui\\captain banners";
 	public static File captainBannerFile = new File( captainBannerPath );
-	
+
 	public static String customPortraitPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\ui\\custom_portraits";
 	public static File customPortraitFile = new File( customPortraitPath );
@@ -101,6 +109,10 @@ public class FileConstants
 			+ "\\alexander\\data\\ui\\unit_info";
 	public final static String uiAncillariesPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\ui\\ancillaries";
+	public final static String stratBannerPath = Patch.GAME_ROOT
+			+ "\\Data\\banners";
+	public final static String battleBannerPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\models\\textures";
 
 	public static boolean testFile( )
 	{
@@ -184,7 +196,14 @@ public class FileConstants
 		{
 			return false;
 		}
-
+		else if( !descrBannersFile.exists( ) )
+		{
+			return false;
+		}
+		else if( !descrFactionsFile.exists( ) )
+		{
+			return false;
+		}
 		return true;
 	}
 }
