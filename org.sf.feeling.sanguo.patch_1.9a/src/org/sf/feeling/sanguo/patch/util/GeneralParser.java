@@ -92,24 +92,41 @@ public class GeneralParser
 	private static void sortSkills( SortMap skills )
 	{
 		List keyList = skills.getKeyList( );
-		for ( int i = 0; i < keyList.size( ); i++ )
+
+		for ( int i = 1; i < 6; i++ )
 		{
-			String skill = (String) keyList.get( i );
-			if ( skill.indexOf( "Jnxg" ) > -1 && keyList.size( ) > 15 )
+			for ( int j = 0; j < keyList.size( ); j++ )
+			{
+				String skill = (String) keyList.get( j );
+				if ( skill.toLowerCase( ).indexOf( "jn" + i ) > -1 )
+				{
+					keyList.remove( skill );
+					keyList.add( i + 2, skill );
+					break;
+				}
+			}
+		}
+		for ( int i = 1; i <= 9; i++ )
+		{
+			for ( int j = 0; j < keyList.size( ); j++ )
+			{
+				String skill = (String) keyList.get( j );
+				if ( skill.toLowerCase( ).indexOf( "jna" + i ) > -1 )
+				{
+					keyList.remove( skill );
+					keyList.add( i + 2 + 5, skill );
+					break;
+				}
+			}
+		}
+		for ( int j = 0; j < keyList.size( ); j++ )
+		{
+			String skill = (String) keyList.get( j );
+			if ( skill.toLowerCase( ).indexOf( "jnxg" ) > -1 )
 			{
 				keyList.remove( skill );
-				keyList.add( 15, skill );
-			}
-			else
-			{
-				for ( int j = 3; j < 8; j++ )
-				{
-					if ( skill.indexOf( "Jn" + j ) > -1 && keyList.size( ) > j )
-					{
-						keyList.remove( skill );
-						keyList.add( j, skill );
-					}
-				}
+				keyList.add( 3 + 5 + 9, skill );
+				break;
 			}
 		}
 	}
@@ -812,7 +829,7 @@ public class GeneralParser
 						false );
 				out.println( levelscript );
 				out.print( writer.getBuffer( ) );
-				out.println( ";------------------------------------------");
+				out.println( ";------------------------------------------" );
 				out.println( triggerscript );
 				out.close( );
 				printer.close( );

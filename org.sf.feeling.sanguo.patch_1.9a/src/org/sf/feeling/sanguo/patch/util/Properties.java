@@ -55,11 +55,6 @@ public class Properties extends SortMap
 {
 
 	/**
-	 * use serialVersionUID from JDK 1.1.X for interoperability
-	 */
-	private static final long serialVersionUID = 4112578634029874840L;
-
-	/**
 	 * A property list that contains default values for any keys not found in
 	 * this property list.
 	 * 

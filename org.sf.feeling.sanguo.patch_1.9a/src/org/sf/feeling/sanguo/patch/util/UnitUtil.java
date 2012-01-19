@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1256,6 +1257,11 @@ public class UnitUtil
 	public static List getNonRelativeGenerals( )
 	{
 		return MapUtil.nonRelativeGeneralList;
+	}
+
+	public static Set getUnAvailableGeneralPoints( )
+	{
+		return MapUtil.unAvailableGeneralPoints;
 	}
 
 	public static SortMap getFactionMap( )

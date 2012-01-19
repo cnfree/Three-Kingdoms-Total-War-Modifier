@@ -116,4 +116,8 @@ public class BattleUtil {
 	public static SortMap getFactionTextureMap(){
 		return MapUtil.factionTextureMap;
 	}
+	
+	public static SortMap getFactionDescriptionMap(){
+		return MapUtil.factionDescriptionMap;
+	}
 }

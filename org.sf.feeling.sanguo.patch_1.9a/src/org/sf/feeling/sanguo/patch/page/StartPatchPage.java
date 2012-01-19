@@ -15,7 +15,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -34,6 +33,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -75,6 +75,8 @@ public class StartPatchPage extends SimpleTabPage
 	private CCombo generalChangeCombo;
 	private Button generalChangeBtn;
 	private Button posButton;
+	private Spinner posXSpinner;
+	private Spinner posYSpinner;
 
 	public void buildUI( Composite parent )
 	{
@@ -94,7 +96,8 @@ public class StartPatchPage extends SimpleTabPage
 						+ "比如马腾和马超交换，马超将成为马腾势力的君主，而马腾则会成为马超的儿子。<br/>"
 						+ "2、更换所属势力的武将不能有儿子，并且不能是势力君主或者继承人。<br/>"
 						+ "3、“武将年龄设置”能减小的岁数有限，想最大化减小武将年龄，需使用“最大化减小势力武将年龄”功能。<br/>"
-						+ "4、收买武将对势力武将有年龄要求，请最好设置势力某一武将年龄大于40岁。</p></form>",
+						+ "4、收买武将对势力武将有年龄要求，设置势力部分垃圾武将年龄大于40岁更有利于武将的收买。<br/>" 
+						+ "5、修改器会自动计算武将可用坐标，以保证武将初始位置为合法坐标。</p></form>",
 				true,
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
@@ -187,7 +190,7 @@ public class StartPatchPage extends SimpleTabPage
 							BakUtil.bakData( "势力金钱修改："
 									+ factionCombo.getText( )
 									+ addMoneyText.getText( ) );
-							String faction = (String)factionProperty.get( factionCombo.getText( ) );
+							String faction = (String) factionProperty.get( factionCombo.getText( ) );
 							String line = null;
 							StringWriter writer = new StringWriter( );
 							PrintWriter printer = new PrintWriter( writer );
@@ -449,10 +452,14 @@ public class StartPatchPage extends SimpleTabPage
 					if ( generalChangeCombo.isEnabled( )
 							&& generalChangeCombo.getSelectionIndex( ) != -1 )
 					{
+						posXSpinner.setEnabled( true );
+						posYSpinner.setEnabled( true );
 						posButton.setEnabled( true );
 					}
 					else
 					{
+						posXSpinner.setEnabled( false );
+						posYSpinner.setEnabled( false );
 						posButton.setEnabled( false );
 					}
 				};
@@ -486,21 +493,21 @@ public class StartPatchPage extends SimpleTabPage
 			gd.horizontalIndent = width;
 			positionLabel.setLayoutData( gd );
 
-			final Spinner posXSpinner = WidgetUtil.getToolkit( )
+			posXSpinner = WidgetUtil.getToolkit( )
 					.createSpinner( patchClient );
 			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
 			posXSpinner.setLayoutData( gd );
 			posXSpinner.setEnabled( false );
-			initSpinner( posXSpinner, 0, 200, 0, 1 );
+			initSpinner( posXSpinner, 0, 189, 0, 1 );
 
-			final Spinner posYSpinner = WidgetUtil.getToolkit( )
+			posYSpinner = WidgetUtil.getToolkit( )
 					.createSpinner( patchClient );
 			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
 			posYSpinner.setLayoutData( gd );
 			posYSpinner.setEnabled( false );
-			initSpinner( posYSpinner, 0, 200, 0, 1 );
+			initSpinner( posYSpinner, 0, 179, 0, 1 );
 
 			final ModifyListener spinnerListener = new ModifyListener( ) {
 
@@ -518,10 +525,13 @@ public class StartPatchPage extends SimpleTabPage
 						General temp = (General) iter.next( );
 						if ( temp == model )
 							continue;
-						if ( temp.getPosX( )
-								.equals( Integer.toString( posXSpinner.getSelection( ) ) )
-								&& temp.getPosY( )
-										.equals( Integer.toString( posYSpinner.getSelection( ) ) ) )
+						Point point = new Point( posXSpinner.getSelection( ),
+								posYSpinner.getSelection( ) );
+						if ( ( temp.getPosX( )
+								.equals( Integer.toString( posXSpinner.getSelection( ) ) ) && temp.getPosY( )
+								.equals( Integer.toString( posYSpinner.getSelection( ) ) ) )
+								|| UnitUtil.getUnAvailableGeneralPoints( )
+										.contains( point ) )
 						{
 
 							Display.getDefault( ).asyncExec( new Runnable( ) {
@@ -547,8 +557,9 @@ public class StartPatchPage extends SimpleTabPage
 			posXSpinner.addModifyListener( spinnerListener );
 			posYSpinner.addModifyListener( spinnerListener );
 
-			posButton = WidgetUtil.getToolkit( )
-					.createButton( patchClient, SWT.PUSH, true );
+			posButton = WidgetUtil.getToolkit( ).createButton( patchClient,
+					SWT.PUSH,
+					true );
 			posButton.setEnabled( false );
 			posButton.setText( "选择" );
 			posButton.addSelectionListener( new SelectionAdapter( ) {
@@ -635,15 +646,18 @@ public class StartPatchPage extends SimpleTabPage
 				{
 					generalChangeCombo.setEnabled( generalChangeBtn.getSelection( ) );
 					factionCombo.setEnabled( generalChangeBtn.getSelection( ) );
-					posXSpinner.setEnabled( generalChangeBtn.getSelection( ) );
-					posYSpinner.setEnabled( generalChangeBtn.getSelection( ) );
+
 					if ( generalChangeCombo.isEnabled( )
 							&& generalChangeCombo.getSelectionIndex( ) != -1 )
 					{
+						posXSpinner.setEnabled( true );
+						posYSpinner.setEnabled( true );
 						posButton.setEnabled( true );
 					}
 					else
 					{
+						posXSpinner.setEnabled( false );
+						posYSpinner.setEnabled( false );
 						posButton.setEnabled( false );
 					}
 				}
@@ -843,7 +857,7 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.bakData( "最大化减小势力武将年龄：" + factionCombo.getText( ) );
 					if ( factionCombo.getSelectionIndex( ) > 0 )
 					{
-						String faction = (String)factionProperty.get( factionCombo.getText( ) );
+						String faction = (String) factionProperty.get( factionCombo.getText( ) );
 						GeneralAgeUtil.convertFactionAges( new String[]{
 							faction
 						} );
@@ -878,94 +892,6 @@ public class StartPatchPage extends SimpleTabPage
 			};
 			factionCombo.addSelectionListener( listener );
 		}
-		{
-			final Button alliedBtn = WidgetUtil.getToolkit( )
-					.createButton( patchClient,
-							"解除曹操、刘备、孙策势力之间的铁血同盟",
-							SWT.CHECK );
-
-			GridData gd = new GridData( );
-			gd.horizontalSpan = 2;
-			alliedBtn.setLayoutData( gd );
-
-			final Button alliedApply = WidgetUtil.getToolkit( )
-					.createButton( patchClient, "应用", SWT.PUSH );
-			alliedApply.setEnabled( false );
-			gd = new GridData( );
-			gd.horizontalSpan = 2;
-			gd.horizontalAlignment = SWT.END;
-			alliedApply.setLayoutData( gd );
-
-			final Button alliedRestoreApply = WidgetUtil.getToolkit( )
-					.createButton( patchClient, "还原", SWT.PUSH );
-			gd = new GridData( );
-			gd.horizontalSpan = 2;
-			alliedRestoreApply.setLayoutData( gd );
-
-			alliedRestoreApply.addSelectionListener( new SelectionAdapter( ) {
-
-				public void widgetSelected( SelectionEvent e )
-				{
-					alliedRestoreApply.setEnabled( false );
-					BakUtil.restoreCurrectVersionBakFile( );
-					refreshPage( );
-					alliedRestoreApply.setEnabled( true );
-				}
-			} );
-
-			alliedApply.addSelectionListener( new SelectionAdapter( ) {
-
-				public void widgetSelected( SelectionEvent e )
-				{
-					alliedApply.setEnabled( false );
-					BakUtil.bakData( "解除孙曹刘铁血同盟" );
-					if ( FileConstants.stratFile.exists( ) )
-					{
-						try
-						{
-							String line = null;
-							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.stratFile ),
-									"GBK" ) );
-							StringWriter writer = new StringWriter( );
-							PrintWriter printer = new PrintWriter( writer );
-							while ( ( line = in.readLine( ) ) != null )
-							{
-								Pattern pattern = Pattern.compile( "^\\s*(superfaction)" );
-								Matcher matcher = pattern.matcher( line );
-								if ( matcher.find( ) )
-								{
-									printer.println( ";" + line );
-								}
-								else
-								{
-									printer.println( line );
-								}
-							}
-							in.close( );
-							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.stratFile ),
-									"GBK" ) ),
-									false );
-							out.print( writer.getBuffer( ) );
-							out.close( );
-							printer.close( );
-						}
-						catch ( IOException e1 )
-						{
-							e1.printStackTrace( );
-						}
-					}
-					alliedApply.setEnabled( true );
-				}
-			} );
-
-			alliedBtn.addSelectionListener( new SelectionAdapter( ) {
-
-				public void widgetSelected( SelectionEvent e )
-				{
-					alliedApply.setEnabled( alliedBtn.getSelection( ) );
-				}
-			} );
-		}
 		patchSection.setClient( patchClient );
 	}
 
@@ -992,13 +918,6 @@ public class StartPatchPage extends SimpleTabPage
 	{
 		generalMap = UnitUtil.getAvailableGenerals( );
 		nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
-//		for ( int i = 0; i < generalMap.getKeyList( ).size( ); i++ )
-//		{
-//			String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
-//			generalInCombo.add( generalName );
-//			generalOutCombo.add( generalName );
-//			generalCombo.add( generalName );
-//		}
 	}
 
 	private void createTitle( )
@@ -1042,7 +961,7 @@ public class StartPatchPage extends SimpleTabPage
 
 		generalMap = UnitUtil.getAvailableGenerals( );
 		nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
-		
+
 		removeComboItems( generalInCombo );
 		removeComboItems( generalOutCombo );
 		removeComboItems( generalCombo );

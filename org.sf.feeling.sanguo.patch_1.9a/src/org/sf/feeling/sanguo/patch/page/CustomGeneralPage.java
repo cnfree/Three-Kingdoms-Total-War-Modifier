@@ -26,6 +26,7 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -307,7 +308,7 @@ public class CustomGeneralPage extends SimpleTabPage
 		gd.widthHint = 150;
 		posXSpinner.setLayoutData( gd );
 		posXSpinner.setEnabled( false );
-		initSpinner( posXSpinner, 0, 200, 0, 1 );
+		initSpinner( posXSpinner, 0, 189, 0, 1 );
 
 		posYSpinner = WidgetUtil.getToolkit( )
 				.createSpinner( positionContainer );
@@ -315,7 +316,7 @@ public class CustomGeneralPage extends SimpleTabPage
 		gd.widthHint = 150;
 		posYSpinner.setLayoutData( gd );
 		posYSpinner.setEnabled( false );
-		initSpinner( posYSpinner, 0, 200, 0, 1 );
+		initSpinner( posYSpinner, 0, 179, 0, 1 );
 
 		final ModifyListener spinnerListener = new ModifyListener( ) {
 
@@ -327,10 +328,13 @@ public class CustomGeneralPage extends SimpleTabPage
 				while ( iter.hasNext( ) )
 				{
 					General temp = (General) iter.next( );
-					if ( temp.getPosX( )
-							.equals( Integer.toString( posXSpinner.getSelection( ) ) )
-							&& temp.getPosY( )
-									.equals( Integer.toString( posYSpinner.getSelection( ) ) ) )
+					Point point = new Point( posXSpinner.getSelection( ),
+							posYSpinner.getSelection( ) );
+					if ( ( temp.getPosX( )
+							.equals( Integer.toString( posXSpinner.getSelection( ) ) ) && temp.getPosY( )
+							.equals( Integer.toString( posYSpinner.getSelection( ) ) ) )
+							|| UnitUtil.getUnAvailableGeneralPoints( )
+									.contains( point ) )
 					{
 
 						Display.getDefault( ).asyncExec( new Runnable( ) {
@@ -794,7 +798,7 @@ public class CustomGeneralPage extends SimpleTabPage
 			}
 
 		} );
-		
+
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "14.设置新武将特技(可选)：" );
 		tejiButton = WidgetUtil.getToolkit( ).createButton( patchClient,
 				"设置",

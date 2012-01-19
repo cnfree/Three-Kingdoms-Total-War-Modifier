@@ -6,16 +6,23 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.sf.feeling.sanguo.patch.model.FactionDescription;
 import org.sf.feeling.sanguo.patch.model.FactionTexture;
 import org.sf.feeling.sanguo.patch.model.General;
+import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 
 public class MapUtil
@@ -62,6 +69,75 @@ public class MapUtil
 	static List nonRelativeGeneralList;
 	static SortMap categoryMap;
 	static SortMap factionTextureMap;
+	static SortMap factionDescriptionMap;
+
+	static HashSet unAvailableGeneralPoints = new HashSet( );
+
+	static
+	{
+		try
+		{
+			ImageData mapRegion = TgaLoader.loadImage( new FileInputStream( FileConstants.mapRegionFile ) );
+			int x, y;
+			RGB black = new RGB( 0, 0, 0 );
+			RGB white = new RGB( 255, 255, 255 );
+			for ( x = 0; x < 180; x++ )
+			{
+				for ( y = 0; y < 180; y++ )
+				{
+					if ( black.equals( mapRegion.palette.getRGB( mapRegion.getPixel( x,
+							y ) ) )
+							|| white.equals( mapRegion.palette.getRGB( mapRegion.getPixel( x,
+									y ) ) ) )
+					{
+						unAvailableGeneralPoints.add( new Point( x, 179 - y ) );
+					}
+				}
+			}
+
+			ImageData mapFeature = TgaLoader.loadImage( new FileInputStream( FileConstants.mapFeatureFile ) );
+			for ( x = 0; x < 180; x++ )
+			{
+				for ( y = 0; y < 180; y++ )
+				{
+					RGB rgb = mapFeature.palette.getRGB( mapFeature.getPixel( x,
+							y ) );
+					if ( rgb.blue == 255 )
+					{
+						unAvailableGeneralPoints.add( new Point( x, 179 - y ) );
+					}
+				}
+			}
+
+			ImageData mapGround = TgaLoader.loadImage( new FileInputStream( FileConstants.mapGroundFile ) );
+			List exclueds = Arrays.asList( new RGB[]{
+					new RGB( 192, 128, 128 ),
+					new RGB( 98, 65, 65 ),
+					new RGB( 64, 0, 0 ),
+					new RGB( 196, 0, 0 ),
+					new RGB( 128, 0, 0 )
+			} );
+
+			for ( x = 1; x < 381; x++ )
+			{
+				for ( y = 1; y < 361; y++ )
+				{
+					RGB rgb = mapGround.palette.getRGB( mapGround.getPixel( x,
+							y ) );
+					if ( exclueds.contains( rgb ) )
+					{
+						int posX = ( x - 1 ) / 2;
+						int posY = 179 - y / 2;
+						unAvailableGeneralPoints.add( new Point( posX, posY ) );
+					}
+				}
+			}
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace( );
+		}
+	}
 
 	public static void initMap( )
 	{
@@ -77,6 +153,7 @@ public class MapUtil
 		SoldierMapUtil.initMap( );
 		initNonRelativeGeneralList( );
 		factionTextureMap = initFactionTextureMap( );
+		factionDescriptionMap = initFactionDescriptionMap( );
 	}
 
 	private static SortMap initFactionTextureMap( )
@@ -177,6 +254,144 @@ public class MapUtil
 		}
 
 		return factionTextureMap;
+	}
+
+	private static SortMap initFactionDescriptionMap( )
+	{
+		SortMap factionDescriptionMap = new SortMap( );
+		if ( FileConstants.descrFactionsFile.exists( ) )
+		{
+			try
+			{
+				String line = null;
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.descrFactionsFile ),
+						"GBK" ) );
+				boolean startFaction = false;
+				String faction = null;
+				while ( ( line = in.readLine( ) ) != null )
+				{
+
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(faction)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							startFaction = false;
+							faction = line.replaceAll( "(?i)faction", "" )
+									.trim( )
+									.toUpperCase( );
+							if ( factionProperty.containsValue( faction.toUpperCase( ) ) )
+							{
+								factionDescriptionMap.put( faction,
+										new FactionDescription( ) );
+								startFaction = true;
+								continue;
+							}
+						}
+					}
+					if ( startFaction )
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(culture)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String culture = line.replaceAll( "(?i)(culture)",
+									"" ).trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setCulture( culture );
+							continue;
+						}
+					}
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(primary_colour)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String primary_colour = line.replaceAll( "(?i)primary_colour",
+									"" )
+									.trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setPrimary_colour( primary_colour );
+							continue;
+						}
+					}
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(secondary_colour)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String secondary_colour = line.replaceAll( "(?i)secondary_colour",
+									"" )
+									.trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setSecondary_colour( secondary_colour );
+							continue;
+						}
+					}
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(loading_logo)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String loading_logo = line.replaceAll( "(?i)loading_logo",
+									"" )
+									.trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setLoading_logo( loading_logo );
+							continue;
+						}
+					}
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(standard_index)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String standard_index = line.replaceAll( "(?i)standard_index",
+									"" )
+									.trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setStandard_index( standard_index );
+							continue;
+						}
+					}
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(custom_battle_availability)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String custom_battle_availability = line.replaceAll( "(?i)custom_battle_availability",
+									"" )
+									.trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setCustom_battle_availability( custom_battle_availability );
+							continue;
+						}
+					}
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(prefers_naval_invasions)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String prefers_naval_invasions = line.replaceAll( "(?i)prefers_naval_invasions",
+									"" )
+									.trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setPrefers_naval_invasions( prefers_naval_invasions );
+							continue;
+						}
+					}
+				}
+
+				in.close( );
+			}
+			catch ( IOException e )
+			{
+				e.printStackTrace( );
+			}
+		}
+
+		return factionDescriptionMap;
 	}
 
 	private static void initNonRelativeGeneralList( )

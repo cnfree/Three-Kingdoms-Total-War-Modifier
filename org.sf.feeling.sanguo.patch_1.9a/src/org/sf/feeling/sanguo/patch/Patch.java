@@ -41,6 +41,8 @@ import org.sf.feeling.sanguo.patch.util.FileConstants;
 import org.sf.feeling.sanguo.patch.util.FileUtil;
 import org.sf.feeling.sanguo.patch.util.MapUtil;
 import org.sf.feeling.sanguo.patch.util.Properties;
+import org.sf.feeling.sanguo.patch.util.UpdateUtil;
+import org.sf.feeling.swt.win32.extension.io.FileSystem;
 import org.sf.feeling.swt.win32.extension.shell.ShellFolder;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.extension.system.FileVersionInfo;
@@ -68,8 +70,10 @@ public class Patch
 				FileVersionInfo info = new FileVersionInfo( );
 				info.loadVersionInfo( file );
 				version = info.getProductVersion( );
+				UpdateUtil.update( version );
 			}
 		}
+		UpdateUtil.update( "2.4" );
 	}
 
 	private void initial( )
@@ -82,8 +86,7 @@ public class Patch
 		dialog.setFilterExtensions( new String[]{
 			"*.exe"
 		} ); // Windows
-		File file = new File( System.getProperties( )
-				.getProperty( "user.home" ) //$NON-NLS-1$
+		File file = new File( System.getProperties( ).getProperty( "user.home" ) //$NON-NLS-1$
 				+ File.separator
 				+ "\\.sanguo_patch\\1.9a\\patch.ini" );
 		if ( file.exists( ) )
@@ -134,7 +137,7 @@ public class Patch
 				e.printStackTrace( );
 			}
 
-			shell.setSize( 800, 550 );
+			shell.setSize( 850, 600 );
 			shell.setImages( new Image[]{
 				ImageCache.getImage( "/patch.png" ),
 			} );
@@ -201,6 +204,28 @@ public class Patch
 				display.sleep( );
 		}
 		display.dispose( );
+
+		if ( UpdateUtil.needUpdate )
+		{
+			File updateFile = new File( UpdateUtil.UPDATE_EXE );
+			if ( updateFile.exists( ) )
+			{
+				File lockFile = new File( FileSystem.getCurrentDirectory( ),
+						".lock" );
+				lockFile.deleteOnExit( );
+
+				try
+				{
+					Runtime.getRuntime( ).exec( "\""
+							+ UpdateUtil.UPDATE_EXE
+							+ "\"" );
+				}
+				catch ( IOException e )
+				{
+					e.printStackTrace( );
+				}
+			}
+		}
 	}
 
 	public void select( int index )
