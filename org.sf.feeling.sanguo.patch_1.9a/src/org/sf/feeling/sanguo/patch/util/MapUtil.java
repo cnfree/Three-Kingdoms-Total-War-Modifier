@@ -6,17 +6,23 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.sf.feeling.sanguo.patch.model.FactionDescription;
 import org.sf.feeling.sanguo.patch.model.FactionTexture;
 import org.sf.feeling.sanguo.patch.model.General;
+import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 
 public class MapUtil
@@ -64,7 +70,75 @@ public class MapUtil
 	static SortMap categoryMap;
 	static SortMap factionTextureMap;
 	static SortMap factionDescriptionMap;
-	
+
+	static HashSet unAvailableGeneralPoints = new HashSet( );
+
+	static
+	{
+		try
+		{
+			ImageData mapRegion = TgaLoader.loadImage( new FileInputStream( FileConstants.mapRegionFile ) );
+			int x, y;
+			RGB black = new RGB( 0, 0, 0 );
+			RGB white = new RGB( 255, 255, 255 );
+			for ( x = 0; x < 180; x++ )
+			{
+				for ( y = 0; y < 180; y++ )
+				{
+					if ( black.equals( mapRegion.palette.getRGB( mapRegion.getPixel( x,
+							y ) ) )
+							|| white.equals( mapRegion.palette.getRGB( mapRegion.getPixel( x,
+									y ) ) ) )
+					{
+						unAvailableGeneralPoints.add( new Point( x, 179 - y ) );
+					}
+				}
+			}
+
+			ImageData mapFeature = TgaLoader.loadImage( new FileInputStream( FileConstants.mapFeatureFile ) );
+			for ( x = 0; x < 180; x++ )
+			{
+				for ( y = 0; y < 180; y++ )
+				{
+					RGB rgb = mapFeature.palette.getRGB( mapFeature.getPixel( x,
+							y ) );
+					if ( rgb.blue == 255 )
+					{
+						unAvailableGeneralPoints.add( new Point( x, 179 - y ) );
+					}
+				}
+			}
+
+			ImageData mapGround = TgaLoader.loadImage( new FileInputStream( FileConstants.mapGroundFile ) );
+			List exclueds = Arrays.asList( new RGB[]{
+					new RGB( 192, 128, 128 ),
+					new RGB( 98, 65, 65 ),
+					new RGB( 64, 0, 0 ),
+					new RGB( 196, 0, 0 ),
+					new RGB( 128, 0, 0 )
+			} );
+
+			for ( x = 1; x < 381; x++ )
+			{
+				for ( y = 1; y < 361; y++ )
+				{
+					RGB rgb = mapGround.palette.getRGB( mapGround.getPixel( x,
+							y ) );
+					if ( exclueds.contains( rgb ) )
+					{
+						int posX = ( x - 1 ) / 2;
+						int posY = 179 - y / 2;
+						unAvailableGeneralPoints.add( new Point( posX, posY ) );
+					}
+				}
+			}
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace( );
+		}
+	}
+
 	public static void initMap( )
 	{
 		initUnitTypeToDictionaryMap( );

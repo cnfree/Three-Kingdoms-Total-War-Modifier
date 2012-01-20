@@ -44,7 +44,9 @@ import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.BattleUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
 import org.sf.feeling.sanguo.patch.util.FileConstants;
+import org.sf.feeling.sanguo.patch.util.FileUtil;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
+import org.sf.feeling.sanguo.patch.widget.ColorSelector;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
 import org.sf.feeling.swt.win32.extension.graphics.DDSLoader;
@@ -58,14 +60,15 @@ public class FactionEditPage extends SimpleTabPage
 {
 
 	private SortMap factionMap = UnitUtil.getFactionMap( );
+	private SortMap leaderImageMap = FileUtil.loadProperties( "leaderimage" );
+	private SortMap cultureMap = FileUtil.loadProperties( "culture" );
 
 	ModifyListener nameListener = new ModifyListener( ) {
 
 		public void modifyText( ModifyEvent e )
 		{
-			// checkEnableStatus( );
+			checkEnableStatus( );
 		}
-
 	};
 
 	private Text idText;
@@ -113,6 +116,14 @@ public class FactionEditPage extends SimpleTabPage
 	private CCombo leaderFontSizeCombo;
 
 	private SortMap generalMap;
+	private ColorSelector bigCaptionBannerColorSelector;
+	private ColorSelector smallCaptionBannerColorSelector;
+	private ColorSelector battleBannerColorSelector;
+	private ColorSelector factionTextColorSelector;
+	private CCombo factionTextFontCombo;
+	private CCombo factionTextFontSizeCombo;
+	private Text factionTextText;
+	private CCombo cultureCombo;
 
 	public void buildUI( Composite parent )
 	{
@@ -127,6 +138,7 @@ public class FactionEditPage extends SimpleTabPage
 		createTitle( );
 		createPatchArea( );
 		initPage( );
+		checkEnableStatus( );
 	}
 
 	private void createPatchArea( )
@@ -141,15 +153,14 @@ public class FactionEditPage extends SimpleTabPage
 		Composite patchClient = WidgetUtil.getToolkit( )
 				.createComposite( patchSection );
 		GridLayout layout = new GridLayout( );
-		layout.numColumns = 5;
+		layout.numColumns = 6;
 		patchClient.setLayout( layout );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "选择编辑势力：" );
 		final CCombo factionCombo = WidgetUtil.getToolkit( )
 				.createCCombo( patchClient, SWT.READ_ONLY );
 		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.widthHint = 180;
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = 4;
 		factionCombo.setLayoutData( gd );
 		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
 		{
@@ -161,44 +172,25 @@ public class FactionEditPage extends SimpleTabPage
 			public void widgetSelected( SelectionEvent e )
 			{
 				if ( factionCombo.getSelectionIndex( ) > -1 )
+				{
 					idText.setText( (String) factionMap.getKeyList( )
 							.get( factionCombo.getSelectionIndex( ) ) );
+					nameText.setText( factionCombo.getText( ) );
+					FactionDescription desc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+							.get( idText.getText( ) );
+					String culture = (String) cultureMap.get( desc.getCulture( ) );
+					if ( culture != null )
+						cultureCombo.setText( culture );
+					nameText.setEnabled( true );
+				}
 				else
+				{
 					idText.setText( "" );
-				nameText.setText( factionCombo.getText( ) );
-				if ( nameText.getText( ).indexOf( "公孙" ) != -1 )
-				{
-					bigCaptionBannerText.setText( "公孙" );
-					smallCaptionBannerText.setText( "公孙" );
-					stratBannerText.setText( "公孙" );
-					battleBannerText.setText( "公孙" );
-
+					nameText.setText( "" );
+					cultureCombo.setText( "" );
+					nameText.setEnabled( false );
 				}
-				else if ( nameText.getText( ).indexOf( "在野" ) != -1 )
-				{
-					bigCaptionBannerText.setText( "在野" );
-					smallCaptionBannerText.setText( "在野" );
-					stratBannerText.setText( "在野" );
-					battleBannerText.setText( "在野" );
-				}
-				else if ( nameText.getText( ).indexOf( "朝廷" ) != -1 )
-				{
-					bigCaptionBannerText.setText( "汉" );
-					smallCaptionBannerText.setText( "汉" );
-					stratBannerText.setText( "汉" );
-					battleBannerText.setText( "汉" );
-				}
-				else
-				{
-					bigCaptionBannerText.setText( ""
-							+ nameText.getText( ).charAt( 0 ) );
-					smallCaptionBannerText.setText( ""
-							+ nameText.getText( ).charAt( 0 ) );
-					stratBannerText.setText( ""
-							+ nameText.getText( ).charAt( 0 ) );
-					battleBannerText.setText( ""
-							+ nameText.getText( ).charAt( 0 ) );
-				}
+				checkEnableStatus( );
 			}
 		} );
 
@@ -215,19 +207,29 @@ public class FactionEditPage extends SimpleTabPage
 				"",
 				SWT.READ_ONLY );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.widthHint = 180;
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = 4;
 		idText.setLayoutData( gd );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置势力名称：" );
 
 		nameText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.widthHint = 180;
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = 4;
 		nameText.setLayoutData( gd );
 
 		nameText.addModifyListener( nameListener );
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置势力文化：" );
+
+		cultureCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 4;
+		cultureCombo.setLayoutData( gd );
+		for ( int i = 0; i < cultureMap.getKeyList( ).size( ); i++ )
+		{
+			cultureCombo.add( (String) cultureMap.get( i ) );
+		}
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑派系大旗帜：" );
 		bigCaptionBannerText = WidgetUtil.getToolkit( )
@@ -262,7 +264,8 @@ public class FactionEditPage extends SimpleTabPage
 							Integer.parseInt( bigCaptionBannerFontSizeCombo.getText( ) ),
 							SWT.BOLD );
 					gc.setFont( new Font( null, fontData ) );
-					gc.setForeground( new Color( null, 31, 31, 31 ) );
+					gc.setForeground( ColorCache.getInstance( )
+							.getColor( bigCaptionBannerColorSelector.getColorValue( ) ) );
 					if ( bigCaptionBannerText.getText( ).trim( ).length( ) > 0 )
 					{
 						char[] chars = ChangeCode.toShort( bigCaptionBannerText.getText( )
@@ -295,6 +298,13 @@ public class FactionEditPage extends SimpleTabPage
 		};
 		bigCaptionBannerText.addModifyListener( bigCaptionBannerModifyListener );
 
+		bigCaptionBannerColorSelector = new ColorSelector( patchClient );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		bigCaptionBannerColorSelector.getButton( ).setLayoutData( gd );
+		bigCaptionBannerColorSelector.setColorValue( new RGB( 31, 31, 31 ) );
+		bigCaptionBannerColorSelector.addModifyListener( bigCaptionBannerModifyListener );
+
 		bigCaptionBannerFontCombo = WidgetUtil.getToolkit( )
 				.createCCombo( patchClient, SWT.READ_ONLY );
 		FontData[] fonts = Display.getDefault( ).getFontList( null, true );
@@ -313,7 +323,7 @@ public class FactionEditPage extends SimpleTabPage
 		bigCaptionBannerFontCombo.setItems( fontNames );
 		bigCaptionBannerFontCombo.setText( "楷体" );
 		gd = new GridData( );
-		gd.widthHint = 80;
+		gd.widthHint = 60;
 		bigCaptionBannerFontCombo.setLayoutData( gd );
 		bigCaptionBannerFontCombo.addModifyListener( bigCaptionBannerModifyListener );
 
@@ -363,7 +373,8 @@ public class FactionEditPage extends SimpleTabPage
 							Integer.parseInt( smallCaptionBannerFontSizeCombo.getText( ) ),
 							SWT.BOLD );
 					gc.setFont( new Font( null, fontData ) );
-					gc.setForeground( new Color( null, 31, 31, 31 ) );
+					gc.setForeground( ColorCache.getInstance( )
+							.getColor( smallCaptionBannerColorSelector.getColorValue( ) ) );
 					if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
 					{
 						char[] chars = ChangeCode.toShort( smallCaptionBannerText.getText( )
@@ -395,12 +406,19 @@ public class FactionEditPage extends SimpleTabPage
 		};
 		smallCaptionBannerText.addModifyListener( smallCaptionModifyListener );
 
+		smallCaptionBannerColorSelector = new ColorSelector( patchClient );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		smallCaptionBannerColorSelector.getButton( ).setLayoutData( gd );
+		smallCaptionBannerColorSelector.setColorValue( new RGB( 21, 21, 21 ) );
+		smallCaptionBannerColorSelector.addModifyListener( smallCaptionModifyListener );
+
 		smallCaptionBannerFontCombo = WidgetUtil.getToolkit( )
 				.createCCombo( patchClient, SWT.READ_ONLY );
 		smallCaptionBannerFontCombo.setItems( fontNames );
 		smallCaptionBannerFontCombo.setText( "楷体" );
 		gd = new GridData( );
-		gd.widthHint = 80;
+		gd.widthHint = 60;
 		smallCaptionBannerFontCombo.setLayoutData( gd );
 		smallCaptionBannerFontCombo.addModifyListener( smallCaptionModifyListener );
 
@@ -420,6 +438,7 @@ public class FactionEditPage extends SimpleTabPage
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑战役旗帜：" );
 		stratBannerText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 2;
 		stratBannerText.setLayoutData( gd );
 
 		ModifyListener stratModifyListener = new ModifyListener( ) {
@@ -476,7 +495,7 @@ public class FactionEditPage extends SimpleTabPage
 		stratBannerFontCombo.setItems( fontNames );
 		stratBannerFontCombo.setText( "楷体" );
 		gd = new GridData( );
-		gd.widthHint = 80;
+		gd.widthHint = 60;
 		stratBannerFontCombo.setLayoutData( gd );
 		stratBannerFontCombo.addModifyListener( stratModifyListener );
 
@@ -529,7 +548,8 @@ public class FactionEditPage extends SimpleTabPage
 							Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
 							SWT.BOLD );
 					gc.setFont( new Font( null, fontData ) );
-					gc.setForeground( new Color( null, 21, 21, 21 ) );
+					gc.setForeground( ColorCache.getInstance( )
+							.getColor( battleBannerColorSelector.getColorValue( ) ) );
 					if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
 					{
 						char[] chars = ChangeCode.toShort( battleBannerText.getText( )
@@ -560,12 +580,19 @@ public class FactionEditPage extends SimpleTabPage
 		};
 		battleBannerText.addModifyListener( battleModifyListener );
 
+		battleBannerColorSelector = new ColorSelector( patchClient );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		battleBannerColorSelector.getButton( ).setLayoutData( gd );
+		battleBannerColorSelector.setColorValue( new RGB( 21, 21, 21 ) );
+		battleBannerColorSelector.addModifyListener( battleModifyListener );
+
 		battleBannerFontCombo = WidgetUtil.getToolkit( )
 				.createCCombo( patchClient, SWT.READ_ONLY );
 		battleBannerFontCombo.setItems( fontNames );
 		battleBannerFontCombo.setText( "楷体" );
 		gd = new GridData( );
-		gd.widthHint = 80;
+		gd.widthHint = 60;
 		battleBannerFontCombo.setLayoutData( gd );
 		battleBannerFontCombo.addModifyListener( battleModifyListener );
 
@@ -597,7 +624,7 @@ public class FactionEditPage extends SimpleTabPage
 			}
 		} );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.horizontalSpan = 2;
+		gd.horizontalSpan = 3;
 		startImageCombo.setLayoutData( gd );
 		startImageCombo.addSelectionListener( new SelectionAdapter( ) {
 
@@ -677,6 +704,7 @@ public class FactionEditPage extends SimpleTabPage
 		leaderCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 				SWT.READ_ONLY );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 2;
 		leaderCombo.setLayoutData( gd );
 		ModifyListener leaderModifyListener = new ModifyListener( ) {
 
@@ -700,7 +728,7 @@ public class FactionEditPage extends SimpleTabPage
 		leaderFontCombo.setItems( fontNames );
 		leaderFontCombo.setText( "黑体" );
 		gd = new GridData( );
-		gd.widthHint = 80;
+		gd.widthHint = 60;
 		leaderFontCombo.setLayoutData( gd );
 		leaderFontCombo.addModifyListener( leaderModifyListener );
 
@@ -716,6 +744,107 @@ public class FactionEditPage extends SimpleTabPage
 		gd.widthHint = 60;
 		leaderFontSizeCombo.setLayoutData( gd );
 		leaderFontSizeCombo.addModifyListener( leaderModifyListener );
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑势力外交文字：" );
+		factionTextText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		factionTextText.setLayoutData( gd );
+		ModifyListener factionTextModifyListener = new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				Image image = new Image( null, 29, 29 );
+				GC gc = new GC( image );
+				gc.setAdvanced( true );
+				gc.setTextAntialias( SWT.ON );
+
+				RGB rgb = factionTextColorSelector.getColorValue( );
+				gc.setBackground( ColorCache.getInstance( )
+						.getColor( (int) ( rgb.red > 127 ? 255 : ( 255 * 0.85 ) ),
+								(int) ( rgb.green > 127 ? 255 : ( 255 * 0.85 ) ),
+								(int) ( rgb.blue > 127 ? 255 : ( 255 * 0.85 ) ) ) );
+				gc.setForeground( ColorCache.getInstance( )
+						.getColor( (int) ( rgb.red > 127 ? 255 : ( 255 * 0.4 ) ),
+								(int) ( rgb.green > 127 ? 255 : ( 255 * 0.4 ) ),
+								(int) ( rgb.blue > 127 ? 255 : ( 255 * 0.4 ) ) ) );
+				gc.fillGradientRectangle( 0, 0, 29, 29, true );
+				gc.setForeground( ColorCache.getInstance( ).getColor( rgb ) );
+
+				Font font = null;
+				try
+				{
+					FontData fontData = new FontData( factionTextFontCombo.getText( ),
+							Integer.parseInt( factionTextFontSizeCombo.getText( ) ),
+							SWT.BOLD );
+					font = new Font( null, fontData );
+					gc.setFont( font );
+				}
+				catch ( NumberFormatException e1 )
+				{
+				}
+
+				if ( factionTextText.getText( ).length( ) > 0 )
+				{
+					Point point = gc.textExtent( factionTextText.getText( 0, 0 ) );
+					gc.drawText( ChangeCode.toShort( factionTextText.getText( 0,
+							0 ) ),
+							( 29 - point.x ) / 2,
+							( 29 - point.y ) / 2,
+							true );
+				}
+
+				ImageData imageData = image.getImageData( );
+				int x, y;
+				for ( x = 0; x < 29; x++ )
+				{
+					for ( y = 0; y < 29; y++ )
+					{
+						if ( Math.pow( x - 14.5, 2 ) + Math.pow( y - 14.5, 2 ) >= Math.pow( 14.5,
+								2 ) )
+						{
+							imageData.setAlpha( x, y, 0 );
+						}
+						else
+							imageData.setAlpha( x, y, 255 );
+					}
+				}
+				if ( font != null )
+					font.dispose( );
+				image.dispose( );
+				gc.dispose( );
+				imageCanvas.setImageData( imageData );
+			}
+		};
+		factionTextText.addModifyListener( factionTextModifyListener );
+
+		factionTextColorSelector = new ColorSelector( patchClient );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		factionTextColorSelector.getButton( ).setLayoutData( gd );
+		factionTextColorSelector.setColorValue( new RGB( 0, 0, 255 ) );
+		factionTextColorSelector.addModifyListener( factionTextModifyListener );
+
+		factionTextFontCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		factionTextFontCombo.setItems( fontNames );
+		factionTextFontCombo.setText( "楷体" );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		factionTextFontCombo.setLayoutData( gd );
+		factionTextFontCombo.addModifyListener( factionTextModifyListener );
+
+		factionTextFontSizeCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		for ( int i = 8; i < 72; i++ )
+		{
+			factionTextFontSizeCombo.add( "" + i );
+		}
+		factionTextFontSizeCombo.setText( "18" );
+
+		gd = new GridData( );
+		gd.widthHint = 60;
+		factionTextFontSizeCombo.setLayoutData( gd );
+		factionTextFontSizeCombo.addModifyListener( factionTextModifyListener );
 
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 5;
@@ -752,6 +881,68 @@ public class FactionEditPage extends SimpleTabPage
 		} );
 
 		patchSection.setClient( patchClient );
+	}
+
+	private void checkEnableStatus( )
+	{
+		if ( nameText.getText( ).trim( ).length( ) > 0
+				&& idText.getText( ).trim( ).length( ) > 0 )
+		{
+			bigCaptionBannerText.setEnabled( true );
+			bigCaptionBannerFontCombo.setEnabled( true );
+			bigCaptionBannerFontSizeCombo.setEnabled( true );
+			smallCaptionBannerText.setEnabled( true );
+			smallCaptionBannerFontCombo.setEnabled( true );
+			smallCaptionBannerFontSizeCombo.setEnabled( true );
+			battleBannerText.setEnabled( true );
+			battleBannerFontCombo.setEnabled( true );
+			battleBannerFontSizeCombo.setEnabled( true );
+			stratBannerText.setEnabled( true );
+			stratBannerFontCombo.setEnabled( true );
+			stratBannerFontSizeCombo.setEnabled( true );
+			startImageCombo.setEnabled( true );
+			startImageButton.setEnabled( true );
+			leaderCombo.setEnabled( true );
+			leaderFontCombo.setEnabled( true );
+			leaderFontSizeCombo.setEnabled( true );
+			bigCaptionBannerColorSelector.setEnabled( true );
+			smallCaptionBannerColorSelector.setEnabled( true );
+			battleBannerColorSelector.setEnabled( true );
+			cultureCombo.setEnabled( true );
+			factionTextText.setEnabled( true );
+			factionTextColorSelector.setEnabled( true );
+			factionTextFontCombo.setEnabled( true );
+			factionTextFontSizeCombo.setEnabled( true );
+		}
+		else
+		{
+			bigCaptionBannerText.setEnabled( false );
+			bigCaptionBannerFontCombo.setEnabled( false );
+			bigCaptionBannerFontSizeCombo.setEnabled( false );
+			smallCaptionBannerText.setEnabled( false );
+			smallCaptionBannerFontCombo.setEnabled( false );
+			smallCaptionBannerFontSizeCombo.setEnabled( false );
+			battleBannerText.setEnabled( false );
+			battleBannerFontCombo.setEnabled( false );
+			battleBannerFontSizeCombo.setEnabled( false );
+			stratBannerText.setEnabled( false );
+			stratBannerFontCombo.setEnabled( false );
+			stratBannerFontSizeCombo.setEnabled( false );
+			startImageCombo.setEnabled( false );
+			startImageButton.setEnabled( false );
+			leaderCombo.setEnabled( false );
+			leaderFontCombo.setEnabled( false );
+			leaderFontSizeCombo.setEnabled( false );
+			bigCaptionBannerColorSelector.setEnabled( false );
+			smallCaptionBannerColorSelector.setEnabled( false );
+			battleBannerColorSelector.setEnabled( false );
+			cultureCombo.setEnabled( false );
+			factionTextText.setEnabled( false );
+			factionTextColorSelector.setEnabled( false );
+			factionTextFontCombo.setEnabled( false );
+			factionTextFontSizeCombo.setEnabled( false );
+			
+		}
 	}
 
 	protected ImageData computeStartImage( ImageData imageData )

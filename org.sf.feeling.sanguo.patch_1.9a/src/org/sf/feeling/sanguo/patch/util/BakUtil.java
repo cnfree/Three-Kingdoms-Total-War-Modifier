@@ -74,6 +74,7 @@ public class BakUtil
 			FileConstants.modelStratFile,
 			FileConstants.descrBannersFile,
 			FileConstants.descrFactionsFile,
+			FileConstants.descrWallsFile,
 	};
 
 	private static FileFilter tgaFilter = new FileFilter( ) {

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -450,7 +451,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(character\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ generalInCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -546,7 +547,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(character\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ generalOutCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1016,7 +1017,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher2 = pattern2.matcher( line );
 					if ( matcher2.find( )
-							&& line.split( "(?i)(character\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ generalCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1165,7 +1166,7 @@ public class UnitUtil
 								Pattern.CASE_INSENSITIVE );
 						Matcher matcher = pattern.matcher( line );
 						if ( matcher.find( )
-								&& line.split( "(?i)(character\\s+)("
+								&& line.split( "(?i)(character.+)("
 										+ generalCode
 										+ ")(\\s*)(,)" ).length == 2 )
 						{
@@ -1256,6 +1257,11 @@ public class UnitUtil
 	public static List getNonRelativeGenerals( )
 	{
 		return MapUtil.nonRelativeGeneralList;
+	}
+
+	public static Set getUnAvailableGeneralPoints( )
+	{
+		return MapUtil.unAvailableGeneralPoints;
 	}
 
 	public static SortMap getFactionMap( )
@@ -1618,7 +1624,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(character\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ generalCode
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1658,7 +1664,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(character\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ leader
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -1935,7 +1941,7 @@ public class UnitUtil
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(character\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ leader
 									+ ")(\\s*)(,)" ).length == 2 )
 					{

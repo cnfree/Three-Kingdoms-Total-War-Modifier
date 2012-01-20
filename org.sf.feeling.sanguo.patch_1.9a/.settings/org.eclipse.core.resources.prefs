@@ -1,4 +1,4 @@
-#Sat Jan 14 18:10:04 GMT 2012
+#Fri Jan 20 02:52:05 GMT 2012
 eclipse.preferences.version=1
 encoding//src/org/sf/feeling/sanguo/patch/Patch.java=UTF-8
 encoding//src/org/sf/feeling/sanguo/patch/code/banner.properties=UTF-8
@@ -6,6 +6,7 @@ encoding//src/org/sf/feeling/sanguo/patch/code/baowu.properties=UTF-8
 encoding//src/org/sf/feeling/sanguo/patch/code/baowu.txt=UTF-8
 encoding//src/org/sf/feeling/sanguo/patch/code/city.properties=UTF-8
 encoding//src/org/sf/feeling/sanguo/patch/code/city.txt=UTF-8
+encoding//src/org/sf/feeling/sanguo/patch/code/culture.properties=UTF-8
 encoding//src/org/sf/feeling/sanguo/patch/code/faction.properties=UTF-8
 encoding//src/org/sf/feeling/sanguo/patch/code/faction.txt=UTF-8
 encoding//src/org/sf/feeling/sanguo/patch/code/horse.properties=UTF-8

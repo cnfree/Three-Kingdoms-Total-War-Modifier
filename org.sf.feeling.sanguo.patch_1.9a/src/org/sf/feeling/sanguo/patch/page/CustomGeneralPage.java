@@ -26,6 +26,7 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -162,9 +163,7 @@ public class CustomGeneralPage extends SimpleTabPage
 					&& bigImage != null
 					&& soldier != null
 					&& skills != null
-					&& skills.getKeyList( ).size( ) > 0
-					&& posXSpinner.getSelection( ) > 0
-					&& posYSpinner.getSelection( ) > 0 )
+					&& skills.getKeyList( ).size( ) > 0 )
 			{
 				applyButton.setEnabled( true );
 			}
@@ -307,7 +306,7 @@ public class CustomGeneralPage extends SimpleTabPage
 		gd.widthHint = 150;
 		posXSpinner.setLayoutData( gd );
 		posXSpinner.setEnabled( false );
-		initSpinner( posXSpinner, 0, 200, 0, 1 );
+		initSpinner( posXSpinner, 0, 189, 0, 1 );
 
 		posYSpinner = WidgetUtil.getToolkit( )
 				.createSpinner( positionContainer );
@@ -315,46 +314,7 @@ public class CustomGeneralPage extends SimpleTabPage
 		gd.widthHint = 150;
 		posYSpinner.setLayoutData( gd );
 		posYSpinner.setEnabled( false );
-		initSpinner( posYSpinner, 0, 200, 0, 1 );
-
-		final ModifyListener spinnerListener = new ModifyListener( ) {
-
-			public void modifyText( final ModifyEvent e )
-			{
-				Iterator iter = UnitUtil.getGeneralModels( )
-						.values( )
-						.iterator( );
-				while ( iter.hasNext( ) )
-				{
-					General temp = (General) iter.next( );
-					if ( temp.getPosX( )
-							.equals( Integer.toString( posXSpinner.getSelection( ) ) )
-							&& temp.getPosY( )
-									.equals( Integer.toString( posYSpinner.getSelection( ) ) ) )
-					{
-
-						Display.getDefault( ).asyncExec( new Runnable( ) {
-
-							public void run( )
-							{
-								if ( e.widget == posXSpinner )
-								{
-									posXSpinner.setSelection( posXSpinner.getSelection( ) + 1 );
-								}
-								else if ( e.widget == posYSpinner )
-								{
-									posYSpinner.setSelection( posYSpinner.getSelection( ) + 1 );
-								}
-							}
-						} );
-						break;
-					}
-				}
-			}
-		};
-
-		posXSpinner.addModifyListener( spinnerListener );
-		posYSpinner.addModifyListener( spinnerListener );
+		initSpinner( posYSpinner, 0, 179, 0, 1 );
 
 		positionButton = WidgetUtil.getToolkit( )
 				.createButton( positionContainer, SWT.PUSH, true );
@@ -379,8 +339,12 @@ public class CustomGeneralPage extends SimpleTabPage
 								.get( general );
 						try
 						{
-							posXSpinner.setSelection( Integer.parseInt( model.getPosX( ) ) );
-							posYSpinner.setSelection( Integer.parseInt( model.getPosY( ) ) );
+							Point point = computeGeneralPosition( new Point( Integer.parseInt( model.getPosX( ) ),
+									Integer.parseInt( model.getPosY( ) ) ),
+									true,
+									true );
+							posXSpinner.setSelection( point.x );
+							posYSpinner.setSelection( point.y );
 						}
 						catch ( NumberFormatException e1 )
 						{
@@ -794,7 +758,7 @@ public class CustomGeneralPage extends SimpleTabPage
 			}
 
 		} );
-		
+
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "14.设置新武将特技(可选)：" );
 		tejiButton = WidgetUtil.getToolkit( ).createButton( patchClient,
 				"设置",
@@ -913,8 +877,14 @@ public class CustomGeneralPage extends SimpleTabPage
 				customGeneral.setDisplayName( nameText.getText( ).trim( ) );
 				customGeneral.setName( idText.getText( ).trim( ) );
 				customGeneral.setFaction( faction );
-				customGeneral.setPosX( posXSpinner.getSelection( ) );
-				customGeneral.setPosY( posYSpinner.getSelection( ) );
+				
+				Point point = computeGeneralPosition( new Point(posXSpinner.getSelection( ) ,
+						posYSpinner.getSelection( ) ),
+						true,
+						true );	
+				customGeneral.setPosX( point.x );
+				customGeneral.setPosY( point.y );
+				
 				if ( generalModelCombo.getSelectionIndex( ) != -1 )
 				{
 					customGeneral.setStrat_model( (String) officerMap.getKeyList( )
@@ -1163,5 +1133,47 @@ public class CustomGeneralPage extends SimpleTabPage
 			skillButton.setText( "设置（未设置）" );
 		}
 		checkEnableStatus( );
+	}
+
+	private Point computeGeneralPosition( Point point, boolean x, boolean y )
+	{
+		Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
+
+		while ( iter.hasNext( ) )
+		{
+			General temp = (General) iter.next( );
+			if ( ( temp.getPosX( ).equals( Integer.toString( point.x ) ) && temp.getPosY( )
+					.equals( Integer.toString( point.y ) ) )
+					|| UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
+			{
+				if ( point.x == 189 )
+				{
+					x = false;
+				}
+				if ( point.y == 179 )
+				{
+					y = false;
+				}
+				if ( x )
+				{
+					point.x = point.x + 1;
+				}
+				else
+				{
+					point.x = point.x - 1;
+				}
+				if ( y )
+				{
+					point.y = point.y + 1;
+				}
+				else
+				{
+					point.y = point.y - 1;
+				}
+				return computeGeneralPosition( point, x, y );
+			}
+		}
+
+		return point;
 	}
 }

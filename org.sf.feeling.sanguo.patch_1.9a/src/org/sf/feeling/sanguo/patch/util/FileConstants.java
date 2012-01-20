@@ -23,6 +23,10 @@ public class FileConstants
 			+ "\\alexander\\data\\descr_sm_factions.txt";
 	public static File descrFactionsFile = new File( descrFactionsPath );
 
+	public static String descrWallsPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\descr_walls.txt";
+	public static File descrWallsFile = new File( descrWallsPath );
+
 	public static String captainBannerPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\ui\\captain banners";
 	public static File captainBannerFile = new File( captainBannerPath );
@@ -74,7 +78,20 @@ public class FileConstants
 	public final static String stratFilePath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\descr_strat.txt";
 	public final static File stratFile = new File( stratFilePath );
+	
+	public final static String mapGroundPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\map_ground_types.tga";
+	public final static File mapGroundFile = new File( mapGroundPath );
+	
+	public final static String mapRegionPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\map_regions.tga";
+	public final static File mapRegionFile = new File( mapRegionPath );
 
+	public final static String mapFeaturePath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\map_features.tga";
+	public final static File mapFeatureFile = new File( mapFeaturePath );
+
+	
 	public final static String desc_namesFilePath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\descr_names.txt";
 	public final static File descNamesFile = new File( desc_namesFilePath );
@@ -127,7 +144,7 @@ public class FileConstants
 
 	public final static String uiPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\ui";
-	
+
 	public static boolean testFile( )
 	{
 		if ( !unitFile.exists( ) )
@@ -215,6 +232,22 @@ public class FileConstants
 			return false;
 		}
 		else if ( !descrFactionsFile.exists( ) )
+		{
+			return false;
+		}
+		else if ( !descrWallsFile.exists( ) )
+		{
+			return false;
+		}
+		else if ( !mapRegionFile.exists( ) )
+		{
+			return false;
+		}
+		else if ( !mapGroundFile.exists( ) )
+		{
+			return false;
+		}
+		else if ( !mapFeatureFile.exists( ) )
 		{
 			return false;
 		}

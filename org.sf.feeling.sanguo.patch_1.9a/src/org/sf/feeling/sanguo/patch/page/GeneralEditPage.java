@@ -22,6 +22,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -108,45 +109,6 @@ public class GeneralEditPage extends SimpleTabPage
 
 	private SortMap generalModelMap;
 
-	final ModifyListener spinnerListener = new ModifyListener( ) {
-
-		public void modifyText( final ModifyEvent e )
-		{
-			General model = (General) UnitUtil.getGeneralModels( )
-					.get( general );
-
-			Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
-			while ( iter.hasNext( ) )
-			{
-				General temp = (General) iter.next( );
-				if ( temp == model )
-					continue;
-				if ( temp.getPosX( )
-						.equals( Integer.toString( posXSpinner.getSelection( ) ) )
-						&& temp.getPosY( )
-								.equals( Integer.toString( posYSpinner.getSelection( ) ) ) )
-				{
-
-					Display.getDefault( ).asyncExec( new Runnable( ) {
-
-						public void run( )
-						{
-							if ( e.widget == posXSpinner )
-							{
-								posXSpinner.setSelection( posXSpinner.getSelection( ) + 1 );
-							}
-							else if ( e.widget == posYSpinner )
-							{
-								posYSpinner.setSelection( posYSpinner.getSelection( ) + 1 );
-							}
-						}
-					} );
-					break;
-				}
-			}
-			checkEnableStatus( );
-		}
-	};
 	private Button tejiButton;
 	private FormText soldierText;
 
@@ -192,9 +154,7 @@ public class GeneralEditPage extends SimpleTabPage
 			if ( general != null
 					&& bigImage != null
 					&& skills != null
-					&& skills.getKeyList( ).size( ) > 0
-					&& posXSpinner.getSelection( ) > 0
-					&& posYSpinner.getSelection( ) > 0 )
+					&& skills.getKeyList( ).size( ) > 0 )
 			{
 				String generalUnit = UnitUtil.getGeneralUnitType( general );
 				if ( generalUnitMap.containsKey( generalUnit )
@@ -330,7 +290,7 @@ public class GeneralEditPage extends SimpleTabPage
 		gd.widthHint = 150;
 		posXSpinner.setLayoutData( gd );
 		posXSpinner.setEnabled( false );
-		initSpinner( posXSpinner, 0, 200, 0, 1 );
+		initSpinner( posXSpinner, 0, 189, 0, 1 );
 
 		posYSpinner = WidgetUtil.getToolkit( )
 				.createSpinner( positionContainer );
@@ -338,10 +298,7 @@ public class GeneralEditPage extends SimpleTabPage
 		gd.widthHint = 150;
 		posYSpinner.setLayoutData( gd );
 		posYSpinner.setEnabled( false );
-		initSpinner( posYSpinner, 0, 200, 0, 1 );
-
-		posXSpinner.addModifyListener( spinnerListener );
-		posYSpinner.addModifyListener( spinnerListener );
+		initSpinner( posYSpinner, 0, 179, 0, 1 );
 
 		positionButton = WidgetUtil.getToolkit( )
 				.createButton( positionContainer, SWT.PUSH, true );
@@ -366,8 +323,12 @@ public class GeneralEditPage extends SimpleTabPage
 								.get( general );
 						try
 						{
-							posXSpinner.setSelection( Integer.parseInt( model.getPosX( ) ) );
-							posYSpinner.setSelection( Integer.parseInt( model.getPosY( ) ) );
+							Point point = computeGeneralPosition( new Point( Integer.parseInt( model.getPosX( ) ),
+									Integer.parseInt( model.getPosY( ) ) ),
+									true,
+									true );
+							posXSpinner.setSelection( point.x );
+							posYSpinner.setSelection( point.y );
 						}
 						catch ( NumberFormatException e1 )
 						{
@@ -1002,13 +963,16 @@ public class GeneralEditPage extends SimpleTabPage
 
 				General model = (General) generalModelMap.get( general );
 
-				if ( !model.getPosX( )
-						.equals( "" + posXSpinner.getSelection( ) )
-						|| !model.getPosY( ).equals( ""
-								+ posYSpinner.getSelection( ) ) )
+				Point point = computeGeneralPosition( new Point( posXSpinner.getSelection( ),
+						posYSpinner.getSelection( ) ),
+						true,
+						true );
+
+				if ( !model.getPosX( ).equals( "" + point.x )
+						|| !model.getPosY( ).equals( "" + point.y ) )
 				{
-					customGeneral.setPosX( "" + posXSpinner.getSelection( ) );
-					customGeneral.setPosY( "" + posYSpinner.getSelection( ) );
+					customGeneral.setPosX( "" + point.x );
+					customGeneral.setPosY( "" + point.y );
 				}
 				boolean modelChange = false;
 				String generalModel = null;
@@ -1117,14 +1081,8 @@ public class GeneralEditPage extends SimpleTabPage
 
 				try
 				{
-					posXSpinner.removeModifyListener( spinnerListener );
-					posYSpinner.removeModifyListener( spinnerListener );
-
 					posXSpinner.setSelection( Integer.parseInt( model.getPosX( ) ) );
 					posYSpinner.setSelection( Integer.parseInt( model.getPosY( ) ) );
-
-					posXSpinner.addModifyListener( spinnerListener );
-					posYSpinner.addModifyListener( spinnerListener );
 				}
 				catch ( NumberFormatException e1 )
 				{
@@ -1328,5 +1286,53 @@ public class GeneralEditPage extends SimpleTabPage
 		combo.setMaximum( max );
 		combo.setDigits( digit );
 		combo.setIncrement( step );
+	}
+
+	private Point computeGeneralPosition( Point point, boolean x, boolean y )
+	{
+		String general = (String) generalMap.getKeyList( )
+				.get( generalCombo.getSelectionIndex( ) );
+		General model = (General) UnitUtil.getGeneralModels( ).get( general );
+		Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
+
+		while ( iter.hasNext( ) )
+		{
+			General temp = (General) iter.next( );
+			if ( temp == model )
+				continue;
+
+			if ( ( temp.getPosX( ).equals( Integer.toString( point.x ) ) && temp.getPosY( )
+					.equals( Integer.toString( point.y ) ) )
+					|| UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
+			{
+				if ( point.x == 189 )
+				{
+					x = false;
+				}
+				if ( point.y == 179 )
+				{
+					y = false;
+				}
+				if ( x )
+				{
+					point.x = point.x + 1;
+				}
+				else
+				{
+					point.x = point.x - 1;
+				}
+				if ( y )
+				{
+					point.y = point.y + 1;
+				}
+				else
+				{
+					point.y = point.y - 1;
+				}
+				return computeGeneralPosition( point, x, y );
+			}
+		}
+
+		return point;
 	}
 }

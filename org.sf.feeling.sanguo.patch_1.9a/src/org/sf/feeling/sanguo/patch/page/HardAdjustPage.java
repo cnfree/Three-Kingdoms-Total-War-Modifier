@@ -371,7 +371,7 @@ public class HardAdjustPage extends SimpleTabPage {
 							if (!startTemple) {
 								printer.println(line);
 								Pattern pattern = Pattern
-										.compile("^\\s*(temple_of)");
+										.compile("^\\s*(hrr_farms)", Pattern.CASE_INSENSITIVE);
 								Matcher matcher = pattern.matcher(line);
 								if (matcher.find()) {
 									startTemple = true;
@@ -385,7 +385,7 @@ public class HardAdjustPage extends SimpleTabPage {
 								} else {
 									printer.println(line);
 									Pattern pattern1 = Pattern
-											.compile("^\\s*(construction)");
+											.compile("^\\s*(construction)", Pattern.CASE_INSENSITIVE);
 									Matcher matcher1 = pattern1.matcher(line);
 									if (matcher1.find()) {
 										startTemple = false;
