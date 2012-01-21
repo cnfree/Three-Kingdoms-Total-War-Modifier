@@ -11,9 +11,14 @@
 #AutoIt3Wrapper_Res_Language=2052
 #EndRegion ;
 
+$error = @scriptdir&"\..\.error"
 $lock = @scriptdir&"\..\.lock"
 $parent = @scriptdir&"\.."
 $update = @scriptdir&"\patch"
+
+if fileexists( $error ) then
+	exit
+endif
 
 if not fileexists( $update ) then
 	exit
