@@ -218,11 +218,11 @@ public class UpdateUtil
 				patchDir.mkdirs( );
 
 			zipFile = new ZipFile( updateZipFile, "GBK" );
-			Enumeration<ZipEntry> enumeration = zipFile.getEntries( );
+			Enumeration enumeration = zipFile.getEntries( );
 			ZipEntry zipEntry = null;
 			while ( enumeration.hasMoreElements( ) )
 			{
-				zipEntry = enumeration.nextElement( );
+				zipEntry = (ZipEntry)enumeration.nextElement( );
 				if ( zipEntry.isDirectory( ) )
 					continue;
 				String filePath = PATCH_DIR
