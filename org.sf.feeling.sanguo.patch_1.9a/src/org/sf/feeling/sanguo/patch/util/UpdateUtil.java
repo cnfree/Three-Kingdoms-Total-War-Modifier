@@ -28,6 +28,8 @@ public class UpdateUtil
 			+ "\\update";
 	public static final String BAK_DIR = FileSystem.getCurrentDirectory( )
 			+ "\\~bak";
+	public static final String ERROR_FLAG = FileSystem.getCurrentDirectory( )
+			+ "\\.error";
 
 	public static boolean needUpdate = false;
 
@@ -40,10 +42,16 @@ public class UpdateUtil
 
 				try
 				{
+					File errorFlag = new File(ERROR_FLAG);
+					if(errorFlag.exists( )){
+						deleteUpdateFiles( );
+						errorFlag.delete( );
+					}
 					URL url = new URL( "http://feeling.sourceforge.net/patch/1.9a/update.info" );
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection( );
+					conn.setUseCaches( false );
 					BufferedReader reader = new BufferedReader( new InputStreamReader( conn.getInputStream( ) ) );
-					String updateVersion = reader.readLine( ).trim( );
+					String updateVersion = reader.readLine( );
 					String updateURL = reader.readLine( );
 					String updateMD5 = reader.readLine( );
 					String zipURL = reader.readLine( );
@@ -58,9 +66,9 @@ public class UpdateUtil
 					{
 						if ( zipURL != null && updateURL != null )
 						{
-							download( updateURL );
-							download( zipURL );
-
+							download( zipURL, PATCH_FILE );
+							download( updateURL, UPDATE_EXE );
+							
 							File updateZipFile = new File( PATCH_FILE );
 							String updateZipMD5 = FileUtil.getMD5Str( updateZipFile );
 							File updateExeFile = new File( UPDATE_EXE );
@@ -89,9 +97,18 @@ public class UpdateUtil
 						deleteUpdateFiles( );
 					}
 				}
-				catch ( IOException e )
+				catch ( Exception e )
 				{
 					e.printStackTrace( );
+					File errorFile = new File( ERROR_FLAG );
+					try
+					{
+						errorFile.createNewFile( );
+					}
+					catch ( IOException e1 )
+					{
+						e1.printStackTrace( );
+					}
 				}
 			}
 		};
@@ -101,23 +118,25 @@ public class UpdateUtil
 
 	public static void main( String[] args )
 	{
-		System.out.println( FileUtil.getMD5Str( new File( "C:\\Users\\cchen\\Desktop\\patch\\output\\patch_1.9a_2.5.zip" ) ) );
+		System.out.println( FileUtil.getMD5Str( new File( "E:\\Git\\configuration\\git\\sanguo\\org.sf.feeling.sanguo.patch_1.9a\\build\\Update.exe" ) ) );
 	}
 
-	protected static void download( String downloadURL ) throws IOException
+	protected static void download( String downloadURL, String file )
+			throws Exception
 	{
 		int nStartPos = 0;
 		URL url = new URL( downloadURL );
 		HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection( );
+		httpConnection.setUseCaches( false );
 		long nEndPos = getFileSize( downloadURL );
-		File updateFile = new File( PATCH_FILE );
+		File updateFile = new File( file );
 		if ( !updateFile.exists( ) )
 		{
 			if ( !updateFile.getParentFile( ).exists( ) )
 				updateFile.getParentFile( ).mkdirs( );
 			updateFile.createNewFile( );
 		}
-		RandomAccessFile oSavedFile = new RandomAccessFile( PATCH_FILE, "rw" );
+		RandomAccessFile oSavedFile = new RandomAccessFile( file, "rw" );
 		httpConnection.setRequestProperty( "User-Agent", "Internet Explorer" );
 		String sProperty = "bytes=" + nStartPos + "-";
 		httpConnection.setRequestProperty( "RANGE", sProperty );
@@ -129,16 +148,19 @@ public class UpdateUtil
 			oSavedFile.write( b, 0, nRead );
 			nStartPos += nRead;
 		}
+		input.close( );
 		httpConnection.disconnect( );
+		oSavedFile.close( );
 	}
 
-	protected static long getFileSize( String sURL )
+	protected static long getFileSize( String sURL ) throws Exception
 	{
 		int nFileLength = -1;
 		try
 		{
 			URL url = new URL( sURL );
 			HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection( );
+			httpConnection.setUseCaches( false );
 			httpConnection.setRequestProperty( "User-Agent",
 					"Internet Explorer" );
 			int responseCode = httpConnection.getResponseCode( );
@@ -162,12 +184,13 @@ public class UpdateUtil
 				else
 					break;
 			}
+			httpConnection.disconnect( );
+			return nFileLength;
 		}
 		catch ( Exception e )
 		{
-			e.printStackTrace( );
+			throw e;
 		}
-		return nFileLength;
 	}
 
 	private static void deleteUpdateFiles( )
@@ -185,7 +208,7 @@ public class UpdateUtil
 	}
 
 	public static void decompressUpdateFile( File updateZipFile )
-			throws IOException
+			throws Exception
 	{
 		ZipFile zipFile = null;
 		try
@@ -222,12 +245,7 @@ public class UpdateUtil
 		}
 		catch ( Exception e )
 		{
-			e.printStackTrace( );
-			if ( zipFile != null )
-			{
-				zipFile.close( );
-			}
-			deleteUpdateFiles( );
+			throw e;
 		}
 	}
 }

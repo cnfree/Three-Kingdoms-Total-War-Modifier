@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -212,17 +213,7 @@ public class Patch
 				File lockFile = new File( FileSystem.getCurrentDirectory( ),
 						".lock" );
 				lockFile.deleteOnExit( );
-
-				try
-				{
-					Runtime.getRuntime( ).exec( "\""
-							+ UpdateUtil.UPDATE_EXE
-							+ "\"" );
-				}
-				catch ( IOException e )
-				{
-					e.printStackTrace( );
-				}
+				Program.launch( UpdateUtil.UPDATE_EXE );
 			}
 		}
 	}
