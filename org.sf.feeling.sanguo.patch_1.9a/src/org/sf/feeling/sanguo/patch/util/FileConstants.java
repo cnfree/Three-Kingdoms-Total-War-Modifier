@@ -78,11 +78,11 @@ public class FileConstants
 	public final static String stratFilePath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\descr_strat.txt";
 	public final static File stratFile = new File( stratFilePath );
-	
+
 	public final static String mapGroundPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\map_ground_types.tga";
 	public final static File mapGroundFile = new File( mapGroundPath );
-	
+
 	public final static String mapRegionPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\map_regions.tga";
 	public final static File mapRegionFile = new File( mapRegionPath );
@@ -91,7 +91,6 @@ public class FileConstants
 			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander\\map_features.tga";
 	public final static File mapFeatureFile = new File( mapFeaturePath );
 
-	
 	public final static String desc_namesFilePath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\descr_names.txt";
 	public final static File descNamesFile = new File( desc_namesFilePath );
@@ -132,6 +131,14 @@ public class FileConstants
 			+ "\\alexander\\data\\models\\textures";
 	public final static String factionMapsPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander";
+
+	public final static String campaignDescriptionPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\text\\campaign_descriptions.txt";
+	public final static File campaignDescriptionFile = new File( campaignDescriptionPath );
+
+	public final static String expandedBiPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\text\\expanded_bi.txt";
+	public final static File expandedBiFile = new File( expandedBiPath );
 
 	public final static String[] cultures = new String[]{
 			"barbarian",
@@ -248,6 +255,14 @@ public class FileConstants
 			return false;
 		}
 		else if ( !mapFeatureFile.exists( ) )
+		{
+			return false;
+		}
+		else if ( !campaignDescriptionFile.exists( ) )
+		{
+			return false;
+		}
+		else if ( !expandedBiFile.exists( ) )
 		{
 			return false;
 		}
