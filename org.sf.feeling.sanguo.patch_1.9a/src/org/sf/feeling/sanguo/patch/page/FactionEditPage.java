@@ -1034,7 +1034,6 @@ public class FactionEditPage extends SimpleTabPage
 									imageData,
 									image.getPixelFormat( ),
 									image.getNumMipMaps( ) > 1 );
-							imageCanvas.setImageData( imageData );
 						}
 						catch ( IOException e1 )
 						{
@@ -1834,7 +1833,8 @@ public class FactionEditPage extends SimpleTabPage
 				}
 
 			}
-
+			gc.dispose( );
+			font.dispose( );
 			leaderImage = imageData;
 		}
 		catch ( IOException e1 )
@@ -1870,7 +1870,8 @@ public class FactionEditPage extends SimpleTabPage
 			FontData fontData = new FontData( bigCaptionBannerFontCombo.getText( ),
 					Integer.parseInt( bigCaptionBannerFontSizeCombo.getText( ) ),
 					SWT.BOLD );
-			gc.setFont( new Font( null, fontData ) );
+			Font font = new Font( null, fontData );
+			gc.setFont( font );
 			gc.setForeground( ColorCache.getInstance( )
 					.getColor( bigCaptionBannerColorSelector.getColorValue( ) ) );
 			if ( bigCaptionBannerText.getText( ).trim( ).length( ) > 0 )
@@ -1894,7 +1895,7 @@ public class FactionEditPage extends SimpleTabPage
 			}
 
 			captionBannerImage = oldImage.getImageData( );
-
+			font.dispose( );
 			gc.dispose( );
 			oldImage.dispose( );
 		}
@@ -1932,7 +1933,8 @@ public class FactionEditPage extends SimpleTabPage
 			FontData fontData = new FontData( smallCaptionBannerFontCombo.getText( ),
 					Integer.parseInt( smallCaptionBannerFontSizeCombo.getText( ) ),
 					SWT.BOLD );
-			gc.setFont( new Font( null, fontData ) );
+			Font font = new Font( null, fontData );
+			gc.setFont( font );
 			gc.setForeground( ColorCache.getInstance( )
 					.getColor( smallCaptionBannerColorSelector.getColorValue( ) ) );
 			if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
@@ -1954,8 +1956,8 @@ public class FactionEditPage extends SimpleTabPage
 				}
 			}
 			smallCaptionBannerImage = oldImage.getImageData( );
-
 			gc.dispose( );
+			font.dispose( );
 			oldImage.dispose( );
 		}
 		catch ( IOException e1 )
@@ -1975,10 +1977,11 @@ public class FactionEditPage extends SimpleTabPage
 		FontData fontData = new FontData( stratBannerFontCombo.getText( ),
 				Integer.parseInt( stratBannerFontSizeCombo.getText( ) ),
 				SWT.BOLD );
-		gc.setFont( new Font( null, fontData ) );
-		gc.setBackground( new Color( null, 0, 0, 0 ) );
+		Font font = new Font( null, fontData );
+		gc.setFont( font );
+		gc.setBackground( ColorCache.getInstance( ).getColor( 0, 0, 0 ) );
 		gc.fillRectangle( 0, 0, 64, 64 );
-		gc.setForeground( new Color( null, 255, 255, 255 ) );
+		gc.setForeground( ColorCache.getInstance( ).getColor( 255, 255, 255 ) );
 		if ( stratBannerText.getText( ).trim( ).length( ) > 0 )
 		{
 			char[] chars = ChangeCode.toShort( stratBannerText.getText( )
@@ -2006,6 +2009,7 @@ public class FactionEditPage extends SimpleTabPage
 		stratBanner = image.getImageData( );
 
 		gc.dispose( );
+		font.dispose( );
 		image.dispose( );
 		return stratBanner;
 	}
@@ -2039,7 +2043,8 @@ public class FactionEditPage extends SimpleTabPage
 			FontData fontData = new FontData( battleBannerFontCombo.getText( ),
 					Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
 					SWT.BOLD );
-			gc.setFont( new Font( null, fontData ) );
+			Font font = new Font( null, fontData );
+			gc.setFont( font );
 			gc.setForeground( ColorCache.getInstance( )
 					.getColor( battleBannerColorSelector.getColorValue( ) ) );
 			if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
@@ -2060,6 +2065,7 @@ public class FactionEditPage extends SimpleTabPage
 				}
 			}
 			battleBanner = image.getImageData( );
+			font.dispose( );
 			gc.dispose( );
 			image.dispose( );
 		}
