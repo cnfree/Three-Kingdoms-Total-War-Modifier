@@ -889,7 +889,7 @@ public class FactionEditPage extends SimpleTabPage
 							{
 
 								Pattern pattern = Pattern.compile( "^\\s*\\{\\s*"
-										+ Pattern.quote( description ) );
+										+ description );
 								Matcher matcher = pattern.matcher( line );
 								if ( matcher.find( ) )
 								{
@@ -1658,7 +1658,6 @@ public class FactionEditPage extends SimpleTabPage
 		factionDescriptionMap = BattleUtil.getFactionDescriptionMap( );
 		factionMap = UnitUtil.getFactionMap( );
 
-		
 		int index = factionCombo.getSelectionIndex( );
 
 		String faction = factionCombo.getText( );
