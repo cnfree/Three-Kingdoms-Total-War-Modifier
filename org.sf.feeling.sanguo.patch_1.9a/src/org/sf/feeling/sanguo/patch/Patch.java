@@ -16,10 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.tools.zip.ZipFileInfo;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -33,7 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.gameeden.mail.SmtpMailSender;
+import org.sf.feeling.sanguo.patch.dialog.ErrorLogDialog;
 import org.sf.feeling.sanguo.patch.page.BasePage;
 import org.sf.feeling.sanguo.patch.provider.CategoryProviderFactory;
 import org.sf.feeling.sanguo.patch.provider.ICategoryProvider;
@@ -226,7 +223,7 @@ public class Patch
 
 	private static Patch patch;
 	private Shell shell;
-	private ShellWrapper wrapper;
+	public ShellWrapper wrapper;
 
 	public Shell getShell( )
 	{
@@ -235,7 +232,6 @@ public class Patch
 
 	public static void main( String[] args )
 	{
-
 		try
 		{
 			patch = new Patch( args );
@@ -244,103 +240,25 @@ public class Patch
 		catch ( Exception e )
 		{
 			e.printStackTrace( );
-			mailExceptionLog( e );
+			popupExceptionLog( e );
 		}
 	}
 
-	private static void mailExceptionLog( Exception e )
+	private static void popupExceptionLog( Exception e )
 	{
 		Display display = Display.getCurrent( );
 		if ( display == null || display.isDisposed( ) )
 			display = new Display( );
-		if ( MessageDialog.openQuestion( null,
-				"未知错误",
-				"修改器发生未知错误，即将退出。您是否允许修改器发送错误日志至cnfree@126.com?" ) )
-		{
-			SmtpMailSender sender = SmtpMailSender.createESmtpMailSender( "smtp.126.com",
-					"cnfree2000@126.com",
-					"cnfree2000",
-					"cnfree" );
-			try
-			{
-				String detailText = "\n\n===================================\n";
-				if ( BakUtil.getBakCurrentVersion( ) != null )
-				{
-					detailText += "CurrentVersion        "
-							+ BakUtil.getBakCurrentVersion( )
-							+ "\n";
-				}
-				File bakFolder = new File( BakUtil.bakFolderPath );
-				if ( bakFolder.exists( ) )
-				{
-					File[] children = bakFolder.listFiles( );
-					if ( children != null )
-					{
-						for ( int i = 0; i < children.length; i++ )
-						{
-							File file = children[i];
-							if ( !file.exists( )
-									|| BakUtil.defalutBakFile.getName( )
-											.equals( file.getName( ) )
-									|| !file.isFile( ) )
-								continue;
-							try
-							{
-								ZipFileInfo zipFile = new ZipFileInfo( file,
-										"GBK" );
-								String comment = zipFile.getComment( );
-								zipFile.close( );
-								if ( comment != null )
-								{
-									detailText += ( file.getName( )
-											.split( "\\." )[0]
-											+ "        "
-											+ comment + "\n" );
-								}
-							}
-							catch ( IOException e1 )
-							{
-								e1.printStackTrace( );
-							}
-						}
-					}
-				}
-
-				StringWriter writer = new StringWriter( );
-				e.printStackTrace( new PrintWriter( writer ) );
-
-				List attachmentList = new ArrayList( );
-				if ( BakUtil.getCurrentVersionBakFile( ) != null )
-					attachmentList.add( BakUtil.getCurrentVersionBakFile( ) );
-				File bugBak = BakUtil.bakBugData( );
-				if ( bugBak != null && bugBak.exists( ) )
-				{
-					attachmentList.add( bugBak );
-				}
-				if ( attachmentList.size( ) > 0 )
-				{
-					sender.sendTextMail( "cnfree@126.com",
-							"三国全面战争1.9a修改器1.0版异常反馈",
-							writer.getBuffer( ).toString( ) + detailText,
-							(File[]) attachmentList.toArray( new File[0] ) );
-				}
-				else
-				{
-					sender.sendTextMail( "cnfree@126.com",
-							"三国全面战争1.9a修改器1.0版异常反馈",
-							writer.getBuffer( ).toString( ) + detailText );
-				}
-				writer.close( );
-			}
-			catch ( IOException e1 )
-			{
-				e1.printStackTrace( );
-			}
-		}
-		else
-		{
-			e.printStackTrace( );
-		}
+		Shell shell = null;
+		if ( Patch.getInstance( ) != null )
+			shell = Patch.getInstance( ).getShell( );
+		ErrorLogDialog dialog = new ErrorLogDialog( shell );
+		dialog.setMessage( "修改器发生未知错误，即将退出，您可以将错误日志发送到修改器反馈中心。" );
+		StringBuffer buffer = new StringBuffer( );
+		readErrorMsg( buffer, e );
+		dialog.setText( buffer.toString( ) );
+		dialog.setBlockOnOpen( true );
+		dialog.open( );
 		display.dispose( );
 	}
 
@@ -370,4 +288,19 @@ public class Patch
 		wrapper.getClientArea( ).setEnabled( true );
 	}
 
+	public static void readErrorMsg( StringBuffer buffer, Exception e )
+	{
+		StringWriter writer = new StringWriter( );
+		PrintWriter ps = new PrintWriter( writer );
+		e.printStackTrace( ps );
+		try
+		{
+			writer.close( );
+		}
+		catch ( IOException e1 )
+		{
+			e1.printStackTrace( );
+		}
+		buffer.append( writer.toString( ) + "\r\n" ); //$NON-NLS-1$
+	}
 }

@@ -68,7 +68,7 @@ public class CategoryProviderFactory
 				"编辑势力",
 				"代码查找",
 				"备份与还原",
-				"功能或Bug提交",
+				//"功能或Bug提交",
 				"三国全战百度贴吧",
 				"修改器反馈中心",
 				"注意事项"
@@ -95,7 +95,7 @@ public class CategoryProviderFactory
 				FactionEditPage.class,
 				CodePage.class,
 				BakAndRestorePage.class,
-				BugSubmitPage.class,
+				//BugSubmitPage.class,
 				TiebaPage.class,
 				FeedbackPage.class,
 				AboutPage.class,
