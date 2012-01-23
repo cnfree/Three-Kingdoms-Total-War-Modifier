@@ -43,6 +43,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormText;
@@ -1668,7 +1669,15 @@ public class FactionEditPage extends SimpleTabPage
 		}
 
 		if ( factionMap.containsValue( faction ) )
+		{
 			factionCombo.setText( faction );
+		}
+		else if ( idText.getText( ).trim( ).length( ) > 0 )
+		{
+			factionCombo.select( factionMap.getKeyList( )
+					.indexOf( idText.getText( ).trim( ) ) );
+		}
+		factionCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		index = startImageCombo.getSelectionIndex( );
 		startImageCombo.removeAll( );
