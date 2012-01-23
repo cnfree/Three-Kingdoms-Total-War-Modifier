@@ -152,7 +152,21 @@ public class FileUtil
 		replaceFile( file, regex1, map );
 	}
 
+	public static void replaceFile( File file, String regex1, String regex2,
+			String replacement, String encoding )
+	{
+		Map map = new HashMap( );
+		map.put( regex2, replacement );
+		replaceFile( file, regex1, map, encoding );
+	}
+
 	public static void replaceFile( File file, String regex, Map map )
+	{
+		replaceFile( file, regex, map, "GBK" );
+	}
+
+	public static void replaceFile( File file, String regex, Map map,
+			String encoding )
 	{
 		// bakFile(file);
 		try
@@ -160,7 +174,7 @@ public class FileUtil
 			int sizeL = (int) file.length( );
 			int chars_read = 0;
 			BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( file ),
-					"GBK" ) );
+					encoding ) );
 			char[] data = new char[sizeL];
 			while ( in.ready( ) )
 			{
@@ -188,7 +202,7 @@ public class FileUtil
 			}
 			matcher.appendTail( sbr );
 			PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( file ),
-					"GBK" ) ),
+					encoding ) ),
 					false );
 			out.print( sbr );
 			out.close( );
@@ -359,9 +373,17 @@ public class FileUtil
 		try
 		{
 			Properties props = new Properties( );
-			InputStream in = FileUtil.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/code/"
-					+ property
-					+ ".properties" );
+			InputStream in = null;
+			if ( "faction".equals( property ) )
+			{
+				in = new FileInputStream( FileConstants.factionPropertiesFile );
+			}
+			else
+			{
+				in = FileUtil.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/code/"
+						+ property
+						+ ".properties" );
+			}
 			props.load( in );
 			in.close( );
 

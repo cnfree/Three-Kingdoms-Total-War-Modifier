@@ -82,7 +82,7 @@ public class BaowuModify {
 				"选择宝物：");
 
 		baowuCombo = WidgetUtil.getToolkit().createCCombo(clientContainer,
-				SWT.NONE);
+				SWT.READ_ONLY);
 		GridData gd = new GridData();
 		gd.widthHint = 150;
 		baowuCombo.setLayoutData(gd);

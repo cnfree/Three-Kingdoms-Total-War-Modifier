@@ -40,6 +40,7 @@ public class UnitPatchPage extends SimpleTabPage
 
 	private SortMap soldierUnitMap;
 	private SortMap factionMap;
+	private CCombo factionCombo;
 
 	public void buildUI( Composite parent )
 	{
@@ -73,13 +74,9 @@ public class UnitPatchPage extends SimpleTabPage
 		final Button toushiBtn = WidgetUtil.getToolkit( )
 				.createButton( patchClient, "势力兵种添加", SWT.CHECK );
 
-		final CCombo factionCombo = WidgetUtil.getToolkit( )
-				.createCCombo( patchClient, SWT.READ_ONLY );
-		factionMap = UnitUtil.getFactionMap( );
-		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
-		{
-			factionCombo.add( (String) factionMap.get( i ) );
-		}
+		factionCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
+
 		GridData gd = new GridData( );
 		gd.widthHint = 100;
 		factionCombo.setLayoutData( gd );
@@ -275,5 +272,26 @@ public class UnitPatchPage extends SimpleTabPage
 	public String getDisplayName( )
 	{
 		return "势力兵种添加";
+	}
+
+	public void refresh( )
+	{
+		super.refresh( );
+		refreshPage( );
+	}
+
+	private void refreshPage( )
+	{
+		factionMap = UnitUtil.getFactionMap( );
+		String faction = factionCombo.getText( );
+
+		factionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			factionCombo.add( (String) factionMap.get( i ) );
+		}
+
+		if ( factionMap.containsValue( faction ) )
+			factionCombo.setText( faction );
 	}
 }

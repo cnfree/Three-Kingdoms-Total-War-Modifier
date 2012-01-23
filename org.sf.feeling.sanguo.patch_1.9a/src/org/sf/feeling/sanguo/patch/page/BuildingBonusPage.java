@@ -27,7 +27,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
@@ -40,7 +39,6 @@ import org.sf.feeling.swt.win32.extension.util.SortMap;
 
 public class BuildingBonusPage extends SimpleTabPage {
 
-	private SortMap factionMap = UnitUtil.getFactionMap();;
 	private String[] buildings = new String[] { "wooden_pallisade",
 			"wooden_wall", "stone_wall", "large_stone_wall", "epic_stone_wall" };
 	private final String[] bonusTypes = new String[] {
@@ -66,6 +64,7 @@ public class BuildingBonusPage extends SimpleTabPage {
 			"贸易收入", "农业", "商业", "复兴汉室", "改朝换代", "保境安民", "雄踞一方", "异族文化", "道教文化",
 			"黄天当立" };
 	private CCombo factionCombo;
+	private SortMap factionMap;
 
 	public void buildUI(Composite parent) {
 		super.buildUI(parent);
@@ -104,14 +103,11 @@ public class BuildingBonusPage extends SimpleTabPage {
 		WidgetUtil.getToolkit().createLabel(patchClient, "选择势力：");
 
 		factionCombo = WidgetUtil.getToolkit().createCCombo(patchClient,
-				SWT.NONE);
+				SWT.READ_ONLY);
 		GridData gd = new GridData();
 		gd.widthHint = 150;
 		gd.horizontalSpan = 3;
 		factionCombo.setLayoutData(gd);
-		for (int i = 0; i < factionMap.getKeyList().size(); i++) {
-			factionCombo.add((String) factionMap.get(i));
-		}
 
 		final List comboList = new ArrayList();
 		for (int j = 0; j < bonusTypes.length; j++) {
@@ -305,7 +301,17 @@ public class BuildingBonusPage extends SimpleTabPage {
 	}
 
 	private void refreshPage() {
-		if (factionCombo.getSelectionIndex() > -1)
-			factionCombo.notifyListeners(SWT.Selection, new Event());
+		factionMap = UnitUtil.getFactionMap( );
+		
+		String faction = factionCombo.getText( );
+
+		factionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			factionCombo.add( (String) factionMap.get( i ) );
+		}
+
+		if ( factionMap.containsValue( faction ) )
+			factionCombo.setText( faction );
 	}
 }

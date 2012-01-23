@@ -29,6 +29,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -74,6 +76,21 @@ public class StartPatchPage extends SimpleTabPage
 	private Button posButton;
 	private Spinner posXSpinner;
 	private Spinner posYSpinner;
+	private CCombo moneyFactionCombo;
+	private CCombo generalChangeFactionCombo;
+	private SortMap factionMap;
+	private CCombo ageFactionCombo;
+	private CCombo generalChangeOutFactionCombo;
+	private CCombo generalSwitchInFactionCombo;
+	private CCombo generalSwitchOutFactionCombo;
+	private CCombo generalIdentityFactionCombo;
+	private CCombo generalIdentityChangeCombo;
+	private Button switchGeneralApply;
+	private Button changeGeneralFactionApply;
+	private Button changeIdentityRestoreApply;
+	private Button changeIdentityApply;
+	private CCombo identityCombo;
+	private Button zouTianXiaApply;
 
 	public void buildUI( Composite parent )
 	{
@@ -116,31 +133,28 @@ public class StartPatchPage extends SimpleTabPage
 		Composite patchClient = WidgetUtil.getToolkit( )
 				.createComposite( patchSection );
 		GridLayout layout = new GridLayout( );
-		layout.numColumns = 6;
+		layout.numColumns = 8;
 		patchClient.setLayout( layout );
 		{
 			final Button addMoneyBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "势力初始金钱修改", SWT.CHECK );
 
-			SortMap factionMap = UnitUtil.getFactionMap( );
-
-			final CCombo factionCombo = WidgetUtil.getToolkit( )
+			moneyFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
-			{
-				factionCombo.add( (String) factionMap.get( i ) );
-			}
-			factionCombo.add( "全部势力", 0 );
-			factionCombo.select( 0 );
+
+			moneyFactionCombo.add( "全部势力", 0 );
+			moneyFactionCombo.select( 0 );
 			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.horizontalSpan = 2;
 			gd.widthHint = 150;
-			factionCombo.setLayoutData( gd );
-			factionCombo.setEnabled( false );
+			moneyFactionCombo.setLayoutData( gd );
+			moneyFactionCombo.setEnabled( false );
 
 			final Text addMoneyText = WidgetUtil.getToolkit( )
 					.createText( patchClient, "50000" );
 			addMoneyText.setEnabled( false );
 			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.horizontalSpan = 2;
 			gd.widthHint = 150;
 			addMoneyText.setLayoutData( gd );
 
@@ -158,7 +172,7 @@ public class StartPatchPage extends SimpleTabPage
 
 				public void widgetSelected( SelectionEvent e )
 				{
-					if ( factionCombo.getSelectionIndex( ) == -1
+					if ( moneyFactionCombo.getSelectionIndex( ) == -1
 							|| addMoneyText.getText( ).trim( ).length( ) == 0 )
 						return;
 					long money = 0;
@@ -174,7 +188,7 @@ public class StartPatchPage extends SimpleTabPage
 					addMoneyApply.setEnabled( false );
 					if ( FileConstants.stratFile.exists( ) )
 					{
-						if ( factionCombo.getSelectionIndex( ) == 0 )
+						if ( moneyFactionCombo.getSelectionIndex( ) == 0 )
 						{
 							BakUtil.bakData( "势力金钱修改：全部势力"
 									+ addMoneyText.getText( ) );
@@ -185,9 +199,9 @@ public class StartPatchPage extends SimpleTabPage
 						else
 						{
 							BakUtil.bakData( "势力金钱修改："
-									+ factionCombo.getText( )
+									+ moneyFactionCombo.getText( )
 									+ addMoneyText.getText( ) );
-							String faction = (String) factionProperty.get( factionCombo.getText( ) );
+							String faction = (String) factionProperty.get( moneyFactionCombo.getText( ) );
 							String line = null;
 							StringWriter writer = new StringWriter( );
 							PrintWriter printer = new PrintWriter( writer );
@@ -261,7 +275,7 @@ public class StartPatchPage extends SimpleTabPage
 
 				public void widgetSelected( SelectionEvent e )
 				{
-					factionCombo.setEnabled( addMoneyBtn.getSelection( ) );
+					moneyFactionCombo.setEnabled( addMoneyBtn.getSelection( ) );
 					addMoneyText.setEnabled( addMoneyBtn.getSelection( ) );
 					addMoneyApply.setEnabled( addMoneyBtn.getSelection( ) );
 				}
@@ -277,11 +291,19 @@ public class StartPatchPage extends SimpleTabPage
 							FileUtil.findMatchString( FileConstants.characterFile,
 									re7 + re2 + re3,
 									re3 ) );
+			zouTianXiaText.addModifyListener( new ModifyListener( ) {
+
+				public void modifyText( ModifyEvent arg0 )
+				{
+					zouTianXiaApply.setEnabled( zouTianXiaBtn.getSelection( )
+							&& zouTianXiaText.getText( ).trim( ).length( ) > 0 );
+				}
+			} );
 			zouTianXiaText.setEnabled( false );
 			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.horizontalSpan = 2;
+			gd.horizontalSpan = 4;
 			zouTianXiaText.setLayoutData( gd );
-			final Button zouTianXiaApply = WidgetUtil.getToolkit( )
+			zouTianXiaApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
 			zouTianXiaApply.setEnabled( false );
 			final Button zouTianXiaRestore = WidgetUtil.getToolkit( )
@@ -312,7 +334,8 @@ public class StartPatchPage extends SimpleTabPage
 						{
 							e1.printStackTrace( );
 						}
-						zouTianXiaApply.setEnabled( true );
+						zouTianXiaApply.setEnabled( zouTianXiaBtn.getSelection( )
+								&& zouTianXiaText.getText( ).trim( ).length( ) > 0 );
 					}
 				}
 			} );
@@ -330,6 +353,8 @@ public class StartPatchPage extends SimpleTabPage
 						zouTianXiaText.setText( FileUtil.findMatchString( FileConstants.characterFile,
 								re7 + re2 + re3,
 								re3 ) );
+						zouTianXiaApply.setEnabled( zouTianXiaBtn.getSelection( )
+								&& zouTianXiaText.getText( ).trim( ).length( ) > 0 );
 					}
 				}
 			} );
@@ -339,7 +364,8 @@ public class StartPatchPage extends SimpleTabPage
 				public void widgetSelected( SelectionEvent e )
 				{
 					zouTianXiaText.setEnabled( zouTianXiaBtn.getSelection( ) );
-					zouTianXiaApply.setEnabled( zouTianXiaBtn.getSelection( ) );
+					zouTianXiaApply.setEnabled( zouTianXiaBtn.getSelection( )
+							&& zouTianXiaText.getText( ).trim( ).length( ) > 0 );
 				}
 
 			} );
@@ -347,23 +373,118 @@ public class StartPatchPage extends SimpleTabPage
 		{
 			final Button generalChangeBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "武将交换", SWT.CHECK );
-			generalInCombo = WidgetUtil.getToolkit( )
+
+			generalSwitchInFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
 			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.widthHint = 150;
+			generalSwitchInFactionCombo.setLayoutData( gd );
+			generalSwitchInFactionCombo.setEnabled( false );
+			generalSwitchInFactionCombo.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( generalSwitchInFactionCombo.getSelectionIndex( ) == 0 )
+					{
+						String text = generalInCombo.getText( );
+						generalInCombo.removeAll( );
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+							generalInCombo.add( generalName );
+							if ( generalName.equals( text ) )
+								generalInCombo.setText( text );
+						}
+					}
+					else if ( generalSwitchInFactionCombo.getSelectionIndex( ) > 0 )
+					{
+						String text = generalInCombo.getText( );
+						generalInCombo.removeAll( );
+						String faction = (String) factionMap.getKeyList( )
+								.get( generalSwitchInFactionCombo.getSelectionIndex( ) - 1 );
+						SortMap modelMap = UnitUtil.getGeneralModels( );
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String general = (String) generalMap.getKeyList( )
+									.get( i );
+							General model = (General) modelMap.get( general );
+							if ( faction.equals( model.getFaction( ).trim( ) ) )
+							{
+								String generalName = ChangeCode.toLong( (String) generalMap.get( general ) );
+								generalInCombo.add( generalName );
+								if ( generalName.equals( text ) )
+									generalInCombo.setText( text );
+							}
+						}
+					}
+					switchGeneralApply.setEnabled( generalChangeBtn.getSelection( )
+							&& generalInCombo.getSelectionIndex( ) != -1
+							&& generalOutCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			generalInCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			generalInCombo.setLayoutData( gd );
 			generalInCombo.setEnabled( false );
+
+			generalSwitchOutFactionCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			generalSwitchOutFactionCombo.setLayoutData( gd );
+			generalSwitchOutFactionCombo.setEnabled( false );
+			generalSwitchOutFactionCombo.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( generalSwitchOutFactionCombo.getSelectionIndex( ) == 0 )
+					{
+						String text = generalOutCombo.getText( );
+						generalOutCombo.removeAll( );
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+							generalOutCombo.add( generalName );
+							if ( generalName.equals( text ) )
+								generalOutCombo.setText( text );
+						}
+					}
+					else if ( generalSwitchOutFactionCombo.getSelectionIndex( ) > 0 )
+					{
+						String text = generalOutCombo.getText( );
+						generalOutCombo.removeAll( );
+						String faction = (String) factionMap.getKeyList( )
+								.get( generalSwitchOutFactionCombo.getSelectionIndex( ) - 1 );
+						SortMap modelMap = UnitUtil.getGeneralModels( );
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String general = (String) generalMap.getKeyList( )
+									.get( i );
+							General model = (General) modelMap.get( general );
+							if ( faction.equals( model.getFaction( ).trim( ) ) )
+							{
+								String generalName = ChangeCode.toLong( (String) generalMap.get( general ) );
+								generalOutCombo.add( generalName );
+								if ( generalName.equals( text ) )
+									generalOutCombo.setText( text );
+							}
+						}
+					}
+					switchGeneralApply.setEnabled( generalChangeBtn.getSelection( )
+							&& generalInCombo.getSelectionIndex( ) != -1
+							&& generalOutCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
 
 			generalOutCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
 			gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.widthHint = 150;
 			generalOutCombo.setLayoutData( gd );
 			generalOutCombo.setEnabled( false );
 
-			final Button changeUnitApply = WidgetUtil.getToolkit( )
+			switchGeneralApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
-			changeUnitApply.setEnabled( false );
+			switchGeneralApply.setEnabled( false );
 
 			final Button changeUnitRestoreApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "还原", SWT.PUSH );
@@ -379,22 +500,24 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					changeUnitRestoreApply.setEnabled( true );
-					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+					switchGeneralApply.setEnabled( generalChangeBtn.getSelection( )
 							&& generalInCombo.getSelectionIndex( ) != -1
 							&& generalOutCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
-			changeUnitApply.addSelectionListener( new SelectionAdapter( ) {
+			switchGeneralApply.addSelectionListener( new SelectionAdapter( ) {
 
 				public void widgetSelected( SelectionEvent e )
 				{
-					changeUnitApply.setEnabled( false );
+					switchGeneralApply.setEnabled( false );
 
 					String generalInCode = (String) generalMap.getKeyList( )
-							.get( generalInCombo.getSelectionIndex( ) );
+							.get( generalMap.getValueList( )
+									.indexOf( generalInCombo.getText( ) ) );
 					String generalOutCode = (String) generalMap.getKeyList( )
-							.get( generalOutCombo.getSelectionIndex( ) );
+							.get( generalMap.getValueList( )
+									.indexOf( generalOutCombo.getText( ) ) );
 
 					BakUtil.bakData( "武将交换："
 							+ generalInCombo.getText( )
@@ -404,7 +527,7 @@ public class StartPatchPage extends SimpleTabPage
 					UnitUtil.switchGeneral( generalInCode, generalOutCode );
 					MapUtil.initMap( );
 					refreshPage( );
-					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+					switchGeneralApply.setEnabled( generalChangeBtn.getSelection( )
 							&& generalInCombo.getSelectionIndex( ) != -1
 							&& generalOutCombo.getSelectionIndex( ) != -1 );
 				}
@@ -414,6 +537,8 @@ public class StartPatchPage extends SimpleTabPage
 
 				public void widgetSelected( SelectionEvent e )
 				{
+					generalSwitchInFactionCombo.setEnabled( generalChangeBtn.getSelection( ) );
+					generalSwitchOutFactionCombo.setEnabled( generalChangeBtn.getSelection( ) );
 					generalInCombo.setEnabled( generalChangeBtn.getSelection( ) );
 					generalOutCombo.setEnabled( generalChangeBtn.getSelection( ) );
 				}
@@ -423,7 +548,7 @@ public class StartPatchPage extends SimpleTabPage
 
 				public void widgetSelected( SelectionEvent e )
 				{
-					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+					switchGeneralApply.setEnabled( generalChangeBtn.getSelection( )
 							&& generalInCombo.getSelectionIndex( ) != -1
 							&& generalOutCombo.getSelectionIndex( ) != -1 );
 				}
@@ -436,10 +561,61 @@ public class StartPatchPage extends SimpleTabPage
 					.createButton( patchClient, "", SWT.CHECK );
 			int width = generalChangeBtn.computeSize( SWT.DEFAULT, SWT.DEFAULT ).x;
 			generalChangeBtn.setText( "更换武将势力" );
-			generalChangeCombo = WidgetUtil.getToolkit( )
+
+			generalChangeOutFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
 			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.widthHint = 150;
+			generalChangeOutFactionCombo.setLayoutData( gd );
+			generalChangeOutFactionCombo.setEnabled( false );
+			generalChangeOutFactionCombo.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( generalChangeOutFactionCombo.getSelectionIndex( ) == 0 )
+					{
+						String text = generalChangeCombo.getText( );
+						generalChangeCombo.removeAll( );
+						nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
+						generalChangeCombo.removeAll( );
+
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+							generalChangeCombo.add( generalName );
+							if ( generalName.equals( text ) )
+								generalChangeCombo.setText( text );
+						}
+					}
+					else if ( generalChangeOutFactionCombo.getSelectionIndex( ) > 0 )
+					{
+						String text = generalChangeCombo.getText( );
+						generalChangeCombo.removeAll( );
+						nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
+						String faction = (String) factionMap.getKeyList( )
+								.get( generalChangeOutFactionCombo.getSelectionIndex( ) - 1 );
+						SortMap modelMap = UnitUtil.getGeneralModels( );
+						for ( int i = 0; i < nonRelativeGeneralList.size( ); i++ )
+						{
+							String general = (String) nonRelativeGeneralList.get( i );
+							General model = (General) modelMap.get( general );
+							if ( faction.equals( model.getFaction( ).trim( ) ) )
+							{
+								String generalName = ChangeCode.toLong( (String) generalMap.get( nonRelativeGeneralList.get( i ) ) );
+								generalChangeCombo.add( generalName );
+								if ( generalName.equals( text ) )
+									generalChangeCombo.setText( text );
+							}
+						}
+					}
+					changeGeneralFactionApply.setEnabled( generalChangeBtn.getSelection( )
+							&& generalChangeCombo.getSelectionIndex( ) != -1
+							&& generalChangeFactionCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			generalChangeCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			generalChangeCombo.setLayoutData( gd );
 			generalChangeCombo.setEnabled( false );
 			generalChangeCombo.addSelectionListener( new SelectionAdapter( ) {
@@ -462,21 +638,17 @@ public class StartPatchPage extends SimpleTabPage
 				};
 			} );
 
-			final SortMap factionMap = UnitUtil.getFactionMap( );
-
-			final CCombo factionCombo = WidgetUtil.getToolkit( )
+			generalChangeFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
-			{
-				factionCombo.add( (String) factionMap.get( i ) );
-			}
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
-			factionCombo.setLayoutData( gd );
-			factionCombo.setEnabled( false );
+			gd.horizontalSpan = 2;
+			generalChangeFactionCombo.setLayoutData( gd );
+			generalChangeFactionCombo.setEnabled( false );
 
-			final Button changeUnitApply = WidgetUtil.getToolkit( )
+			changeGeneralFactionApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
-			changeUnitApply.setEnabled( false );
+			changeGeneralFactionApply.setEnabled( false );
 
 			final Button changeUnitRestoreApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "还原", SWT.PUSH );
@@ -492,6 +664,7 @@ public class StartPatchPage extends SimpleTabPage
 
 			posXSpinner = WidgetUtil.getToolkit( ).createSpinner( patchClient );
 			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.horizontalSpan = 2;
 			gd.widthHint = 150;
 			posXSpinner.setLayoutData( gd );
 			posXSpinner.setEnabled( false );
@@ -500,6 +673,7 @@ public class StartPatchPage extends SimpleTabPage
 			posYSpinner = WidgetUtil.getToolkit( ).createSpinner( patchClient );
 			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
+			gd.horizontalSpan = 2;
 			posYSpinner.setLayoutData( gd );
 			posYSpinner.setEnabled( false );
 			initSpinner( posYSpinner, 0, 179, 0, 1 );
@@ -553,31 +727,33 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					changeUnitRestoreApply.setEnabled( true );
-					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+					changeGeneralFactionApply.setEnabled( generalChangeBtn.getSelection( )
 							&& generalChangeCombo.getSelectionIndex( ) != -1
-							&& factionCombo.getSelectionIndex( ) != -1 );
+							&& generalChangeFactionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
-			changeUnitApply.addSelectionListener( new SelectionAdapter( ) {
+			changeGeneralFactionApply.addSelectionListener( new SelectionAdapter( ) {
 
 				public void widgetSelected( SelectionEvent e )
 				{
-					changeUnitApply.setEnabled( false );
+					changeGeneralFactionApply.setEnabled( false );
 
 					Point point = computeGeneralPosition( new Point( posXSpinner.getSelection( ),
 							posYSpinner.getSelection( ) ),
 							true,
 							true );
 
-					String generalCode = (String) nonRelativeGeneralList.get( generalChangeCombo.getSelectionIndex( ) );
+					String generalCode = (String) generalMap.getKeyList( )
+							.get( generalMap.getValueList( )
+									.indexOf( generalChangeCombo.getText( ) ) );
 					String factionCode = (String) factionMap.getKeyList( )
-							.get( factionCombo.getSelectionIndex( ) );
+							.get( generalChangeFactionCombo.getSelectionIndex( ) );
 
 					BakUtil.bakData( "更换武将势力："
 							+ generalChangeCombo.getText( )
 							+ "-->"
-							+ factionCombo.getText( )
+							+ generalChangeFactionCombo.getText( )
 							+ "势力，坐标（"
 							+ point.x
 							+ "，"
@@ -588,9 +764,9 @@ public class StartPatchPage extends SimpleTabPage
 							+ point.x, "" + point.y );
 					MapUtil.initMap( );
 					refreshPage( );
-					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+					changeGeneralFactionApply.setEnabled( generalChangeBtn.getSelection( )
 							&& generalChangeCombo.getSelectionIndex( ) != -1
-							&& factionCombo.getSelectionIndex( ) != -1 );
+							&& generalChangeFactionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -598,8 +774,9 @@ public class StartPatchPage extends SimpleTabPage
 
 				public void widgetSelected( SelectionEvent e )
 				{
+					generalChangeOutFactionCombo.setEnabled( generalChangeBtn.getSelection( ) );
 					generalChangeCombo.setEnabled( generalChangeBtn.getSelection( ) );
-					factionCombo.setEnabled( generalChangeBtn.getSelection( ) );
+					generalChangeFactionCombo.setEnabled( generalChangeBtn.getSelection( ) );
 
 					if ( generalChangeCombo.isEnabled( )
 							&& generalChangeCombo.getSelectionIndex( ) != -1 )
@@ -621,13 +798,13 @@ public class StartPatchPage extends SimpleTabPage
 
 				public void widgetSelected( SelectionEvent e )
 				{
-					changeUnitApply.setEnabled( generalChangeBtn.getSelection( )
+					changeGeneralFactionApply.setEnabled( generalChangeBtn.getSelection( )
 							&& generalChangeCombo.getSelectionIndex( ) != -1
-							&& factionCombo.getSelectionIndex( ) != -1 );
+							&& generalChangeFactionCombo.getSelectionIndex( ) != -1 );
 				}
 			};
 			generalChangeCombo.addSelectionListener( listener );
-			factionCombo.addSelectionListener( listener );
+			generalChangeFactionCombo.addSelectionListener( listener );
 
 			generalChangeCombo.addSelectionListener( new SelectionAdapter( ) {
 
@@ -635,7 +812,9 @@ public class StartPatchPage extends SimpleTabPage
 				{
 					if ( generalChangeCombo.getSelectionIndex( ) != -1 )
 					{
-						String general = (String) nonRelativeGeneralList.get( generalChangeCombo.getSelectionIndex( ) );
+						String general = (String) generalMap.getKeyList( )
+								.get( generalMap.getValueList( )
+										.indexOf( generalChangeCombo.getText( ) ) );
 						General model = (General) UnitUtil.getGeneralModels( )
 								.get( general );
 						try
@@ -652,11 +831,170 @@ public class StartPatchPage extends SimpleTabPage
 			} );
 		}
 		{
+			final Button generalIdentityBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "", SWT.CHECK );
+			generalIdentityBtn.setText( "设置武将身份" );
+
+			generalIdentityFactionCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			generalIdentityFactionCombo.setLayoutData( gd );
+			generalIdentityFactionCombo.setEnabled( false );
+			generalIdentityFactionCombo.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( generalIdentityFactionCombo.getSelectionIndex( ) == 0 )
+					{
+						String text = generalIdentityChangeCombo.getText( );
+						generalIdentityChangeCombo.removeAll( );
+						nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
+						generalIdentityChangeCombo.removeAll( );
+
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+							generalIdentityChangeCombo.add( generalName );
+							if ( generalName.equals( text ) )
+								generalIdentityChangeCombo.setText( text );
+						}
+					}
+					else if ( generalIdentityFactionCombo.getSelectionIndex( ) > 0 )
+					{
+						String text = generalIdentityChangeCombo.getText( );
+						generalIdentityChangeCombo.removeAll( );
+						String faction = (String) factionMap.getKeyList( )
+								.get( generalIdentityFactionCombo.getSelectionIndex( ) - 1 );
+						SortMap modelMap = UnitUtil.getGeneralModels( );
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String general = (String) generalMap.getKeyList( )
+									.get( i );
+							General model = (General) modelMap.get( general );
+							if ( faction.equals( model.getFaction( ).trim( ) ) )
+							{
+								String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+								generalIdentityChangeCombo.add( generalName );
+								if ( generalName.equals( text ) )
+									generalIdentityChangeCombo.setText( text );
+							}
+						}
+					}
+					changeIdentityApply.setEnabled( generalIdentityBtn.getSelection( )
+							&& generalIdentityChangeCombo.getSelectionIndex( ) != -1
+							&& identityCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			generalIdentityChangeCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			generalIdentityChangeCombo.setLayoutData( gd );
+			generalIdentityChangeCombo.setEnabled( false );
+
+			identityCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+					SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.widthHint = 150;
+			gd.horizontalSpan = 2;
+			identityCombo.setLayoutData( gd );
+			identityCombo.setEnabled( false );
+			identityCombo.setItems( new String[]{
+					"势力君主", "势力继承人"
+			} );
+
+			changeIdentityApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			changeIdentityApply.setEnabled( false );
+			changeIdentityApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					changeIdentityApply.setEnabled( false );
+					BakUtil.bakData( "设置武将身份："
+							+ generalIdentityChangeCombo.getText( )
+							+ "-->"
+							+ identityCombo.getText( ) );
+
+					String general = (String) generalMap.getKeyList( )
+							.get( generalMap.getValueList( )
+									.indexOf( generalIdentityChangeCombo.getText( ) ) );
+					General model = (General) UnitUtil.getGeneralModels( )
+							.get( general );
+					String faction = model.getFaction( );
+					if ( identityCombo.getSelectionIndex( ) == 0 )
+					{
+						String leader = (String) UnitUtil.getFactionLeaderMap( )
+								.get( faction );
+						UnitUtil.switchGeneral( general, leader );
+					}
+					else if ( identityCombo.getSelectionIndex( ) == 1 )
+					{
+						String heir = (String) UnitUtil.getFactionHeirMap( )
+								.get( faction );
+						UnitUtil.switchGeneral( general, heir );
+					}
+					MapUtil.initMap( );
+					refreshPage( );
+					changeIdentityApply.setEnabled( generalIdentityBtn.getSelection( )
+							&& generalIdentityChangeCombo.getSelectionIndex( ) != -1
+							&& identityCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			changeIdentityRestoreApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			gd = new GridData( );
+			gd.horizontalSpan = 2;
+			changeIdentityRestoreApply.setLayoutData( gd );
+
+			changeIdentityRestoreApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					changeIdentityRestoreApply.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					changeIdentityRestoreApply.setEnabled( true );
+					changeIdentityApply.setEnabled( generalIdentityBtn.getSelection( )
+							&& generalIdentityChangeCombo.getSelectionIndex( ) != -1
+							&& identityCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			generalIdentityBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					generalIdentityFactionCombo.setEnabled( generalIdentityBtn.getSelection( ) );
+					generalIdentityChangeCombo.setEnabled( generalIdentityBtn.getSelection( ) );
+					identityCombo.setEnabled( generalIdentityBtn.getSelection( ) );
+					changeIdentityApply.setEnabled( generalIdentityBtn.getSelection( )
+							&& generalIdentityChangeCombo.getSelectionIndex( ) != -1
+							&& identityCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			SelectionAdapter listener = new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					changeIdentityApply.setEnabled( generalIdentityBtn.getSelection( )
+							&& generalIdentityChangeCombo.getSelectionIndex( ) != -1
+							&& identityCombo.getSelectionIndex( ) != -1 );
+				}
+			};
+
+			generalIdentityChangeCombo.addSelectionListener( listener );
+			identityCombo.addSelectionListener( listener );
+		}
+		{
 			final Button generalAgeBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "武将年龄设置", SWT.CHECK );
 			generalCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 					SWT.READ_ONLY );
 			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.horizontalSpan = 2;
 			gd.widthHint = 150;
 			generalCombo.setLayoutData( gd );
 			generalCombo.setEnabled( false );
@@ -677,6 +1015,7 @@ public class StartPatchPage extends SimpleTabPage
 					.createCCombo( patchClient, SWT.READ_ONLY );
 			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
+			gd.horizontalSpan = 2;
 			generalAgeCombo.setLayoutData( gd );
 			generalAgeCombo.setEnabled( false );
 
@@ -737,6 +1076,9 @@ public class StartPatchPage extends SimpleTabPage
 				{
 					generalCombo.setEnabled( generalAgeBtn.getSelection( ) );
 					generalAgeCombo.setEnabled( generalAgeBtn.getSelection( ) );
+					generalAgeApply.setEnabled( generalAgeBtn.getSelection( )
+							&& generalCombo.getSelectionIndex( ) != -1
+							&& generalAgeCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -755,26 +1097,20 @@ public class StartPatchPage extends SimpleTabPage
 		{
 			final Button factionAgeBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "最大化减小势力武将年龄", SWT.CHECK );
-			final CCombo factionCombo = WidgetUtil.getToolkit( )
+			ageFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
 
-			SortMap factionMap = UnitUtil.getFactionMap( );
-			for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
-			{
-				factionCombo.add( (String) factionMap.get( i ) );
-			}
-			factionCombo.add( "全部势力", 0 );
-
 			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.horizontalSpan = 2;
 			gd.widthHint = 150;
-			factionCombo.setLayoutData( gd );
-			factionCombo.setEnabled( false );
+			ageFactionCombo.setLayoutData( gd );
+			ageFactionCombo.setEnabled( false );
 
 			final Button factionAgeApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
 			factionAgeApply.setEnabled( false );
 			gd = new GridData( );
-			gd.horizontalSpan = 2;
+			gd.horizontalSpan = 3;
 			gd.horizontalAlignment = SWT.END;
 			factionAgeApply.setLayoutData( gd );
 
@@ -793,7 +1129,7 @@ public class StartPatchPage extends SimpleTabPage
 					refreshPage( );
 					factionAgeRestoreApply.setEnabled( true );
 					factionAgeApply.setEnabled( factionAgeBtn.getSelection( )
-							&& factionCombo.getSelectionIndex( ) != -1 );
+							&& ageFactionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -802,15 +1138,15 @@ public class StartPatchPage extends SimpleTabPage
 				public void widgetSelected( SelectionEvent e )
 				{
 					factionAgeApply.setEnabled( false );
-					BakUtil.bakData( "最大化减小势力武将年龄：" + factionCombo.getText( ) );
-					if ( factionCombo.getSelectionIndex( ) > 0 )
+					BakUtil.bakData( "最大化减小势力武将年龄：" + ageFactionCombo.getText( ) );
+					if ( ageFactionCombo.getSelectionIndex( ) > 0 )
 					{
-						String faction = (String) factionProperty.get( factionCombo.getText( ) );
+						String faction = (String) factionProperty.get( ageFactionCombo.getText( ) );
 						GeneralAgeUtil.convertFactionAges( new String[]{
 							faction
 						} );
 					}
-					else if ( factionCombo.getSelectionIndex( ) == 0 )
+					else if ( ageFactionCombo.getSelectionIndex( ) == 0 )
 					{
 						List factions = new ArrayList( );
 						factions.addAll( factionProperty.values( ) );
@@ -818,7 +1154,7 @@ public class StartPatchPage extends SimpleTabPage
 					}
 					refreshPage( );
 					factionAgeApply.setEnabled( factionAgeBtn.getSelection( )
-							&& factionCombo.getSelectionIndex( ) != -1 );
+							&& ageFactionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -826,7 +1162,9 @@ public class StartPatchPage extends SimpleTabPage
 
 				public void widgetSelected( SelectionEvent e )
 				{
-					factionCombo.setEnabled( factionAgeBtn.getSelection( ) );
+					ageFactionCombo.setEnabled( factionAgeBtn.getSelection( ) );
+					factionAgeApply.setEnabled( factionAgeBtn.getSelection( )
+							&& ageFactionCombo.getSelectionIndex( ) != -1 );
 				}
 			} );
 
@@ -835,10 +1173,10 @@ public class StartPatchPage extends SimpleTabPage
 				public void widgetSelected( SelectionEvent e )
 				{
 					factionAgeApply.setEnabled( factionAgeBtn.getSelection( )
-							&& factionCombo.getSelectionIndex( ) != -1 );
+							&& ageFactionCombo.getSelectionIndex( ) != -1 );
 				}
 			};
-			factionCombo.addSelectionListener( listener );
+			ageFactionCombo.addSelectionListener( listener );
 		}
 		patchSection.setClient( patchClient );
 	}
@@ -887,84 +1225,190 @@ public class StartPatchPage extends SimpleTabPage
 
 	private void refreshPage( )
 	{
-		String generalIn = null;
-		int index = generalInCombo.getSelectionIndex( );
-		if ( index > -1 )
-			generalIn = (String) generalMap.getKeyList( ).get( index );
-
-		String generalOut = null;
-		index = generalOutCombo.getSelectionIndex( );
-		if ( index > -1 )
-			generalOut = (String) generalMap.getKeyList( ).get( index );
-
-		String general = null;
-		index = generalCombo.getSelectionIndex( );
-		if ( index > -1 )
-			general = (String) generalMap.getKeyList( ).get( index );
-
-		String generalChange = null;
-		index = generalChangeCombo.getSelectionIndex( );
-		if ( index > -1 )
-			generalChange = (String) nonRelativeGeneralList.get( index );
-
-		generalMap = UnitUtil.getAvailableGenerals( );
-		nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
+		String generalIn = generalInCombo.getText( );
+		String generalOut = generalOutCombo.getText( );
+		String general = generalCombo.getText( );
+		String generalChange = generalChangeCombo.getText( );
+		String generalIdentity = generalIdentityChangeCombo.getText( );
 
 		removeComboItems( generalInCombo );
 		removeComboItems( generalOutCombo );
 		removeComboItems( generalCombo );
 		removeComboItems( generalChangeCombo );
+		removeComboItems( generalIdentityChangeCombo );
 
-		for ( int i = 0; i < generalMap.size( ); i++ )
+		factionMap = UnitUtil.getFactionMap( );
+		generalMap = UnitUtil.getAvailableGenerals( );
+		nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
+
+		String faction = moneyFactionCombo.getText( );
+
+		moneyFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
 		{
-			String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
-			generalInCombo.add( generalName );
-			generalOutCombo.add( generalName );
-			generalCombo.add( generalName );
+			moneyFactionCombo.add( (String) factionMap.get( i ) );
 		}
 
-		for ( int i = 0; i < nonRelativeGeneralList.size( ); i++ )
+		if ( factionMap.containsValue( faction ) )
+			moneyFactionCombo.setText( faction );
+
+		faction = generalChangeFactionCombo.getText( );
+		generalChangeFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
 		{
-			String generalName = ChangeCode.toLong( (String) generalMap.get( nonRelativeGeneralList.get( i ) ) );
-			generalChangeCombo.add( generalName );
+			generalChangeFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		if ( factionMap.containsValue( faction ) )
+		{
+			generalChangeFactionCombo.setText( faction );
+			generalChangeFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
 		}
 
-		index = generalMap.getIndexOf( generalIn );
-		if ( index != -1 )
+		int index = generalChangeOutFactionCombo.getSelectionIndex( );
+		faction = generalChangeOutFactionCombo.getText( );
+		generalChangeOutFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
 		{
-			generalInCombo.select( index );
+			generalChangeOutFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		generalChangeOutFactionCombo.add( "全部势力", 0 );
+		if ( factionMap.containsValue( faction ) )
+		{
+			generalChangeOutFactionCombo.setText( faction );
+			generalChangeOutFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+		else if ( index == 0 )
+		{
+			generalChangeOutFactionCombo.select( 0 );
+			generalChangeOutFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+
+		index = generalSwitchInFactionCombo.getSelectionIndex( );
+		faction = generalSwitchInFactionCombo.getText( );
+		generalSwitchInFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			generalSwitchInFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		generalSwitchInFactionCombo.add( "全部势力", 0 );
+		if ( factionMap.containsValue( faction ) )
+		{
+			generalSwitchInFactionCombo.setText( faction );
+			generalSwitchInFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+		else if ( index == 0 )
+		{
+			generalSwitchInFactionCombo.select( 0 );
+			generalSwitchInFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+
+		index = generalSwitchOutFactionCombo.getSelectionIndex( );
+		faction = generalSwitchOutFactionCombo.getText( );
+		generalSwitchOutFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			generalSwitchOutFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		generalSwitchOutFactionCombo.add( "全部势力", 0 );
+		if ( factionMap.containsValue( faction ) )
+		{
+			generalSwitchOutFactionCombo.setText( faction );
+			generalSwitchOutFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+		else if ( index == 0 )
+		{
+			generalSwitchOutFactionCombo.select( 0 );
+			generalSwitchOutFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+
+		index = ageFactionCombo.getSelectionIndex( );
+		faction = ageFactionCombo.getText( );
+		ageFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			ageFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		ageFactionCombo.add( "全部势力", 0 );
+		if ( factionMap.containsValue( faction ) )
+		{
+			ageFactionCombo.setText( faction );
+			ageFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
+		}
+		else if ( index == 0 )
+		{
+			ageFactionCombo.select( 0 );
+			ageFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
+		}
+
+		index = generalIdentityFactionCombo.getSelectionIndex( );
+		faction = generalIdentityFactionCombo.getText( );
+		generalIdentityFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			generalIdentityFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		generalIdentityFactionCombo.add( "全部势力", 0 );
+		if ( factionMap.containsValue( faction ) )
+		{
+			generalIdentityFactionCombo.setText( faction );
+			generalIdentityFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+		else if ( index == 0 )
+		{
+			generalIdentityFactionCombo.select( 0 );
+			generalIdentityFactionCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
+		}
+
+		if ( generalIn != null && generalInCombo.indexOf( generalIn ) != -1 )
+		{
+			generalInCombo.setText( generalIn );
 			generalInCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
 
-		index = generalMap.getIndexOf( generalOut );
-		if ( index != -1 )
+		if ( generalOut != null && generalOutCombo.indexOf( generalOut ) != -1 )
 		{
-			generalOutCombo.select( index );
+			generalOutCombo.setText( generalOut );
 			generalOutCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
 
-		index = generalMap.getIndexOf( general );
-		if ( index != -1 )
+		for ( int i = 0; i < generalMap.size( ); i++ )
 		{
-			generalCombo.select( index );
+			generalCombo.add( (String) generalMap.get( i ) );
+		}
+		if ( general != null && generalCombo.indexOf( general ) != -1 )
+		{
+			generalCombo.setText( general );
 			generalCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
 
-		index = nonRelativeGeneralList.indexOf( generalChange );
-		if ( index != -1 )
+		if ( generalChange != null
+				&& generalChangeCombo.indexOf( generalChange ) != -1 )
 		{
-			generalChangeCombo.select( index );
+			generalChangeCombo.setText( generalChange );
 			generalChangeCombo.notifyListeners( SWT.Selection, new Event( ) );
+		}
+
+		if ( generalIdentity != null
+				&& generalIdentityChangeCombo.indexOf( generalIdentity ) != -1 )
+		{
+			generalIdentityChangeCombo.setText( generalChange );
+			generalIdentityChangeCombo.notifyListeners( SWT.Selection,
+					new Event( ) );
 		}
 	}
 
 	private void removeComboItems( CCombo combo )
 	{
-		for ( int i = 0; i < combo.getItemCount( ); i++ )
-		{
-			combo.remove( i );
-			i--;
-		}
+		combo.removeAll( );
 	}
 
 	private void initSpinner( Spinner combo, int min, int max, int digit,

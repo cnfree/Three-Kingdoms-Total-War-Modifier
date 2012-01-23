@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +26,7 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipInputStream;
 
 import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipFile;
 import org.apache.tools.zip.ZipOutputStream;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -77,6 +79,7 @@ public class BakUtil
 			FileConstants.descrWallsFile,
 			FileConstants.campaignDescriptionFile,
 			FileConstants.expandedBiFile,
+			FileConstants.factionPropertiesFile,
 	};
 
 	private static FileFilter tgaFilter = new FileFilter( ) {
@@ -289,10 +292,12 @@ public class BakUtil
 			try
 			{
 				List resourceList = new ArrayList( );
-				ZipInputStream zis = new ZipInputStream( new FileInputStream( bakFile ) );
-				java.util.zip.ZipEntry zipEntry = null;
-				while ( ( zipEntry = zis.getNextEntry( ) ) != null )
+				ZipFile zis = new ZipFile( bakFile, "GBK" );
+				Enumeration enumeration = zis.getEntries( );
+				ZipEntry zipEntry = null;
+				while ( enumeration.hasMoreElements( ) )
 				{
+					zipEntry = (ZipEntry) enumeration.nextElement( );
 					if ( zipEntry.getName( ).startsWith( "resources/" ) )
 					{
 						resourceList.add( zipEntry.getName( ) );

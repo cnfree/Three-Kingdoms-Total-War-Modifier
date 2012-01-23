@@ -11,6 +11,7 @@ public class General
 	private String posY;
 	private boolean isLeader = false;
 	private boolean isHeir = false;
+	private String faction;
 	
 	public boolean isHeir( )
 	{
@@ -94,5 +95,14 @@ public class General
 	{
 		this.battle_model = battle_model;
 	}
+	
+	public String getFaction( )
+	{
+		return faction;
+	}
 
+	public void setFaction( String faction )
+	{
+		this.faction = faction;
+	}
 }

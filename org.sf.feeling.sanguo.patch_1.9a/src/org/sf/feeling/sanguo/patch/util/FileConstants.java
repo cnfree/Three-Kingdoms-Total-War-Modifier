@@ -11,6 +11,10 @@ public class FileConstants
 	public static String dataPath = Patch.GAME_ROOT + "\\alexander\\data";
 	public static File dataFile = new File( dataPath );
 
+	public static String factionPropertiesPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\faction.properties";
+	public static File factionPropertiesFile = new File( factionPropertiesPath );
+	
 	public static String menuSymbolsPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\menu\\symbols";
 	public static File menuSymbolsFile = new File( menuSymbolsPath );

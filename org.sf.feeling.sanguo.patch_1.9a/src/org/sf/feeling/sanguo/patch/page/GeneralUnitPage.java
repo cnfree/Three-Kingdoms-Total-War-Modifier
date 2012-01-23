@@ -71,22 +71,6 @@ public class GeneralUnitPage extends SimpleTabPage {
 		});
 		createTitle();
 		createPatchArea();
-
-		initPage();
-	}
-
-	private void initPage() {
-		generalUnitMap = UnitUtil.getGeneralUnits();
-		for (int i = 0; i < generalUnitMap.getKeyList().size(); i++) {
-			generalUnitCombo.add(ChangeCode.toLong((String) generalUnitMap
-					.get(i)));
-
-		}
-		factionMap = UnitUtil.getFactionMap();
-		for (int i = 0; i < factionMap.getKeyList().size(); i++) {
-			factionCombo.add((String) factionMap.get(i));
-
-		}
 	}
 
 	private void createPatchArea() {
@@ -305,6 +289,18 @@ public class GeneralUnitPage extends SimpleTabPage {
 			generalUnitCombo.select(newIndex);
 			generalUnitCombo.notifyListeners(SWT.Selection, new Event());
 		}
+		
+		factionMap = UnitUtil.getFactionMap( );
+		String faction = factionCombo.getText( );
+
+		factionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			factionCombo.add( (String) factionMap.get( i ) );
+		}
+
+		if ( factionMap.containsValue( faction ) )
+			factionCombo.setText( faction );
 	}
 
 	public void deActivate() {

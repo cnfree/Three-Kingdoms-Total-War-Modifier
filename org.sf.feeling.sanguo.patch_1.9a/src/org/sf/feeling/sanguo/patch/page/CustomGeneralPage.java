@@ -65,7 +65,7 @@ public class CustomGeneralPage extends SimpleTabPage
 {
 
 	private final SortMap jueweiProperty = FileUtil.loadProperties( "juewei" );
-	private final SortMap factionMap = UnitUtil.getFactionMap( );
+	private SortMap factionMap;
 	private CCombo smallImageCombo;
 	private CCombo bigImageCombo;
 	private CCombo soldierImageCombo;
@@ -261,10 +261,6 @@ public class CustomGeneralPage extends SimpleTabPage
 		factionCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 				SWT.READ_ONLY );
 
-		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
-		{
-			factionCombo.add( (String) factionMap.get( i ) );
-		}
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.widthHint = 180;
 		gd.horizontalSpan = 2;
@@ -1106,11 +1102,25 @@ public class CustomGeneralPage extends SimpleTabPage
 		availableGeneralMap = UnitUtil.getAvailableGenerals( );
 		generalUnitMap = UnitUtil.getAvailableGeneralUnits( );
 		officerMap = UnitUtil.getAvailableOfficers( );
+		factionMap = UnitUtil.getFactionMap( );
+		
 		smallImageCombo.setItems( new String[0] );
 		bigImageCombo.setItems( new String[0] );
 		soldierImageCombo.setItems( new String[0] );
 		generalModelCombo.setItems( new String[0] );
-		battleModelCombo.setItems( new String[0] );
+		battleModelCombo.setItems( new String[0] );	
+		
+		String faction = factionCombo.getText( );
+
+		factionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			factionCombo.add( (String) factionMap.get( i ) );
+		}
+
+		if ( factionMap.containsValue( faction ) )
+			factionCombo.setText( faction );
+		
 		for ( int i = 0; i < availableGeneralMap.size( ); i++ )
 		{
 			String generalName = ChangeCode.toLong( (String) availableGeneralMap.get( i ) );

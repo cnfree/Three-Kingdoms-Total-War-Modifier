@@ -441,6 +441,40 @@ public class GeneralParser
 		return (String[]) jueweiList.toArray( new String[0] );
 	}
 
+	public static String getGeneralDescriptor( String general )
+	{
+		String generalDescriptor = null;
+		if ( FileConstants.vnVsFile.exists( ) )
+		{
+			try
+			{
+				String[] levels = GeneralParser.getJueweiLevels( general );
+				String level = levels[levels.length - 1];
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.vnVsFile ),
+						"UTF-16LE" ) );
+				String line = null;
+				while ( ( line = in.readLine( ) ) != null )
+				{
+					if ( line.indexOf( level ) > -1 )
+					{
+						if ( line.indexOf( "{" + level + "_desc}" ) > -1 )
+						{
+							generalDescriptor = line.substring( line.indexOf( '}' ) + 1 )
+									.trim( );
+							break;
+						}
+					}
+				}
+				in.close( );
+			}
+			catch ( IOException e )
+			{
+				e.printStackTrace( );
+			}
+		}
+		return generalDescriptor;
+	}
+
 	public static void setGeneralJueweis( String juewei, String[] jueweis,
 			String generalDescription )
 	{
@@ -554,9 +588,9 @@ public class GeneralParser
 		}
 	}
 
-	public static String[] getGeneralJueweis( String general )
+	public static String[] getGeneralJueweis( String juewei )
 	{
-		String[] jueweiLevels = getJueweiLevels( general );
+		String[] jueweiLevels = getJueweiLevels( juewei );
 		String[] jueweis = new String[jueweiLevels.length];
 		if ( FileConstants.vnVsFile.exists( ) )
 		{
@@ -567,7 +601,7 @@ public class GeneralParser
 				String line = null;
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.indexOf( general ) > -1 )
+					if ( line.indexOf( juewei ) > -1 )
 					{
 						for ( int i = 0; i < jueweiLevels.length; i++ )
 						{

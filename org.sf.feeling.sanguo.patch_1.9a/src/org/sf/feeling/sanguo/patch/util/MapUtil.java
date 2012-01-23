@@ -28,6 +28,15 @@ import org.sf.feeling.swt.win32.extension.util.SortMap;
 public class MapUtil
 {
 
+	static
+	{
+		if ( !FileConstants.factionPropertiesFile.exists( ) )
+		{
+			FileUtil.writeToBinarayFile( FileConstants.factionPropertiesFile,
+					MapUtil.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/code/faction.properties" ) );
+		}
+	}
+
 	public static final String HANDLER = "handler";
 
 	public static final String SIEGE = "siege";
@@ -35,8 +44,6 @@ public class MapUtil
 	public static final String INFANTRY = "infantry";
 
 	public static final String CAVALRY = "cavalry";
-
-	final static SortMap factionProperty = FileUtil.loadProperties( "faction" );
 
 	static SortMap unitMap; // key-value:unit type - unit name
 	static SortMap generalNameMap; // key-value:general code - general name
@@ -61,6 +68,8 @@ public class MapUtil
 	static SortMap factionMap; // key-value:faction - faction name
 	static SortMap unitFactionMap; // key-value:unit type - faction list
 	static SortMap factionGeneralMap;// key-value:faction - general code list
+	static SortMap factionLeaderMap;// key-value:faction - general code list
+	static SortMap factionHeirMap;// key-value:faction - general code list
 	static SortMap horseMap;// key-value:faction - general code list
 	static SortMap officerMap;// key-value:faction - general code list
 	static SortMap mountTypeToModelMap;
@@ -70,8 +79,8 @@ public class MapUtil
 	static SortMap categoryMap;
 	static SortMap factionTextureMap;
 	static SortMap factionDescriptionMap;
-
 	static HashSet unAvailableGeneralPoints = new HashSet( );
+	static SortMap factionProperty;
 
 	static
 	{
@@ -141,6 +150,7 @@ public class MapUtil
 
 	public static void initMap( )
 	{
+		factionProperty = FileUtil.loadProperties( "faction" );
 		initUnitTypeToDictionaryMap( );
 		initMountTypeToModelMap( );
 		unitMap = initUnitMap( );
@@ -685,6 +695,8 @@ public class MapUtil
 	private static SortMap initGeneralOrderMap( )
 	{
 		factionGeneralMap = new SortMap( );
+		factionLeaderMap = new SortMap( );
+		factionHeirMap = new SortMap();
 		generalUnitTypeMap = new SortMap( );
 		generalModelMap = new SortMap( );
 		if ( FileConstants.stratFile.exists( ) )
@@ -730,14 +742,23 @@ public class MapUtil
 								Matcher matcher1 = pattern1.matcher( line );
 								if ( matcher1.find( ) )
 								{
-									String[] value = matcher2.group( )
-											.split( "," );
-									general = value[value.length - 2].replaceAll( "character",
-											"" )
-											.trim( );
+									if ( matcher2.group( )
+											.indexOf( "sub_faction" ) > -1 )
+									{
+										general = matcher2.group( )
+												.replaceAll( "character", "" )
+												.split( "," )[1].trim( ).trim( );
+									}
+									else
+									{
+										general = matcher2.group( )
+												.replaceAll( "character", "" )
+												.split( "," )[0].trim( );
+									}
 									( (List) factionGeneralMap.get( faction ) ).add( general );
 
 									General model = new General( );
+									model.setFaction( faction );
 
 									String[] splits = line.split( ",\\s*" );
 									for ( int i = 0; i < splits.length; i++ )
@@ -746,10 +767,14 @@ public class MapUtil
 										if ( args[0].equalsIgnoreCase( "leader" ) )
 										{
 											model.setLeader( true );
+											factionLeaderMap.put( faction,
+													general );
 										}
 										else if ( args[0].equalsIgnoreCase( "heir" ) )
 										{
 											model.setHeir( true );
+											factionHeirMap.put(  faction,
+													general );
 										}
 										else if ( args.length == 2 )
 										{
@@ -835,7 +860,7 @@ public class MapUtil
 		for ( int i = 0; i < availableGeneralList.size( ); i++ )
 		{
 			Object key = availableGeneralList.get( i );
-			String generalName = (String) generalNameMap.get( key );
+			String generalName = ChangeCode.toLong((String) generalNameMap.get( key ));
 			if ( availableGeneralMap.containsValue( generalName ) )
 			{
 				for ( int j = 0; j < availableGeneralMap.getKeyList( ).size( ); j++ )
@@ -845,22 +870,24 @@ public class MapUtil
 					if ( availableGeneralMap.get( j ).equals( generalName ) )
 					{
 						String faction = UnitUtil.getGeneralFaction( general );
-						availableGeneralMap.put( general, generalName
-								+ "（"
-								+ factionMap.get( faction.toUpperCase( ) )
-								+ "）" );
+						availableGeneralMap.put( general,
+								ChangeCode.toLong( generalName
+										+ "（"
+										+ factionMap.get( faction.toUpperCase( ) )
+										+ "）" ) );
 					}
 				}
 				String faction = UnitUtil.getGeneralFaction( (String) key );
 				availableGeneralMap.put( key,
-						generalName
+						ChangeCode.toLong( generalName
 								+ "（"
 								+ factionMap.get( faction.toUpperCase( ) )
-								+ "）" );
+								+ "）" ) );
 			}
 			else
 			{
-				availableGeneralMap.put( key, generalNameMap.get( key ) );
+				availableGeneralMap.put( key,
+						ChangeCode.toLong( (String) generalNameMap.get( key ) ) );
 			}
 		}
 		return availableGeneralMap;

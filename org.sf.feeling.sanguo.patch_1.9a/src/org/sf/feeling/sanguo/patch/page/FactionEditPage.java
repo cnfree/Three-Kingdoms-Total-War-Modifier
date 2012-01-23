@@ -2,12 +2,24 @@
 package org.sf.feeling.sanguo.patch.page;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -45,6 +57,8 @@ import org.sf.feeling.sanguo.patch.util.BattleUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
 import org.sf.feeling.sanguo.patch.util.FileConstants;
 import org.sf.feeling.sanguo.patch.util.FileUtil;
+import org.sf.feeling.sanguo.patch.util.GeneralParser;
+import org.sf.feeling.sanguo.patch.util.MapUtil;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.ColorSelector;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
@@ -59,8 +73,10 @@ import org.sf.feeling.swt.win32.internal.extension.util.ColorCache;
 public class FactionEditPage extends SimpleTabPage
 {
 
-	private SortMap factionMap = UnitUtil.getFactionMap( );
+	private SortMap factionMap;
 	private SortMap leaderImageMap = FileUtil.loadProperties( "leaderimage" );
+	private SortMap factionTextMap = FileUtil.loadProperties( "factiontext" );
+	private SortMap descriptionMap = FileUtil.loadProperties( "factiondescription" );
 	private SortMap cultureMap = FileUtil.loadProperties( "culture" );
 
 	ModifyListener nameListener = new ModifyListener( ) {
@@ -106,6 +122,14 @@ public class FactionEditPage extends SimpleTabPage
 	private Button startImageButton;
 
 	private ImageData startImage;
+	private ImageData normal48Image;
+	private ImageData grey48Image;
+	private ImageData roll48Image;
+	private ImageData select48Image;
+	private ImageData normal24Image;
+	private ImageData grey24Image;
+	private ImageData roll24Image;
+	private ImageData select24Image;
 
 	private SortMap factionDescriptionMap;
 
@@ -124,6 +148,16 @@ public class FactionEditPage extends SimpleTabPage
 	private CCombo factionTextFontSizeCombo;
 	private Text factionTextText;
 	private CCombo cultureCombo;
+	private Button applyButton;
+	private CCombo factionCombo;
+
+	private ImageData bigCaptionBannerImage;
+	private ImageData smallCaptionBannerImage;
+	private ImageData battleBannerImage;
+	private ImageData stratBannerImage;
+	private ImageData factionTextImage;
+	private ImageData leaderImage;
+	private ImageData factionImage;
 
 	public void buildUI( Composite parent )
 	{
@@ -157,15 +191,11 @@ public class FactionEditPage extends SimpleTabPage
 		patchClient.setLayout( layout );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "选择编辑势力：" );
-		final CCombo factionCombo = WidgetUtil.getToolkit( )
-				.createCCombo( patchClient, SWT.READ_ONLY );
+		factionCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
 		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 4;
 		factionCombo.setLayoutData( gd );
-		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
-		{
-			factionCombo.add( (String) factionMap.get( i ) );
-		}
 
 		factionCombo.addSelectionListener( new SelectionAdapter( ) {
 
@@ -197,7 +227,7 @@ public class FactionEditPage extends SimpleTabPage
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );
-		gd.verticalSpan = 14;
+		gd.verticalSpan = 11;
 		gd.widthHint = 256;
 		gd.minimumHeight = 256;
 		imageCanvas.setLayoutData( gd );
@@ -240,59 +270,9 @@ public class FactionEditPage extends SimpleTabPage
 
 			public void modifyText( ModifyEvent e )
 			{
-				File file = new File( FileConstants.captainBannerPath,
-						"captain_portrait_" + idText.getText( ) + ".tga" );
-				try
-				{
-					ImageData imageData = TgaLoader.loadImage( new FileInputStream( file ),
-							true,
-							true );
-					int pixel = imageData.getPixel( 26, 60 );
-					for ( int x = 20; x < 20 + 18; x++ )
-					{
-						for ( int y = 24; y < 24 + 41; y++ )
-						{
-							imageData.setPixel( x, y, pixel );
-						}
-					}
-
-					Image oldImage = new Image( null, imageData );
-					GC gc = new GC( oldImage );
-					gc.setAdvanced( true );
-					gc.setAntialias( SWT.ON );
-					FontData fontData = new FontData( bigCaptionBannerFontCombo.getText( ),
-							Integer.parseInt( bigCaptionBannerFontSizeCombo.getText( ) ),
-							SWT.BOLD );
-					gc.setFont( new Font( null, fontData ) );
-					gc.setForeground( ColorCache.getInstance( )
-							.getColor( bigCaptionBannerColorSelector.getColorValue( ) ) );
-					if ( bigCaptionBannerText.getText( ).trim( ).length( ) > 0 )
-					{
-						char[] chars = ChangeCode.toShort( bigCaptionBannerText.getText( )
-								.trim( ) )
-								.toCharArray( );
-						Point fontSize = gc.stringExtent( "" + chars[0] );
-						gc.setTextAntialias( SWT.ON );
-						gc.drawText( "" + chars[0],
-								( 18 - fontSize.x ) / 2 + 21,
-								29,
-								true );
-						if ( chars.length >= 2 )
-						{
-							gc.drawText( "" + chars[1],
-									( 18 - fontSize.x ) / 2 + 21,
-									29 + fontSize.y,
-									true );
-						}
-					}
-					imageCanvas.setImageData( oldImage.getImageData( ) );
-					gc.dispose( );
-					oldImage.dispose( );
-				}
-				catch ( IOException e1 )
-				{
-					e1.printStackTrace( );
-				}
+				bigCaptionBannerImage = createCaptionBannerImage( );
+				if ( bigCaptionBannerImage != null )
+					imageCanvas.setImageData( bigCaptionBannerImage );
 			}
 
 		};
@@ -349,58 +329,9 @@ public class FactionEditPage extends SimpleTabPage
 
 			public void modifyText( ModifyEvent e )
 			{
-				File file = new File( FileConstants.captainBannerPath,
-						"captain_card_romans_julii.tga" );
-				try
-				{
-					ImageData imageData = TgaLoader.loadImage( new FileInputStream( file ),
-							true,
-							true );
-					int pixel = imageData.getPixel( 16, 45 );
-					for ( int x = 7; x < 7 + 16; x++ )
-					{
-						for ( int y = 16; y < 16 + 35; y++ )
-						{
-							imageData.setPixel( x, y, pixel );
-						}
-					}
-
-					Image oldImage = new Image( null, imageData );
-					GC gc = new GC( oldImage );
-					gc.setAdvanced( true );
-					gc.setAntialias( SWT.ON );
-					FontData fontData = new FontData( smallCaptionBannerFontCombo.getText( ),
-							Integer.parseInt( smallCaptionBannerFontSizeCombo.getText( ) ),
-							SWT.BOLD );
-					gc.setFont( new Font( null, fontData ) );
-					gc.setForeground( ColorCache.getInstance( )
-							.getColor( smallCaptionBannerColorSelector.getColorValue( ) ) );
-					if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
-					{
-						char[] chars = ChangeCode.toShort( smallCaptionBannerText.getText( )
-								.trim( ) )
-								.toCharArray( );
-						Point fontSize = gc.stringExtent( "" + chars[0] );
-						gc.drawText( "" + chars[0],
-								( 16 - fontSize.x ) / 2 + 8,
-								17,
-								true );
-						if ( chars.length >= 2 )
-						{
-							gc.drawText( "" + chars[1],
-									( 16 - fontSize.x ) / 2 + 8,
-									17 + fontSize.y,
-									true );
-						}
-					}
-					imageCanvas.setImageData( oldImage.getImageData( ) );
-					gc.dispose( );
-					oldImage.dispose( );
-				}
-				catch ( IOException e1 )
-				{
-					e1.printStackTrace( );
-				}
+				smallCaptionBannerImage = createSmallCatpionBannerImage( );
+				if ( smallCaptionBannerImage != null )
+					imageCanvas.setImageData( smallCaptionBannerImage );
 			}
 
 		};
@@ -445,48 +376,10 @@ public class FactionEditPage extends SimpleTabPage
 
 			public void modifyText( ModifyEvent e )
 			{
-				Image image = new Image( null, 64, 64 );
-				GC gc = new GC( image );
-				gc.setAdvanced( true );
-				gc.setAntialias( SWT.ON );
-				FontData fontData = new FontData( stratBannerFontCombo.getText( ),
-						Integer.parseInt( stratBannerFontSizeCombo.getText( ) ),
-						SWT.BOLD );
-				gc.setFont( new Font( null, fontData ) );
-				gc.setBackground( new Color( null, 0, 0, 0 ) );
-				gc.fillRectangle( 0, 0, 64, 64 );
-				gc.setForeground( new Color( null, 255, 255, 255 ) );
-				if ( stratBannerText.getText( ).trim( ).length( ) > 0 )
-				{
-					char[] chars = ChangeCode.toShort( stratBannerText.getText( )
-							.trim( ) )
-							.toCharArray( );
-					Point fontSize = gc.stringExtent( "" + chars[0] );
-					if ( chars.length == 1 )
-					{
-						gc.drawText( "" + chars[0],
-								( 64 - fontSize.x ) / 2,
-								( 64 - fontSize.y ) / 2,
-								true );
-					}
-					if ( chars.length >= 2 )
-					{
-						gc.drawText( "" + chars[0],
-								( 64 - fontSize.x ) / 2,
-								( 32 - fontSize.y ) / 2,
-								true );
-						gc.drawText( "" + chars[1],
-								( 64 - fontSize.x ) / 2,
-								( 32 - fontSize.y ) / 2 + 32,
-								true );
-					}
-				}
-				imageCanvas.setImageData( image.getImageData( ) );
-				gc.dispose( );
-				image.dispose( );
-
+				stratBannerImage = createStratBannerImage( );
+				if ( stratBannerImage != null )
+					imageCanvas.setImageData( stratBannerImage );
 			}
-
 		};
 		stratBannerText.addModifyListener( stratModifyListener );
 
@@ -505,7 +398,7 @@ public class FactionEditPage extends SimpleTabPage
 		{
 			stratBannerFontSizeCombo.add( "" + i );
 		}
-		stratBannerFontSizeCombo.setText( "36" );
+		stratBannerFontSizeCombo.setText( "42" );
 
 		gd = new GridData( );
 		gd.widthHint = 60;
@@ -521,60 +414,10 @@ public class FactionEditPage extends SimpleTabPage
 
 			public void modifyText( ModifyEvent e )
 			{
-				FactionTexture texture = (FactionTexture) BattleUtil.getFactionTextureMap( )
-						.get( idText.getText( ) );
-				File file = new File( FileConstants.dataFile,
-						texture.getStandard_texture( ) + ".dds" );
-				try
+				battleBannerImage = createBattleBannerImage( );
+				if ( battleBannerImage != null )
 				{
-					DDSImage ddsImage = DDSLoader.loadDDSImage( new FileInputStream( file ) );
-					ImageData imageData = DDSLoader.getImageData( ddsImage );
-					int pixel = imageData.getPixel( 126, 140 );
-					for ( int x = 125; x < 125 + 53; x++ )
-					{
-						for ( int y = 20; y < 20 + 123; y++ )
-						{
-							imageData.setPixel( x, y, pixel );
-						}
-					}
-
-					Image image = new Image( null, imageData );
-					GC gc = new GC( image );
-					gc.setAdvanced( true );
-					gc.setAntialias( SWT.ON );
-					gc.setTextAntialias( SWT.ON );
-					gc.setLineWidth( 10 );
-					FontData fontData = new FontData( battleBannerFontCombo.getText( ),
-							Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
-							SWT.BOLD );
-					gc.setFont( new Font( null, fontData ) );
-					gc.setForeground( ColorCache.getInstance( )
-							.getColor( battleBannerColorSelector.getColorValue( ) ) );
-					if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
-					{
-						char[] chars = ChangeCode.toShort( battleBannerText.getText( )
-								.trim( ) )
-								.toCharArray( );
-						Point fontSize = gc.stringExtent( "" + chars[0] );
-						gc.drawText( "" + chars[0],
-								( 53 - fontSize.x ) / 2 + 125,
-								30,
-								true );
-						if ( chars.length >= 2 )
-						{
-							gc.drawText( "" + chars[1],
-									( 53 - fontSize.x ) / 2 + 125,
-									30 + fontSize.y,
-									true );
-						}
-					}
-					imageCanvas.setImageData( image.getImageData( ) );
-					gc.dispose( );
-					image.dispose( );
-				}
-				catch ( IOException e1 )
-				{
-					e1.printStackTrace( );
+					imageCanvas.setImageData( battleBannerImage );
 				}
 			}
 		};
@@ -625,6 +468,7 @@ public class FactionEditPage extends SimpleTabPage
 		} );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 3;
+		gd.widthHint = 180;
 		startImageCombo.setLayoutData( gd );
 		startImageCombo.addSelectionListener( new SelectionAdapter( ) {
 
@@ -633,9 +477,9 @@ public class FactionEditPage extends SimpleTabPage
 				startImage = null;
 				if ( startImageCombo.getSelectionIndex( ) != -1 )
 				{
-					String generalCode = (String) factionMap.getKeyList( )
+					String factionCode = (String) factionMap.getKeyList( )
 							.get( startImageCombo.getSelectionIndex( ) );
-					setStartImage( generalCode );
+					setStartImage( factionCode );
 					if ( startImage != null )
 						imageCanvas.setImageData( startImage );
 				}
@@ -673,21 +517,62 @@ public class FactionEditPage extends SimpleTabPage
 					{
 						try
 						{
+							ImageData imageData = null;
 							if ( imageFile.getName( )
 									.toLowerCase( )
 									.endsWith( ".tga" ) )
 							{
-								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
 										true );
-								startImage = computeStartImage( imageData );
-								imageCanvas.setImageData( startImage );
+
 							}
 							else
 							{
 								ImageLoader loader = new ImageLoader( );
-								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
+							}
+							if ( imageData != null )
+							{
+								factionImage = getFactionImage( imageData );
 								startImage = computeStartImage( imageData );
+								normal48Image = compute48Image( imageData,
+										TgaLoader.loadImage( FactionEditPage.class.getResourceAsStream( "/symbol48.tga" ),
+												true ) );
+								Image normalImage = new Image( null,
+										normal48Image );
+								Image grayImage = new Image( null,
+										normalImage,
+										SWT.IMAGE_GRAY );
+								grey48Image = grayImage.getImageData( );
+								normalImage.dispose( );
+								grayImage.dispose( );
+
+								normal24Image = compute24Image( imageData,
+										TgaLoader.loadImage( FactionEditPage.class.getResourceAsStream( "/symbol24.tga" ),
+												true ) );
+								normalImage = new Image( null, normal24Image );
+								grayImage = new Image( null,
+										normalImage,
+										SWT.IMAGE_GRAY );
+								grey24Image = grayImage.getImageData( );
+								normalImage.dispose( );
+								grayImage.dispose( );
+
+								roll48Image = compute48Image( imageData,
+										TgaLoader.loadImage( FactionEditPage.class.getResourceAsStream( "/symbol48_roll.tga" ),
+												true ) );
+								roll24Image = compute24Image( imageData,
+										TgaLoader.loadImage( FactionEditPage.class.getResourceAsStream( "/symbol24_roll.tga" ),
+												true ) );
+
+								select48Image = compute48Image( imageData,
+										TgaLoader.loadImage( FactionEditPage.class.getResourceAsStream( "/symbol48_select.tga" ),
+												true ) );
+								select24Image = compute24Image( imageData,
+										TgaLoader.loadImage( FactionEditPage.class.getResourceAsStream( "/symbol24_select.tga" ),
+												true ) );
+
 								imageCanvas.setImageData( startImage );
 							}
 						}
@@ -753,66 +638,9 @@ public class FactionEditPage extends SimpleTabPage
 
 			public void modifyText( ModifyEvent e )
 			{
-				Image image = new Image( null, 29, 29 );
-				GC gc = new GC( image );
-				gc.setAdvanced( true );
-				gc.setTextAntialias( SWT.ON );
-
-				RGB rgb = factionTextColorSelector.getColorValue( );
-				gc.setBackground( ColorCache.getInstance( )
-						.getColor( (int) ( rgb.red > 127 ? 255 : ( 255 * 0.85 ) ),
-								(int) ( rgb.green > 127 ? 255 : ( 255 * 0.85 ) ),
-								(int) ( rgb.blue > 127 ? 255 : ( 255 * 0.85 ) ) ) );
-				gc.setForeground( ColorCache.getInstance( )
-						.getColor( (int) ( rgb.red > 127 ? 255 : ( 255 * 0.4 ) ),
-								(int) ( rgb.green > 127 ? 255 : ( 255 * 0.4 ) ),
-								(int) ( rgb.blue > 127 ? 255 : ( 255 * 0.4 ) ) ) );
-				gc.fillGradientRectangle( 0, 0, 29, 29, true );
-				gc.setForeground( ColorCache.getInstance( ).getColor( rgb ) );
-
-				Font font = null;
-				try
-				{
-					FontData fontData = new FontData( factionTextFontCombo.getText( ),
-							Integer.parseInt( factionTextFontSizeCombo.getText( ) ),
-							SWT.BOLD );
-					font = new Font( null, fontData );
-					gc.setFont( font );
-				}
-				catch ( NumberFormatException e1 )
-				{
-				}
-
-				if ( factionTextText.getText( ).length( ) > 0 )
-				{
-					Point point = gc.textExtent( factionTextText.getText( 0, 0 ) );
-					gc.drawText( ChangeCode.toShort( factionTextText.getText( 0,
-							0 ) ),
-							( 29 - point.x ) / 2,
-							( 29 - point.y ) / 2,
-							true );
-				}
-
-				ImageData imageData = image.getImageData( );
-				int x, y;
-				for ( x = 0; x < 29; x++ )
-				{
-					for ( y = 0; y < 29; y++ )
-					{
-						if ( Math.pow( x - 14.5, 2 ) + Math.pow( y - 14.5, 2 ) >= Math.pow( 14.5,
-								2 ) )
-						{
-							imageData.setAlpha( x, y, 0 );
-						}
-						else
-							imageData.setAlpha( x, y, 255 );
-					}
-				}
-				if ( font != null )
-					font.dispose( );
-				image.dispose( );
-				gc.dispose( );
-				imageCanvas.setImageData( imageData );
+				factionTextImage = createFactionTextImage( );
+				if ( factionTextImage != null )
+					imageCanvas.setImageData( factionTextImage );
 			}
 		};
 		factionTextText.addModifyListener( factionTextModifyListener );
@@ -839,7 +667,7 @@ public class FactionEditPage extends SimpleTabPage
 		{
 			factionTextFontSizeCombo.add( "" + i );
 		}
-		factionTextFontSizeCombo.setText( "18" );
+		factionTextFontSizeCombo.setText( "16" );
 
 		gd = new GridData( );
 		gd.widthHint = 60;
@@ -847,7 +675,7 @@ public class FactionEditPage extends SimpleTabPage
 		factionTextFontSizeCombo.addModifyListener( factionTextModifyListener );
 
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.horizontalSpan = 5;
+		gd.horizontalSpan = 6;
 		Composite buttonGroup = WidgetUtil.getToolkit( )
 				.createComposite( patchClient );
 		buttonGroup.setLayoutData( gd );
@@ -856,13 +684,580 @@ public class FactionEditPage extends SimpleTabPage
 		layout.numColumns = 2;
 		buttonGroup.setLayout( layout );
 
-		Button applyButton = WidgetUtil.getToolkit( )
-				.createButton( buttonGroup, "应用", SWT.PUSH );
+		applyButton = WidgetUtil.getToolkit( ).createButton( buttonGroup,
+				"应用",
+				SWT.PUSH );
 		applyButton.setEnabled( false );
 		gd = new GridData( );
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.END;
 		applyButton.setLayoutData( gd );
+		applyButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				applyButton.setEnabled( false );
+				String factionName = nameText.getText( ).trim( );
+				String faction = factionCombo.getText( ).trim( );
+
+				List txtFiles = new ArrayList( );
+				if ( !faction.equals( factionName ) )
+				{
+					txtFiles.add( FileConstants.expandedBiFile );
+					txtFiles.add( FileConstants.campaignDescriptionFile );
+					txtFiles.add( FileConstants.factionPropertiesFile );
+				}
+
+				FactionDescription desc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+						.get( idText.getText( ) );
+				String culture = (String) cultureMap.get( desc.getCulture( ) );
+
+				if ( !culture.equals( cultureCombo.getText( ) ) )
+				{
+					txtFiles.add( FileConstants.descrFactionsFile );
+				}
+
+				List imageFiles = new ArrayList( );
+				if ( bigCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					imageFiles.add( new File( FileConstants.captainBannerPath,
+							"captain_portrait_" + idText.getText( ) + ".tga" ) );
+				}
+				if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					imageFiles.add( new File( FileConstants.captainBannerPath,
+							"captain_card_" + idText.getText( ) + ".tga" ) );
+				}
+				if ( stratBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					FactionDescription factionDesc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+							.get( idText.getText( ) );
+					int index = Integer.parseInt( factionDesc.getStandard_index( ) ) / 4 + 1;
+					imageFiles.add( new File( FileConstants.stratBannerPath,
+							"symbols" + index + ".tga.dds" ) );
+				}
+				if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					FactionTexture texture = (FactionTexture) BattleUtil.getFactionTextureMap( )
+							.get( idText.getText( ) );
+					imageFiles.add( new File( FileConstants.dataFile,
+							texture.getStandard_texture( ) + ".dds" ) );
+				}
+				if ( factionTextText.getText( ).trim( ).length( ) > 0 )
+				{
+					for ( int i = 0; i < FileConstants.cultures.length; i++ )
+					{
+						String haredpage = FileConstants.uiPath
+								+ "\\"
+								+ FileConstants.cultures[i]
+								+ "\\interface\\sharedpage_01.tga";
+						imageFiles.add( new File( haredpage ) );
+					}
+				}
+				if ( startImageCombo.getSelectionIndex( ) > -1 )
+				{
+					if ( !startImageCombo.getText( ).trim( ).equals( faction ) )
+					{
+						saveFactionLogoImages( imageFiles );
+					}
+				}
+				else if ( startImageCombo.getText( ).trim( ).length( ) > 0 )
+				{
+					File file = new File( startImageCombo.getText( ).trim( ) );
+					if ( file.exists( ) )
+					{
+						saveFactionLogoImages( imageFiles );
+					}
+				}
+				if ( leaderCombo.getSelectionIndex( ) > -1 )
+				{
+					imageFiles.add( new File( FileConstants.factionMapsPath,
+							"map_"
+									+ idText.getText( ).trim( ).toLowerCase( )
+									+ ".tga" ) );
+				}
+
+				List bakList = new ArrayList( );
+				bakList.addAll( txtFiles );
+				bakList.addAll( imageFiles );
+
+				if ( imageFiles.size( ) > 0 )
+				{
+					if ( txtFiles.size( ) > 0 )
+					{
+						BakUtil.bakDataAndResources( "编辑势力："
+								+ faction
+								+ "-->"
+								+ factionName,
+								(File[]) bakList.toArray( new File[0] ) );
+					}
+					else
+					{
+						BakUtil.bakDataAndResources( "编辑势力：" + faction,
+								(File[]) bakList.toArray( new File[0] ) );
+					}
+				}
+
+				if ( !culture.equals( cultureCombo.getText( ) ) )
+				{
+					if ( FileConstants.descrFactionsFile.exists( ) )
+					{
+						try
+						{
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.descrFactionsFile ),
+									"GBK" ) );
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							boolean startFaction = false;
+							boolean isEnd = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+
+								if ( !isEnd )
+								{
+									if ( startFaction == false )
+									{
+										Pattern pattern = Pattern.compile( "^\\s*faction\\s+"
+												+ idText.getText( ),
+												Pattern.CASE_INSENSITIVE );
+										Matcher matcher = pattern.matcher( line );
+										if ( matcher.find( ) )
+										{
+											startFaction = true;
+										}
+									}
+									else
+									{
+										Pattern pattern = Pattern.compile( "^\\s*culture\\s+",
+												Pattern.CASE_INSENSITIVE );
+										Matcher matcher = pattern.matcher( line );
+										if ( matcher.find( ) )
+										{
+											printer.println( "culture						"
+													+ cultureMap.getKeyList( )
+															.get( cultureCombo.getSelectionIndex( ) ) );
+											startFaction = true;
+											isEnd = true;
+											continue;
+										}
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.descrFactionsFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+							printer.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+
+				}
+
+				if ( txtFiles.size( ) > 0 )
+				{
+					FileUtil.replaceFile( FileConstants.factionPropertiesFile,
+							faction + "=" + idText.getText( ).trim( ),
+							faction + "=" + idText.getText( ).trim( ),
+							factionName + "=" + idText.getText( ).trim( ),
+							"UTF-8" );
+					FileUtil.replaceFile( FileConstants.expandedBiFile,
+							ChangeCode.toShort( factionCombo.getText( ).trim( ) ),
+							".+",
+							ChangeCode.toShort( factionName ),
+							"UTF-16LE" );
+
+					if ( FileConstants.campaignDescriptionFile.exists( ) )
+					{
+						try
+						{
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.campaignDescriptionFile ),
+									"UTF-16LE" ) );
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							String description = (String) descriptionMap.get( idText.getText( )
+									.trim( ) );
+							while ( ( line = in.readLine( ) ) != null )
+							{
+
+								Pattern pattern = Pattern.compile( "^\\s*\\{\\s*"
+										+ Pattern.quote( description ) );
+								Matcher matcher = pattern.matcher( line );
+								if ( matcher.find( ) )
+								{
+									if ( line.toLowerCase( )
+											.indexOf( ( description + "_TITLE" ).toLowerCase( ) ) > -1 )
+									{
+										String general = null;
+										String leader = leaderCombo.getText( )
+												.trim( );
+										if ( leaderCombo.getSelectionIndex( ) > -1 )
+										{
+											general = (String) generalMap.getKeyList( )
+													.get( leaderCombo.getSelectionIndex( ) );
+
+										}
+										else
+										{
+											general = (String) UnitUtil.getFactionLeaderMap( )
+													.get( idText.getText( )
+															.trim( ) );
+										}
+
+										leader = (String) generalMap.get( general );
+										if ( leader.indexOf( '（' ) > -1 )
+											leader = leader.substring( 0,
+													leader.indexOf( '（' ) );
+
+										printer.println( line.substring( 0,
+												line.indexOf( '▁' ) + 1 )
+												+ ChangeCode.toShort( nameText.getText( )
+														.trim( )
+														+ "军▁君主："
+														+ leader ) );
+										line = in.readLine( );
+										printer.println( line );
+										line = in.readLine( );
+
+										String juewei = (String) GeneralParser.getGeneralSkills( general )
+												.getKeyList( )
+												.get( 2 );
+										String leaderDescriptor = GeneralParser.getGeneralDescriptor( juewei );
+										int index = line.indexOf( "\\n\\n" );
+										if ( index > -1 )
+										{
+											printer.println( line.substring( 0,
+													index )
+													+ "\\n\\n勢力君主："
+													+ leaderDescriptor );
+										}
+										continue;
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.campaignDescriptionFile ),
+									"UTF-16LE" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+							printer.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+
+				}
+
+				if ( bigCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( bigCaptionBannerImage != null )
+					{
+						try
+						{
+							TgaLoader.saveImage( new FileOutputStream( new File( FileConstants.captainBannerPath,
+									"captain_portrait_"
+											+ idText.getText( )
+											+ ".tga" ) ),
+									bigCaptionBannerImage );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( smallCaptionBannerImage != null )
+					{
+						try
+						{
+							TgaLoader.saveImage( new FileOutputStream( new File( FileConstants.captainBannerPath,
+									"captain_card_"
+											+ idText.getText( )
+											+ ".tga" ) ),
+									smallCaptionBannerImage );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				if ( stratBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( stratBannerImage != null )
+					{
+						FactionDescription factionDesc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+								.get( idText.getText( ) );
+						int standardIndex = Integer.parseInt( factionDesc.getStandard_index( ) );
+						int index = standardIndex / 4 + 1;
+						int position = standardIndex % 4;
+						File file = new File( FileConstants.stratBannerPath,
+								"symbols" + index + ".tga.dds" );
+						try
+						{
+							RGB white = new RGB( 255, 255, 255 );
+							DDSImage image = DDSLoader.loadDDSImage( new FileInputStream( file ) );
+							ImageData imageData = DDSLoader.getImageData( image );
+							int offsetX = 64 * ( position % 2 );
+							int offsetY = 64 * ( position / 2 );
+							for ( int i = 0; i < 64; i++ )
+							{
+								for ( int j = 0; j < 64; j++ )
+								{
+									if ( white.equals( stratBannerImage.palette.getRGB( stratBannerImage.getPixel( i,
+											j ) ) ) )
+									{
+										imageData.data[( ( i + offsetX ) + ( j + offsetY ) * 128 ) * 4 + 3] = (byte) 255;
+									}
+									else
+									{
+										imageData.data[( ( i + offsetX ) + ( j + offsetY ) * 128 ) * 4 + 3] = 0;
+									}
+								}
+							}
+
+							DDSLoader.saveImage( new FileOutputStream( file ),
+									imageData,
+									image.getPixelFormat( ),
+									image.getNumMipMaps( ) > 1 );
+							imageCanvas.setImageData( imageData );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( battleBannerImage != null )
+					{
+						try
+						{
+							FactionTexture texture = (FactionTexture) BattleUtil.getFactionTextureMap( )
+									.get( idText.getText( ) );
+							File ddsFile = new File( FileConstants.dataFile,
+									texture.getStandard_texture( ) + ".dds" );
+							DDSImage image = DDSLoader.loadDDSImage( new FileInputStream( ddsFile ) );
+							DDSLoader.saveImage( new FileOutputStream( ddsFile ),
+									battleBannerImage,
+									image.getPixelFormat( ),
+									image.getNumMipMaps( ) > 1 );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+
+				}
+				if ( factionTextText.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( factionTextImage != null )
+					{
+						try
+						{
+							for ( int i = 0; i < FileConstants.cultures.length; i++ )
+							{
+								String sharedpage = FileConstants.uiPath
+										+ "\\"
+										+ FileConstants.cultures[i]
+										+ "\\interface\\sharedpage_01.tga";
+								ImageData image = TgaLoader.loadImage( new FileInputStream( new File( sharedpage ) ) );
+								String[] dest = factionTextMap.get( idText.getText( )
+										.trim( ) )
+										.toString( )
+										.split( "," );
+								int destY = Integer.parseInt( dest[0] );
+								int destX = Integer.parseInt( dest[1] );
+
+								int offsetX = ( factionTextImage.width - 34 ) / 2;
+								int offsetY = ( factionTextImage.height - 33 ) / 2;
+
+								for ( int x = 0; x < 33; x++ )
+								{
+									for ( int y = 0; y < 33; y++ )
+									{
+										if ( x >= factionTextImage.width
+												|| y >= factionTextImage.height )
+											continue;
+										image.setPixel( destX
+												* 33
+												+ x
+												- offsetX
+												+ 257,
+												destY * 33 + y - offsetY + 257,
+												image.palette.getPixel( factionTextImage.palette.getRGB( factionTextImage.getPixel( x,
+														y ) ) ) );
+									}
+								}
+								TgaLoader.saveImage( new FileOutputStream( new File( sharedpage ) ),
+										image );
+							}
+						}
+						catch ( Exception e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				if ( startImageCombo.getSelectionIndex( ) > -1 )
+				{
+					if ( startImage != null )
+					{
+						try
+						{
+							String logo = ( (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+									.get( idText.getText( ).trim( ) ) ).getLoading_logo( );
+							TgaLoader.saveImage( new FileOutputStream( new File( FileConstants.dataFile,
+									logo ) ),
+									startImage );
+							saveMenuImages( );
+
+							String factionCode = (String) factionMap.getKeyList( )
+									.get( startImageCombo.getSelectionIndex( ) );
+
+							String[] dest = leaderImageMap.get( idText.getText( )
+									.trim( ) )
+									.toString( )
+									.split( "," );
+							int destY = Integer.parseInt( dest[0] );
+							int destX = Integer.parseInt( dest[1] );
+
+							String[] src = leaderImageMap.get( factionCode )
+									.toString( )
+									.split( "," );
+							int srcY = Integer.parseInt( src[0] );
+							int srcX = Integer.parseInt( src[1] );
+
+							for ( int i = 0; i < FileConstants.cultures.length; i++ )
+							{
+								String stratpage = FileConstants.uiPath
+										+ "\\"
+										+ FileConstants.cultures[i]
+										+ "\\interface\\stratpage_02.tga";
+								ImageData image = TgaLoader.loadImage( new FileInputStream( new File( stratpage ) ) );
+								for ( int x = 0; x < 53; x++ )
+								{
+									for ( int y = 0; y < 53; y++ )
+									{
+										image.setPixel( destX * 53 + x, destY
+												* 53
+												+ y, image.getPixel( srcX
+												* 53
+												+ x, srcY * 53 + y ) );
+									}
+								}
+								TgaLoader.saveImage( new FileOutputStream( new File( stratpage ) ),
+										image );
+							}
+						}
+						catch ( Exception e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				else if ( startImageCombo.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( startImage != null )
+					{
+						try
+						{
+							String logo = ( (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+									.get( idText.getText( ).trim( ) ) ).getLoading_logo( );
+							TgaLoader.saveImage( new FileOutputStream( new File( FileConstants.dataFile,
+									logo ) ),
+									startImage );
+							saveCustomMenuImages( );
+
+							for ( int i = 0; i < FileConstants.cultures.length; i++ )
+							{
+								String stratpage = FileConstants.uiPath
+										+ "\\"
+										+ FileConstants.cultures[i]
+										+ "\\interface\\stratpage_02.tga";
+								ImageData image = TgaLoader.loadImage( new FileInputStream( new File( stratpage ) ) );
+								String[] dest = leaderImageMap.get( idText.getText( )
+										.trim( ) )
+										.toString( )
+										.split( "," );
+								int destY = Integer.parseInt( dest[0] );
+								int destX = Integer.parseInt( dest[1] );
+
+								int offsetX = 0;
+								int offsetY = 0;
+								if ( factionImage.width > factionImage.height )
+								{
+									offsetX = ( 53 - factionImage.width ) / 2;
+								}
+								else
+								{
+									offsetY = ( 53 - factionImage.height ) / 2;
+								}
+
+								for ( int x = 0; x < 53; x++ )
+								{
+									for ( int y = 0; y < 53; y++ )
+									{
+
+										image.setPixel( destX * 53 + x,
+												destY * 53 + y,
+												image.palette.getPixel( factionImage.palette.getRGB( factionImage.getPixel( x
+														- offsetX,
+														y - offsetY ) ) ) );
+									}
+								}
+								TgaLoader.saveImage( new FileOutputStream( new File( stratpage ) ),
+										image );
+							}
+						}
+						catch ( Exception e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				if ( leaderCombo.getSelectionIndex( ) > -1 )
+				{
+					if ( leaderImage != null )
+					{
+						try
+						{
+							TgaLoader.saveImage( new FileOutputStream( new File( FileConstants.factionMapsPath,
+									"map_"
+											+ idText.getText( )
+													.trim( )
+													.toLowerCase( )
+											+ ".tga" ) ),
+									leaderImage );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				MapUtil.initMap( );
+				applyButton.setEnabled( true );
+				checkEnableStatus( );
+				refresh( );
+			}
+		} );
 
 		final Button restoreButton = WidgetUtil.getToolkit( )
 				.createButton( buttonGroup, "还原", SWT.PUSH );
@@ -875,12 +1270,47 @@ public class FactionEditPage extends SimpleTabPage
 			{
 				restoreButton.setEnabled( false );
 				BakUtil.restoreCurrectVersionBakFile( );
-				// refreshPage( );
+				refreshPage( );
 				restoreButton.setEnabled( true );
 			}
 		} );
 
 		patchSection.setClient( patchClient );
+	}
+
+	protected ImageData getFactionImage( ImageData imageData )
+	{
+		Image image = new Image( null, imageData );
+		float ratio = 1.0f;
+		if ( imageData.width > imageData.height )
+		{
+			if ( imageData.height > 53 )
+			{
+				ratio = 53 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 53 * ratio / imageData.width;
+			}
+		}
+		else
+		{
+			if ( imageData.width > 53 )
+			{
+				ratio = 53 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 53 * ratio / imageData.width;
+			}
+		}
+
+		ImageData resizeImageData = GraphicsUtil.resize( image,
+				(int) ( imageData.width * ratio + 0.5f ),
+				(int) ( imageData.height * ratio + 0.5f ) );
+		image.dispose( );
+
+		return resizeImageData;
 	}
 
 	private void checkEnableStatus( )
@@ -913,6 +1343,7 @@ public class FactionEditPage extends SimpleTabPage
 			factionTextColorSelector.setEnabled( true );
 			factionTextFontCombo.setEnabled( true );
 			factionTextFontSizeCombo.setEnabled( true );
+			applyButton.setEnabled( true );
 		}
 		else
 		{
@@ -941,7 +1372,7 @@ public class FactionEditPage extends SimpleTabPage
 			factionTextColorSelector.setEnabled( false );
 			factionTextFontCombo.setEnabled( false );
 			factionTextFontSizeCombo.setEnabled( false );
-			
+			applyButton.setEnabled( false );
 		}
 	}
 
@@ -975,7 +1406,6 @@ public class FactionEditPage extends SimpleTabPage
 		ImageData resizeImageData = GraphicsUtil.resize( image,
 				(int) ( imageData.width * ratio + 0.5f ),
 				(int) ( imageData.height * ratio + 0.5f ) );
-
 		image.dispose( );
 
 		int offsetX = 0;
@@ -1003,6 +1433,12 @@ public class FactionEditPage extends SimpleTabPage
 					int posX = x - 8 - offsetX;
 					int posY = y - 8 - offsetY;
 
+					if ( posX < 0
+							|| posX >= resizeImageData.width
+							|| posY < 0
+							|| posY >= resizeImageData.height )
+						continue;
+
 					if ( Math.pow( 64 - x, 2 ) + Math.pow( 64 - y, 2 ) <= 57 * 57 )
 					{
 						RGB rgb = resizeImageData.palette.getRGB( resizeImageData.getPixel( posX,
@@ -1021,6 +1457,156 @@ public class FactionEditPage extends SimpleTabPage
 			e.printStackTrace( );
 		}
 		return null;
+	}
+
+	protected ImageData compute48Image( ImageData imageData,
+			ImageData orginImage )
+	{
+		Image image = new Image( null, imageData );
+		float ratio = 1.0f;
+		if ( imageData.width > imageData.height )
+		{
+			if ( imageData.height > 42 )
+			{
+				ratio = 42 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 42 * ratio / imageData.width;
+			}
+		}
+		else
+		{
+			if ( imageData.width > 42 )
+			{
+				ratio = 42 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 42 * ratio / imageData.width;
+			}
+		}
+
+		ImageData resizeImageData = GraphicsUtil.resize( image,
+				(int) ( imageData.width * ratio + 0.5f ),
+				(int) ( imageData.height * ratio + 0.5f ) );
+		image.dispose( );
+
+		int offsetX = 0;
+		int offsetY = 0;
+
+		if ( resizeImageData.width > resizeImageData.height )
+		{
+			offsetX = ( 42 - resizeImageData.width ) / 2;
+		}
+		else
+		{
+			offsetY = ( 42 - resizeImageData.height ) / 2;
+		}
+
+		ImageData tgaData = orginImage;
+		byte[] data = orginImage.data;
+
+		for ( int x = 9; x < 50; x++ )
+		{
+			for ( int y = 9; y < 50; y++ )
+			{
+				int posX = x - 9 - offsetX;
+				int posY = y - 9 - offsetY;
+
+				if ( posX < 0
+						|| posX >= resizeImageData.width
+						|| posY < 0
+						|| posY >= resizeImageData.height )
+					continue;
+
+				if ( Math.pow( 30 - x, 2 ) + Math.pow( 30 - y, 2 ) <= 21 * 21 )
+				{
+					RGB rgb = resizeImageData.palette.getRGB( resizeImageData.getPixel( posX,
+							posY ) );
+					int index = ( y * 59 + x ) * 4;
+					data[index + 1] = (byte) rgb.blue;
+					data[index + 2] = (byte) rgb.green;
+					data[index + 3] = (byte) rgb.red;
+				}
+			}
+		}
+		return tgaData;
+	}
+
+	protected ImageData compute24Image( ImageData imageData,
+			ImageData orginImage )
+	{
+		Image image = new Image( null, imageData );
+		float ratio = 1.0f;
+		if ( imageData.width > imageData.height )
+		{
+			if ( imageData.height > 22 )
+			{
+				ratio = 22 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 22 * ratio / imageData.width;
+			}
+		}
+		else
+		{
+			if ( imageData.width > 22 )
+			{
+				ratio = 22 * ratio / imageData.height;
+			}
+			else
+			{
+				ratio = 22 * ratio / imageData.width;
+			}
+		}
+
+		ImageData resizeImageData = GraphicsUtil.resize( image,
+				(int) ( imageData.width * ratio + 0.5f ),
+				(int) ( imageData.height * ratio + 0.5f ) );
+		image.dispose( );
+
+		int offsetX = 0;
+		int offsetY = 0;
+
+		if ( resizeImageData.width > resizeImageData.height )
+		{
+			offsetX = ( 22 - resizeImageData.width ) / 2;
+		}
+		else
+		{
+			offsetY = ( 22 - resizeImageData.height ) / 2;
+		}
+
+		ImageData tgaData = orginImage;
+		byte[] data = orginImage.data;
+
+		for ( int x = 5; x < 25; x++ )
+		{
+			for ( int y = 5; y < 25; y++ )
+			{
+				int posX = x - 5 - offsetX;
+				int posY = y - 5 - offsetY;
+
+				if ( posX < 0
+						|| posX >= resizeImageData.width
+						|| posY < 0
+						|| posY >= resizeImageData.height )
+					continue;
+
+				if ( Math.pow( 15 - x, 2 ) + Math.pow( 15 - y, 2 ) <= 11 * 11 )
+				{
+					RGB rgb = resizeImageData.palette.getRGB( resizeImageData.getPixel( posX,
+							posY ) );
+					int index = ( y * 30 + x ) * 4;
+					data[index + 1] = (byte) rgb.blue;
+					data[index + 2] = (byte) rgb.green;
+					data[index + 3] = (byte) rgb.red;
+				}
+			}
+		}
+		return tgaData;
 	}
 
 	protected void setStartImage( String factionCode )
@@ -1071,11 +1657,26 @@ public class FactionEditPage extends SimpleTabPage
 		generalMap = UnitUtil.getAvailableGenerals( );
 		factionDescriptionMap = BattleUtil.getFactionDescriptionMap( );
 		factionMap = UnitUtil.getFactionMap( );
-		int index = startImageCombo.getSelectionIndex( );
+
+		
+		int index = factionCombo.getSelectionIndex( );
+
+		String faction = factionCombo.getText( );
+
+		factionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			factionCombo.add( (String) factionMap.get( i ) );
+		}
+
+		if ( factionMap.containsValue( faction ) )
+			factionCombo.setText( faction );
+
+		index = startImageCombo.getSelectionIndex( );
 		startImageCombo.removeAll( );
 		for ( int i = 0; i < factionDescriptionMap.size( ); i++ )
 		{
-			String faction = (String) factionMap.get( (String) factionMap.getKeyList( )
+			faction = (String) factionMap.get( (String) factionMap.getKeyList( )
 					.get( i ) );
 			startImageCombo.add( faction );
 		}
@@ -1091,7 +1692,7 @@ public class FactionEditPage extends SimpleTabPage
 			leaderCombo.add( generalName );
 		}
 
-		if ( index != -1 && index < startImageCombo.getItemCount( ) )
+		if ( index != -1 && index < leaderCombo.getItemCount( ) )
 			leaderCombo.select( index );
 	}
 
@@ -1099,136 +1700,550 @@ public class FactionEditPage extends SimpleTabPage
 	{
 		if ( leaderCombo.getSelectionIndex( ) > -1 )
 		{
-			String leader = (String) generalMap.getKeyList( )
-					.get( leaderCombo.getSelectionIndex( ) );
-			String portrait = ( (General) UnitUtil.getGeneralModels( )
-					.get( leader ) ).getPortrait( );
-			String faction = idText.getText( );
+			leaderImage = createLeaderImage( );
 
-			try
+			if ( leaderImage != null )
 			{
-				File file = new File( FileConstants.factionMapsPath, "map_"
-						+ faction.toLowerCase( )
-						+ ".tga" );
-				InputStream is = null;
-				if ( !file.exists( ) )
+				imageCanvas.setImageData( leaderImage );
+			}
+		}
+	}
+
+	private ImageData createLeaderImage( )
+	{
+		ImageData leaderImage = null;
+		String leader = (String) generalMap.getKeyList( )
+				.get( leaderCombo.getSelectionIndex( ) );
+		String portrait = ( (General) UnitUtil.getGeneralModels( ).get( leader ) ).getPortrait( );
+		String faction = idText.getText( );
+
+		try
+		{
+			File file = new File( FileConstants.factionMapsPath, "map_"
+					+ faction.toLowerCase( )
+					+ ".tga" );
+			InputStream is = null;
+			if ( !file.exists( ) )
+			{
+				is = FactionEditPage.class.getResourceAsStream( "/map_faction.tga" );
+			}
+			else
+			{
+				is = new FileInputStream( file );
+			}
+			ImageData imageData = TgaLoader.loadImage( is, true, true );
+			int x, y;
+			for ( x = 291; x < imageData.width; x++ )
+			{
+				for ( y = 0; y < imageData.height; y++ )
 				{
-					is = FactionEditPage.class.getResourceAsStream( "/map_faction.tga" );
+					imageData.setPixel( x, y, imageData.getPixel( 290, y ) );
+					imageData.setAlpha( x, y, imageData.getAlpha( 290, y ) );
+				}
+			}
+
+			Image image = new Image( null, imageData );
+			GC gc = new GC( image );
+			gc.setAdvanced( true );
+			gc.setAntialias( SWT.ON );
+			gc.setTextAntialias( SWT.ON );
+			gc.setInterpolation( SWT.HIGH );
+
+			ImageData portraitImageData = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( new File( FileConstants.customPortraitPath
+					+ "\\"
+					+ portrait
+					+ "\\portrait_young.tga" ) ) ),
+					false );
+			Image portraitImage = new Image( null, portraitImageData );
+			gc.drawImage( portraitImage,
+					0,
+					0,
+					portraitImageData.width,
+					portraitImageData.height,
+					308 + ( 74 - portraitImageData.width ) / 2,
+					28,
+					portraitImageData.width,
+					portraitImageData.height );
+
+			gc.setTextAntialias( SWT.ON );
+
+			FontData fontData = new FontData( leaderFontCombo.getText( ),
+					Integer.parseInt( leaderFontSizeCombo.getText( ) ),
+					SWT.BOLD );
+			Font font = new Font( null, fontData );
+			gc.setFont( font );
+			Color color = (Color) ColorCache.getInstance( ).getColor( 255,
+					255,
+					155 );
+			RGB rgb = color.getRGB( );
+			gc.setForeground( color );
+
+			Point fontSize = gc.stringExtent( "君主" );
+			gc.drawText( "君主",
+					( 74 - fontSize.x ) / 2 + 308,
+					28 + portraitImageData.height + 5,
+					false );
+
+			String name = ChangeCode.toShort( (String) generalMap.get( leader ) );
+			if ( name.indexOf( '（' ) > -1 )
+				name = name.substring( 0, name.indexOf( '（' ) );
+			Point fontSize1 = gc.stringExtent( name );
+			for ( ; true; )
+			{
+				if ( fontSize1.x > fontSize.x + 5 )
+				{
+					fontData.height = fontData.height - 1;
+					font.dispose( );
+					font = new Font( null, fontData );
+					gc.setFont( font );
+					fontSize1 = gc.stringExtent( name );
 				}
 				else
 				{
-					is = new FileInputStream( file );
+					break;
 				}
-				ImageData imageData = TgaLoader.loadImage( is, true, true );
-				int x, y;
-				for ( x = 291; x < imageData.width; x++ )
+			}
+			gc.drawText( name, ( 74 - fontSize1.x ) / 2 + 308, 28
+					+ portraitImageData.height
+					+ 5
+					+ fontSize.y
+					+ 5, false );
+
+			imageData = image.getImageData( );
+			int posX = 308 + ( 74 - portraitImageData.width ) / 2;
+			int posY = 28;
+			for ( x = posX; x < posX + portraitImageData.width; x++ )
+			{
+				for ( y = posY; y < posY + portraitImageData.height; y++ )
 				{
-					for ( y = 0; y < imageData.height; y++ )
-					{
-						imageData.setPixel( x, y, imageData.getPixel( 290, y ) );
-						imageData.setAlpha( x, y, imageData.getAlpha( 290, y ) );
-					}
+					imageData.setAlpha( x, y, 255 );
 				}
+			}
 
-				Image image = new Image( null, imageData );
-				GC gc = new GC( image );
-				gc.setAdvanced( true );
-				gc.setAntialias( SWT.ON );
-				gc.setTextAntialias( SWT.ON );
-				gc.setInterpolation( SWT.HIGH );
+			posX = ( 74 - fontSize.x ) / 2 + 308;
+			posY = 28 + portraitImageData.height + 5;
 
-				ImageData portraitImageData = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( new File( FileConstants.customPortraitPath
-						+ "\\"
-						+ portrait
-						+ "\\portrait_young.tga" ) ) ),
-						false );
-				Image portraitImage = new Image( null, portraitImageData );
-				gc.drawImage( portraitImage,
-						0,
-						0,
-						portraitImageData.width,
-						portraitImageData.height,
-						308 + ( 74 - portraitImageData.width ) / 2,
-						28,
-						portraitImageData.width,
-						portraitImageData.height );
-
-				gc.setTextAntialias( SWT.ON );
-
-				FontData fontData = new FontData( leaderFontCombo.getText( ),
-						Integer.parseInt( leaderFontSizeCombo.getText( ) ),
-						SWT.BOLD );
-				Font font = new Font( null, fontData );
-				gc.setFont( font );
-				Color color = (Color) ColorCache.getInstance( ).getColor( 255,
-						255,
-						155 );
-				RGB rgb = color.getRGB( );
-				gc.setForeground( color );
-
-				Point fontSize = gc.stringExtent( "君主" );
-				gc.drawText( "君主",
-						( 74 - fontSize.x ) / 2 + 308,
-						28 + portraitImageData.height + 5,
-						false );
-
-				String name = ChangeCode.toShort( (String) generalMap.get( leader ) );
-				if ( name.indexOf( '（' ) > -1 )
-					name = name.substring( 0, name.indexOf( '（' ) );
-				Point fontSize1 = gc.stringExtent( name );
-				for ( ; true; )
+			for ( x = posX - 5; x < imageData.width; x++ )
+			{
+				for ( y = posY; y < imageData.height; y++ )
 				{
-					if ( fontSize1.x > fontSize.x + 5 )
-					{
-						fontData.height = fontData.height - 1;
-						font.dispose( );
-						font = new Font( null, fontData );
-						gc.setFont( font );
-						fontSize1 = gc.stringExtent( name );
-					}
-					else
-					{
-						break;
-					}
-				}
-				gc.drawText( name, ( 74 - fontSize1.x ) / 2 + 308, 28
-						+ portraitImageData.height
-						+ 5
-						+ fontSize.y
-						+ 5, false );
-
-				imageData = image.getImageData( );
-				int posX = 308 + ( 74 - portraitImageData.width ) / 2;
-				int posY = 28;
-				for ( x = posX; x < posX + portraitImageData.width; x++ )
-				{
-					for ( y = posY; y < posY + portraitImageData.height; y++ )
+					if ( imageData.palette.getRGB( imageData.getPixel( x, y ) )
+							.equals( rgb ) )
 					{
 						imageData.setAlpha( x, y, 255 );
 					}
 				}
 
-				posX = ( 74 - fontSize.x ) / 2 + 308;
-				posY = 28 + portraitImageData.height + 5;
-
-				for ( x = posX - 5; x < imageData.width; x++ )
-				{
-					for ( y = posY; y < imageData.height; y++ )
-					{
-						if ( imageData.palette.getRGB( imageData.getPixel( x, y ) )
-								.equals( rgb ) )
-						{
-							imageData.setAlpha( x, y, 255 );
-						}
-					}
-
-				}
-
-				imageCanvas.setImageData( imageData );
 			}
-			catch ( IOException e1 )
+
+			leaderImage = imageData;
+		}
+		catch ( IOException e1 )
+		{
+			e1.printStackTrace( );
+		}
+		return leaderImage;
+	}
+
+	private ImageData createCaptionBannerImage( )
+	{
+		ImageData captionBannerImage = null;
+		File file = new File( FileConstants.captainBannerPath,
+				"captain_portrait_" + idText.getText( ) + ".tga" );
+		try
+		{
+			ImageData imageData = TgaLoader.loadImage( new FileInputStream( file ),
+					true,
+					true );
+			int pixel = imageData.getPixel( 26, 60 );
+			for ( int x = 20; x < 20 + 18; x++ )
 			{
-				e1.printStackTrace( );
+				for ( int y = 24; y < 24 + 41; y++ )
+				{
+					imageData.setPixel( x, y, pixel );
+				}
+			}
+
+			Image oldImage = new Image( null, imageData );
+			GC gc = new GC( oldImage );
+			gc.setAdvanced( true );
+			gc.setAntialias( SWT.ON );
+			FontData fontData = new FontData( bigCaptionBannerFontCombo.getText( ),
+					Integer.parseInt( bigCaptionBannerFontSizeCombo.getText( ) ),
+					SWT.BOLD );
+			gc.setFont( new Font( null, fontData ) );
+			gc.setForeground( ColorCache.getInstance( )
+					.getColor( bigCaptionBannerColorSelector.getColorValue( ) ) );
+			if ( bigCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+			{
+				char[] chars = ChangeCode.toShort( bigCaptionBannerText.getText( )
+						.trim( ) )
+						.toCharArray( );
+				Point fontSize = gc.stringExtent( "" + chars[0] );
+				gc.setTextAntialias( SWT.ON );
+				gc.drawText( "" + chars[0],
+						( 18 - fontSize.x ) / 2 + 21,
+						29,
+						true );
+				if ( chars.length >= 2 )
+				{
+					gc.drawText( "" + chars[1],
+							( 18 - fontSize.x ) / 2 + 21,
+							29 + fontSize.y,
+							true );
+				}
+			}
+
+			captionBannerImage = oldImage.getImageData( );
+
+			gc.dispose( );
+			oldImage.dispose( );
+		}
+		catch ( IOException e1 )
+		{
+			e1.printStackTrace( );
+		}
+
+		return captionBannerImage;
+	}
+
+	private ImageData createSmallCatpionBannerImage( )
+	{
+		ImageData smallCaptionBannerImage = null;
+		File file = new File( FileConstants.captainBannerPath,
+				"captain_card_romans_julii.tga" );
+		try
+		{
+			ImageData imageData = TgaLoader.loadImage( new FileInputStream( file ),
+					true,
+					true );
+			int pixel = imageData.getPixel( 16, 45 );
+			for ( int x = 7; x < 7 + 16; x++ )
+			{
+				for ( int y = 16; y < 16 + 35; y++ )
+				{
+					imageData.setPixel( x, y, pixel );
+				}
+			}
+
+			Image oldImage = new Image( null, imageData );
+			GC gc = new GC( oldImage );
+			gc.setAdvanced( true );
+			gc.setAntialias( SWT.ON );
+			FontData fontData = new FontData( smallCaptionBannerFontCombo.getText( ),
+					Integer.parseInt( smallCaptionBannerFontSizeCombo.getText( ) ),
+					SWT.BOLD );
+			gc.setFont( new Font( null, fontData ) );
+			gc.setForeground( ColorCache.getInstance( )
+					.getColor( smallCaptionBannerColorSelector.getColorValue( ) ) );
+			if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+			{
+				char[] chars = ChangeCode.toShort( smallCaptionBannerText.getText( )
+						.trim( ) )
+						.toCharArray( );
+				Point fontSize = gc.stringExtent( "" + chars[0] );
+				gc.drawText( "" + chars[0],
+						( 16 - fontSize.x ) / 2 + 8,
+						17,
+						true );
+				if ( chars.length >= 2 )
+				{
+					gc.drawText( "" + chars[1],
+							( 16 - fontSize.x ) / 2 + 8,
+							17 + fontSize.y,
+							true );
+				}
+			}
+			smallCaptionBannerImage = oldImage.getImageData( );
+
+			gc.dispose( );
+			oldImage.dispose( );
+		}
+		catch ( IOException e1 )
+		{
+			e1.printStackTrace( );
+		}
+		return smallCaptionBannerImage;
+	}
+
+	private ImageData createStratBannerImage( )
+	{
+		ImageData stratBanner = null;
+		Image image = new Image( null, 64, 64 );
+		GC gc = new GC( image );
+		gc.setAdvanced( true );
+		gc.setAntialias( SWT.ON );
+		FontData fontData = new FontData( stratBannerFontCombo.getText( ),
+				Integer.parseInt( stratBannerFontSizeCombo.getText( ) ),
+				SWT.BOLD );
+		gc.setFont( new Font( null, fontData ) );
+		gc.setBackground( new Color( null, 0, 0, 0 ) );
+		gc.fillRectangle( 0, 0, 64, 64 );
+		gc.setForeground( new Color( null, 255, 255, 255 ) );
+		if ( stratBannerText.getText( ).trim( ).length( ) > 0 )
+		{
+			char[] chars = ChangeCode.toShort( stratBannerText.getText( )
+					.trim( ) ).toCharArray( );
+			Point fontSize = gc.stringExtent( "" + chars[0] );
+			if ( chars.length == 1 )
+			{
+				gc.drawText( "" + chars[0],
+						( 64 - fontSize.x ) / 2,
+						( 64 - fontSize.y ) / 2,
+						true );
+			}
+			if ( chars.length >= 2 )
+			{
+				gc.drawText( "" + chars[0],
+						( 64 - fontSize.x ) / 2,
+						( 32 - fontSize.y ) / 2,
+						true );
+				gc.drawText( "" + chars[1],
+						( 64 - fontSize.x ) / 2,
+						( 32 - fontSize.y ) / 2 + 32,
+						true );
+			}
+		}
+		stratBanner = image.getImageData( );
+
+		gc.dispose( );
+		image.dispose( );
+		return stratBanner;
+	}
+
+	private ImageData createBattleBannerImage( )
+	{
+		ImageData battleBanner = null;
+		FactionTexture texture = (FactionTexture) BattleUtil.getFactionTextureMap( )
+				.get( idText.getText( ) );
+		File file = new File( FileConstants.dataFile,
+				texture.getStandard_texture( ) + ".dds" );
+		try
+		{
+			DDSImage ddsImage = DDSLoader.loadDDSImage( new FileInputStream( file ) );
+			ImageData imageData = DDSLoader.getImageData( ddsImage );
+			int pixel = imageData.getPixel( 126, 140 );
+			for ( int x = 125; x < 125 + 53; x++ )
+			{
+				for ( int y = 20; y < 20 + 123; y++ )
+				{
+					imageData.setPixel( x, y, pixel );
+				}
+			}
+
+			Image image = new Image( null, imageData );
+			GC gc = new GC( image );
+			gc.setAdvanced( true );
+			gc.setAntialias( SWT.ON );
+			gc.setTextAntialias( SWT.ON );
+			gc.setLineWidth( 10 );
+			FontData fontData = new FontData( battleBannerFontCombo.getText( ),
+					Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
+					SWT.BOLD );
+			gc.setFont( new Font( null, fontData ) );
+			gc.setForeground( ColorCache.getInstance( )
+					.getColor( battleBannerColorSelector.getColorValue( ) ) );
+			if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
+			{
+				char[] chars = ChangeCode.toShort( battleBannerText.getText( )
+						.trim( ) ).toCharArray( );
+				Point fontSize = gc.stringExtent( "" + chars[0] );
+				gc.drawText( "" + chars[0],
+						( 53 - fontSize.x ) / 2 + 125,
+						30,
+						true );
+				if ( chars.length >= 2 )
+				{
+					gc.drawText( "" + chars[1],
+							( 53 - fontSize.x ) / 2 + 125,
+							30 + fontSize.y,
+							true );
+				}
+			}
+			battleBanner = image.getImageData( );
+			gc.dispose( );
+			image.dispose( );
+		}
+		catch ( IOException e1 )
+		{
+			e1.printStackTrace( );
+		}
+		return battleBanner;
+	}
+
+	private void saveFactionLogoImages( List imageFiles )
+	{
+		for ( int i = 0; i < FileConstants.cultures.length; i++ )
+		{
+			String haredpage = FileConstants.uiPath
+					+ "\\"
+					+ FileConstants.cultures[i]
+					+ "\\interface\\stratpage_02.tga";
+			imageFiles.add( new File( haredpage ) );
+		}
+
+		String logo = ( (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+				.get( idText.getText( ).trim( ) ) ).getLoading_logo( );
+		imageFiles.add( new File( FileConstants.dataFile, logo ) );
+
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_48", "symbol48_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ ".tga" ) );
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_48", "symbol48_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ "_grey.tga" ) );
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_48", "symbol48_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ "_roll.tga" ) );
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_48", "symbol48_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ "_select.tga" ) );
+
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_24", "symbol24_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ ".tga" ) );
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_24", "symbol24_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ "_grey.tga" ) );
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_24", "symbol24_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ "_roll.tga" ) );
+		imageFiles.add( new File( FileConstants.menuSymbolsPath
+				+ "\\FE_buttons_24", "symbol24_"
+				+ idText.getText( ).trim( ).toLowerCase( )
+				+ "_select.tga" ) );
+	}
+
+	private ImageData createFactionTextImage( )
+	{
+		ImageData factionTextImage;
+		Image image = new Image( null, 29, 29 );
+		GC gc = new GC( image );
+		gc.setAdvanced( true );
+		gc.setTextAntialias( SWT.ON );
+
+		RGB rgb = factionTextColorSelector.getColorValue( );
+		gc.setBackground( ColorCache.getInstance( )
+				.getColor( (int) ( rgb.red > 127 ? 255 : ( 255 * 0.85 ) ),
+						(int) ( rgb.green > 127 ? 255 : ( 255 * 0.85 ) ),
+						(int) ( rgb.blue > 127 ? 255 : ( 255 * 0.85 ) ) ) );
+		gc.setForeground( ColorCache.getInstance( )
+				.getColor( (int) ( rgb.red > 127 ? 255 : ( 255 * 0.4 ) ),
+						(int) ( rgb.green > 127 ? 255 : ( 255 * 0.4 ) ),
+						(int) ( rgb.blue > 127 ? 255 : ( 255 * 0.4 ) ) ) );
+		gc.fillGradientRectangle( 0, 0, 29, 29, true );
+		gc.setForeground( ColorCache.getInstance( ).getColor( rgb ) );
+
+		Font font = null;
+		try
+		{
+			FontData fontData = new FontData( factionTextFontCombo.getText( ),
+					Integer.parseInt( factionTextFontSizeCombo.getText( ) ),
+					SWT.BOLD );
+			font = new Font( null, fontData );
+			gc.setFont( font );
+		}
+		catch ( NumberFormatException e1 )
+		{
+		}
+
+		if ( factionTextText.getText( ).length( ) > 0 )
+		{
+			Point point = gc.textExtent( factionTextText.getText( 0, 0 ) );
+			gc.drawText( ChangeCode.toShort( factionTextText.getText( 0, 0 ) ),
+					( 29 - point.x ) / 2,
+					( 29 - point.y ) / 2,
+					true );
+		}
+
+		factionTextImage = image.getImageData( );
+
+		if ( font != null )
+			font.dispose( );
+		image.dispose( );
+		gc.dispose( );
+
+		return factionTextImage;
+	}
+
+	protected void saveMenuImages( ) throws IOException, FileNotFoundException
+	{
+		String factionCode = (String) factionMap.getKeyList( )
+				.get( startImageCombo.getSelectionIndex( ) );
+		String[] size = new String[]{
+				"48", "24"
+		};
+		String[] status = new String[]{
+				"", "_grey", "_roll", "_select"
+		};
+		for ( int i = 0; i < size.length; i++ )
+		{
+			for ( int j = 0; j < status.length; j++ )
+			{
+				String dir = FileConstants.menuSymbolsPath
+						+ "\\FE_buttons_"
+						+ size[i];
+				String outFile = "symbol"
+						+ size[i]
+						+ "_"
+						+ idText.getText( ).trim( ).toLowerCase( )
+						+ status[j]
+						+ ".tga";
+				String inFile = "symbol"
+						+ size[i]
+						+ "_"
+						+ factionCode.toLowerCase( )
+						+ status[j]
+						+ ".tga";
+				TgaLoader.saveImage( new FileOutputStream( new File( dir,
+						outFile ) ),
+						TgaLoader.loadImage( new FileInputStream( new File( dir,
+								inFile ) ) ) );
+			}
+		}
+	}
+
+	protected void saveCustomMenuImages( ) throws IOException,
+			FileNotFoundException
+	{
+		ImageData[] images = new ImageData[]{
+				normal48Image,
+				normal24Image,
+				grey48Image,
+				grey24Image,
+				roll48Image,
+				roll24Image,
+				select48Image,
+				select24Image
+		};
+		String[] size = new String[]{
+				"48", "24"
+		};
+		String[] status = new String[]{
+				"", "_grey", "_roll", "_select"
+		};
+		for ( int i = 0; i < size.length; i++ )
+		{
+			for ( int j = 0; j < status.length; j++ )
+			{
+				String dir = FileConstants.menuSymbolsPath
+						+ "\\FE_buttons_"
+						+ size[i];
+				String outFile = "symbol"
+						+ size[i]
+						+ "_"
+						+ idText.getText( ).trim( ).toLowerCase( )
+						+ status[j]
+						+ ".tga";
+				TgaLoader.saveImage( new FileOutputStream( new File( dir,
+						outFile ) ), images[j * size.length + i] );
 			}
 		}
 	}

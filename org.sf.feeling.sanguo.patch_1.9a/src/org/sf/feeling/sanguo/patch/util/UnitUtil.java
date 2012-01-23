@@ -1904,6 +1904,17 @@ public class UnitUtil
 		return map;
 	}
 
+	public static SortMap getFactionLeaderMap( )
+	{
+		return MapUtil.factionLeaderMap;
+	}
+
+	public static SortMap getFactionHeirMap( )
+	{
+		return MapUtil.factionHeirMap;
+	}
+
+	
 	public static void createGeneral( String general, String faction, int posX,
 			int posY, String strat_model, String battle_model, SortMap skills,
 			String[] baowus, String soldierType )
