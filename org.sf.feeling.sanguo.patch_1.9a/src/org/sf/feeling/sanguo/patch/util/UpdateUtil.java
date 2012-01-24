@@ -42,8 +42,9 @@ public class UpdateUtil
 
 				try
 				{
-					File errorFlag = new File(ERROR_FLAG);
-					if(errorFlag.exists( )){
+					File errorFlag = new File( ERROR_FLAG );
+					if ( errorFlag.exists( ) )
+					{
 						deleteUpdateFiles( );
 						errorFlag.delete( );
 					}
@@ -68,7 +69,7 @@ public class UpdateUtil
 						{
 							download( zipURL, PATCH_FILE );
 							download( updateURL, UPDATE_EXE );
-							
+
 							File updateZipFile = new File( PATCH_FILE );
 							String updateZipMD5 = FileUtil.getMD5Str( updateZipFile );
 							File updateExeFile = new File( UPDATE_EXE );
@@ -87,8 +88,23 @@ public class UpdateUtil
 											.equals( updateZipMD5.trim( )
 													.toLowerCase( ) ) )
 							{
-								needUpdate = true;
-								decompressUpdateFile( updateZipFile );
+
+								if ( checkZipEncoding( updateZipFile, "UTF-8" ) )
+								{
+									decompressUpdateFile( updateZipFile,
+											"UTF-8" );
+									needUpdate = true;
+								}
+								else if ( checkZipEncoding( updateZipFile,
+										"GBK" ) )
+								{
+									decompressUpdateFile( updateZipFile, "GBK" );
+									needUpdate = true;
+								}
+								else
+								{
+									throw new Exception( "无法解析更新文件的字符集编码。" );
+								}
 							}
 						}
 					}
@@ -118,7 +134,29 @@ public class UpdateUtil
 
 	public static void main( String[] args )
 	{
-		System.out.println( FileUtil.getMD5Str( new File( "E:\\Git\\configuration\\git\\sanguo\\org.sf.feeling.sanguo.patch_1.9a\\build\\Update.exe" ) ) );
+		System.out.println( FileUtil.getMD5Str( new File( "C:\\patch_1.9a_3.0.1.zip" ) ) );
+	}
+
+	private static boolean checkZipEncoding( File file, String encoding )
+			throws Exception
+	{
+		boolean flag = false;
+
+		ZipFile zipFile = new ZipFile( file, encoding );
+		Enumeration enumeration = zipFile.getEntries( );
+		ZipEntry zipEntry = null;
+		while ( enumeration.hasMoreElements( ) )
+		{
+			zipEntry = (ZipEntry) enumeration.nextElement( );
+			if ( zipEntry.getName( ).indexOf( "修改器" ) > -1 )
+			{
+				flag = true;
+				break;
+			}
+		}
+		zipFile.close( );
+
+		return flag;
 	}
 
 	protected static void download( String downloadURL, String file )
@@ -207,7 +245,7 @@ public class UpdateUtil
 		}
 	}
 
-	public static void decompressUpdateFile( File updateZipFile )
+	public static void decompressUpdateFile( File updateZipFile, String encoding )
 			throws Exception
 	{
 		ZipFile zipFile = null;
@@ -217,12 +255,12 @@ public class UpdateUtil
 			if ( !patchDir.exists( ) )
 				patchDir.mkdirs( );
 
-			zipFile = new ZipFile( updateZipFile, "GBK" );
+			zipFile = new ZipFile( updateZipFile, encoding );
 			Enumeration enumeration = zipFile.getEntries( );
 			ZipEntry zipEntry = null;
 			while ( enumeration.hasMoreElements( ) )
 			{
-				zipEntry = (ZipEntry)enumeration.nextElement( );
+				zipEntry = (ZipEntry) enumeration.nextElement( );
 				if ( zipEntry.isDirectory( ) )
 					continue;
 				String filePath = PATCH_DIR
