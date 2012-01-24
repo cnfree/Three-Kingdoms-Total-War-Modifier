@@ -513,12 +513,28 @@ public class GeneralParser
 								{
 									String desc = ChangeCode.toShort( generalDescription );
 									StringBuffer buffer = new StringBuffer( );
+									int x = 0;
 									for ( int j = 0; j < desc.length( ); j++ )
 									{
-										buffer.append( desc.charAt( j ) );
-										if ( j > 0 && j % 26 == 0 )
+										char ch = desc.charAt( j );
+										if ( ch == '\\' && desc.charAt( j + 1 ) =='n')
+										{
+											j++;
+											continue;
+										}
+										else if ( ch == '\r' || ch == '\n')
+										{
+											continue;
+										}
+										else
+										{
+											buffer.append( ch );
+											x++;
+										}
+										if ( x % 26 == 0 )
 										{
 											buffer.append( "\\n" );
+											x = 0;
 										}
 									}
 									printer.println( "{"
