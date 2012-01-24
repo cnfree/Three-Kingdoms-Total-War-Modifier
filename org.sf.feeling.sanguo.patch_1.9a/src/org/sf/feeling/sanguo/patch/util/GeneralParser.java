@@ -787,7 +787,10 @@ public class GeneralParser
 				{
 					String level = general + "-" + ( i + 1 );
 					out.println( "{" + level + "}【人物列傳】" );
-					out.println( "{" + level + "_desc}" + generalDescription );
+					out.println( "{"
+							+ level
+							+ "_desc}"
+							+ ChangeCode.toShort( generalDescription ) );
 					if ( i == 0 )
 					{
 						out.println( "{" + level + "_effects_desc}▲" );
