@@ -702,7 +702,8 @@ public class FactionEditPage extends SimpleTabPage
 				String faction = factionCombo.getText( ).trim( );
 
 				List txtFiles = new ArrayList( );
-				if ( !faction.equals( factionName ) )
+				if ( !faction.equals( factionName )
+						|| leaderCombo.getText( ).trim( ).length( ) > 0 )
 				{
 					txtFiles.add( FileConstants.expandedBiFile );
 					txtFiles.add( FileConstants.campaignDescriptionFile );
