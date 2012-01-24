@@ -58,6 +58,7 @@ import org.sf.feeling.sanguo.patch.util.UnitParser;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
+import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 
@@ -414,25 +415,28 @@ public class CustomGeneralPage extends SimpleTabPage
 					{
 						try
 						{
+							ImageData imageData = null;
 							if ( imageFile.getName( )
 									.toLowerCase( )
 									.endsWith( ".tga" ) )
 							{
-								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
-										true )
-										.scaledTo( 69, 96 );
-								imageCanvas.setImageData( imageData );
-								bigImage = imageData;
+										true );
+
 							}
 							else
 							{
 								ImageLoader loader = new ImageLoader( );
-								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0].scaledTo( 69,
-										96 );
-								imageCanvas.setImageData( imageData );
-								bigImage = imageData;
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
+
 							}
+
+							bigImage = GraphicsUtil.resizeImage( imageData,
+									69,
+									96,
+									true );
+							imageCanvas.setImageData( bigImage );
 						}
 						catch ( IOException e1 )
 						{
@@ -506,25 +510,26 @@ public class CustomGeneralPage extends SimpleTabPage
 					{
 						try
 						{
+							ImageData imageData;
 							if ( imageFile.getName( )
 									.toLowerCase( )
 									.endsWith( ".tga" ) )
 							{
-								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
-										true )
-										.scaledTo( 44, 63 );
-								imageCanvas.setImageData( imageData );
-								smallImage = imageData;
+										true );
 							}
 							else
 							{
 								ImageLoader loader = new ImageLoader( );
-								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0].scaledTo( 44,
-										63 );
-								imageCanvas.setImageData( imageData );
-								smallImage = imageData;
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
 							}
+
+							smallImage = GraphicsUtil.resizeImage( imageData,
+									44,
+									63,
+									true );
+							imageCanvas.setImageData( smallImage );
 						}
 						catch ( IOException e1 )
 						{
@@ -678,25 +683,26 @@ public class CustomGeneralPage extends SimpleTabPage
 					{
 						try
 						{
+							ImageData imageData = null;
 							if ( imageFile.getName( )
 									.toLowerCase( )
 									.endsWith( ".tga" ) )
 							{
-								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
-										true )
-										.scaledTo( 160, 210 );
-								imageCanvas.setImageData( imageData );
-								soldierImage = imageData;
+										true );
+
 							}
 							else
 							{
 								ImageLoader loader = new ImageLoader( );
-								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0].scaledTo( 160,
-										210 );
-								imageCanvas.setImageData( imageData );
-								soldierImage = imageData;
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
 							}
+							soldierImage = GraphicsUtil.resizeImage( imageData,
+									160,
+									210,
+									true );
+							imageCanvas.setImageData( soldierImage );
 						}
 						catch ( IOException e1 )
 						{
@@ -873,14 +879,14 @@ public class CustomGeneralPage extends SimpleTabPage
 				customGeneral.setDisplayName( nameText.getText( ).trim( ) );
 				customGeneral.setName( idText.getText( ).trim( ) );
 				customGeneral.setFaction( faction );
-				
-				Point point = computeGeneralPosition( new Point(posXSpinner.getSelection( ) ,
+
+				Point point = computeGeneralPosition( new Point( posXSpinner.getSelection( ),
 						posYSpinner.getSelection( ) ),
 						true,
-						true );	
+						true );
 				customGeneral.setPosX( point.x );
 				customGeneral.setPosY( point.y );
-				
+
 				if ( generalModelCombo.getSelectionIndex( ) != -1 )
 				{
 					customGeneral.setStrat_model( (String) officerMap.getKeyList( )
@@ -1103,13 +1109,13 @@ public class CustomGeneralPage extends SimpleTabPage
 		generalUnitMap = UnitUtil.getAvailableGeneralUnits( );
 		officerMap = UnitUtil.getAvailableOfficers( );
 		factionMap = UnitUtil.getFactionMap( );
-		
+
 		smallImageCombo.setItems( new String[0] );
 		bigImageCombo.setItems( new String[0] );
 		soldierImageCombo.setItems( new String[0] );
 		generalModelCombo.setItems( new String[0] );
-		battleModelCombo.setItems( new String[0] );	
-		
+		battleModelCombo.setItems( new String[0] );
+
 		String faction = factionCombo.getText( );
 
 		factionCombo.removeAll( );
@@ -1120,7 +1126,7 @@ public class CustomGeneralPage extends SimpleTabPage
 
 		if ( factionMap.containsValue( faction ) )
 			factionCombo.setText( faction );
-		
+
 		for ( int i = 0; i < availableGeneralMap.size( ); i++ )
 		{
 			String generalName = ChangeCode.toLong( (String) availableGeneralMap.get( i ) );

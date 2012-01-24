@@ -1281,33 +1281,11 @@ public class FactionEditPage extends SimpleTabPage
 	protected ImageData getFactionImage( ImageData imageData )
 	{
 		Image image = new Image( null, imageData );
-		float ratio = 1.0f;
-		if ( imageData.width > imageData.height )
-		{
-			if ( imageData.height > 53 )
-			{
-				ratio = 53 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 53 * ratio / imageData.width;
-			}
-		}
-		else
-		{
-			if ( imageData.width > 53 )
-			{
-				ratio = 53 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 53 * ratio / imageData.width;
-			}
-		}
 
-		ImageData resizeImageData = GraphicsUtil.resize( image,
-				(int) ( imageData.width * ratio + 0.5f ),
-				(int) ( imageData.height * ratio + 0.5f ) );
+		ImageData resizeImageData = GraphicsUtil.resizeImage( image,
+				53,
+				53,
+				true );
 		image.dispose( );
 
 		return resizeImageData;
@@ -1379,46 +1357,11 @@ public class FactionEditPage extends SimpleTabPage
 	protected ImageData computeStartImage( ImageData imageData )
 	{
 		Image image = new Image( null, imageData );
-		float ratio = 1.0f;
-		if ( imageData.width > imageData.height )
-		{
-			if ( imageData.height > 112 )
-			{
-				ratio = 112 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 112 * ratio / imageData.width;
-			}
-		}
-		else
-		{
-			if ( imageData.width > 112 )
-			{
-				ratio = 112 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 112 * ratio / imageData.width;
-			}
-		}
-
-		ImageData resizeImageData = GraphicsUtil.resize( image,
-				(int) ( imageData.width * ratio + 0.5f ),
-				(int) ( imageData.height * ratio + 0.5f ) );
+		ImageData resizeImageData = GraphicsUtil.resizeImage( image,
+				112,
+				112,
+				true );
 		image.dispose( );
-
-		int offsetX = 0;
-		int offsetY = 0;
-
-		if ( resizeImageData.width > resizeImageData.height )
-		{
-			offsetX = ( 112 - resizeImageData.width ) / 2;
-		}
-		else
-		{
-			offsetY = ( 112 - resizeImageData.height ) / 2;
-		}
 
 		try
 		{
@@ -1430,8 +1373,8 @@ public class FactionEditPage extends SimpleTabPage
 			{
 				for ( int y = 8; y < 120; y++ )
 				{
-					int posX = x - 8 - offsetX;
-					int posY = y - 8 - offsetY;
+					int posX = x - 8;
+					int posY = y - 8;
 
 					if ( posX < 0
 							|| posX >= resizeImageData.width
@@ -1463,46 +1406,12 @@ public class FactionEditPage extends SimpleTabPage
 			ImageData orginImage )
 	{
 		Image image = new Image( null, imageData );
-		float ratio = 1.0f;
-		if ( imageData.width > imageData.height )
-		{
-			if ( imageData.height > 42 )
-			{
-				ratio = 42 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 42 * ratio / imageData.width;
-			}
-		}
-		else
-		{
-			if ( imageData.width > 42 )
-			{
-				ratio = 42 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 42 * ratio / imageData.width;
-			}
-		}
 
-		ImageData resizeImageData = GraphicsUtil.resize( image,
-				(int) ( imageData.width * ratio + 0.5f ),
-				(int) ( imageData.height * ratio + 0.5f ) );
+		ImageData resizeImageData = GraphicsUtil.resizeImage( image,
+				42,
+				42,
+				true );
 		image.dispose( );
-
-		int offsetX = 0;
-		int offsetY = 0;
-
-		if ( resizeImageData.width > resizeImageData.height )
-		{
-			offsetX = ( 42 - resizeImageData.width ) / 2;
-		}
-		else
-		{
-			offsetY = ( 42 - resizeImageData.height ) / 2;
-		}
 
 		ImageData tgaData = orginImage;
 		byte[] data = orginImage.data;
@@ -1511,8 +1420,8 @@ public class FactionEditPage extends SimpleTabPage
 		{
 			for ( int y = 9; y < 50; y++ )
 			{
-				int posX = x - 9 - offsetX;
-				int posY = y - 9 - offsetY;
+				int posX = x - 9;
+				int posY = y - 9;
 
 				if ( posX < 0
 						|| posX >= resizeImageData.width
@@ -1538,46 +1447,12 @@ public class FactionEditPage extends SimpleTabPage
 			ImageData orginImage )
 	{
 		Image image = new Image( null, imageData );
-		float ratio = 1.0f;
-		if ( imageData.width > imageData.height )
-		{
-			if ( imageData.height > 22 )
-			{
-				ratio = 22 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 22 * ratio / imageData.width;
-			}
-		}
-		else
-		{
-			if ( imageData.width > 22 )
-			{
-				ratio = 22 * ratio / imageData.height;
-			}
-			else
-			{
-				ratio = 22 * ratio / imageData.width;
-			}
-		}
 
-		ImageData resizeImageData = GraphicsUtil.resize( image,
-				(int) ( imageData.width * ratio + 0.5f ),
-				(int) ( imageData.height * ratio + 0.5f ) );
+		ImageData resizeImageData = GraphicsUtil.resizeImage( image,
+				22,
+				22,
+				true );
 		image.dispose( );
-
-		int offsetX = 0;
-		int offsetY = 0;
-
-		if ( resizeImageData.width > resizeImageData.height )
-		{
-			offsetX = ( 22 - resizeImageData.width ) / 2;
-		}
-		else
-		{
-			offsetY = ( 22 - resizeImageData.height ) / 2;
-		}
 
 		ImageData tgaData = orginImage;
 		byte[] data = orginImage.data;
@@ -1586,8 +1461,8 @@ public class FactionEditPage extends SimpleTabPage
 		{
 			for ( int y = 5; y < 25; y++ )
 			{
-				int posX = x - 5 - offsetX;
-				int posY = y - 5 - offsetY;
+				int posX = x - 5;
+				int posY = y - 5;
 
 				if ( posX < 0
 						|| posX >= resizeImageData.width

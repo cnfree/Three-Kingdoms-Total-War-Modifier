@@ -57,6 +57,7 @@ import org.sf.feeling.sanguo.patch.util.UnitParser;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
+import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 
@@ -402,25 +403,28 @@ public class GeneralEditPage extends SimpleTabPage
 					{
 						try
 						{
+							ImageData imageData = null;
 							if ( imageFile.getName( )
 									.toLowerCase( )
 									.endsWith( ".tga" ) )
 							{
-								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
-										true )
-										.scaledTo( 69, 96 );
-								imageCanvas.setImageData( imageData );
-								bigImage = imageData;
+										true );
+
 							}
 							else
 							{
 								ImageLoader loader = new ImageLoader( );
-								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0].scaledTo( 69,
-										96 );
-								imageCanvas.setImageData( imageData );
-								bigImage = imageData;
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
+
 							}
+
+							bigImage = GraphicsUtil.resizeImage( imageData,
+									69,
+									96,
+									true );
+							imageCanvas.setImageData( bigImage );
 						}
 						catch ( IOException e1 )
 						{
@@ -497,25 +501,26 @@ public class GeneralEditPage extends SimpleTabPage
 					{
 						try
 						{
+							ImageData imageData;
 							if ( imageFile.getName( )
 									.toLowerCase( )
 									.endsWith( ".tga" ) )
 							{
-								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
-										true )
-										.scaledTo( 44, 63 );
-								imageCanvas.setImageData( imageData );
-								smallImage = imageData;
+										true );
 							}
 							else
 							{
 								ImageLoader loader = new ImageLoader( );
-								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0].scaledTo( 44,
-										63 );
-								imageCanvas.setImageData( imageData );
-								smallImage = imageData;
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
 							}
+
+							smallImage = GraphicsUtil.resizeImage( imageData,
+									44,
+									63,
+									true );
+							imageCanvas.setImageData( smallImage );
 						}
 						catch ( IOException e1 )
 						{
@@ -680,25 +685,26 @@ public class GeneralEditPage extends SimpleTabPage
 					{
 						try
 						{
+							ImageData imageData = null;
 							if ( imageFile.getName( )
 									.toLowerCase( )
 									.endsWith( ".tga" ) )
 							{
-								ImageData imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
 										true,
-										true )
-										.scaledTo( 160, 210 );
-								imageCanvas.setImageData( imageData );
-								soldierImage = imageData;
+										true );
+
 							}
 							else
 							{
 								ImageLoader loader = new ImageLoader( );
-								ImageData imageData = loader.load( imageFile.getAbsolutePath( ) )[0].scaledTo( 160,
-										210 );
-								imageCanvas.setImageData( imageData );
-								soldierImage = imageData;
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
 							}
+							soldierImage = GraphicsUtil.resizeImage( imageData,
+									160,
+									210,
+									true );
+							imageCanvas.setImageData( soldierImage );
 						}
 						catch ( IOException e1 )
 						{
