@@ -18,7 +18,6 @@ import org.sf.feeling.sanguo.patch.page.AboutPage;
 import org.sf.feeling.sanguo.patch.page.BakAndRestorePage;
 import org.sf.feeling.sanguo.patch.page.BaowuModifyPage;
 import org.sf.feeling.sanguo.patch.page.BasicPatchPage;
-import org.sf.feeling.sanguo.patch.page.BugSubmitPage;
 import org.sf.feeling.sanguo.patch.page.BuildingBonusPage;
 import org.sf.feeling.sanguo.patch.page.CodePage;
 import org.sf.feeling.sanguo.patch.page.CustomGeneralPage;

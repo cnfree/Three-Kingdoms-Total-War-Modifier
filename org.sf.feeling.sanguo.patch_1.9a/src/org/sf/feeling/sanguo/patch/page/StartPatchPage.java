@@ -116,9 +116,7 @@ public class StartPatchPage extends SimpleTabPage
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
 		data.maxWidth = 600;
-		noteText.setLayoutData( data );
-
-		initPage( );
+		noteText.setLayoutData( data );;
 	}
 
 	private void createPatchArea( )
@@ -1198,12 +1196,6 @@ public class StartPatchPage extends SimpleTabPage
 	protected int[] computeGeneralAge( String generalCode )
 	{
 		return GeneralAgeUtil.computeGeneralAge( generalCode );
-	}
-
-	private void initPage( )
-	{
-		generalMap = UnitUtil.getAvailableGenerals( );
-		nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
 	}
 
 	private void createTitle( )
