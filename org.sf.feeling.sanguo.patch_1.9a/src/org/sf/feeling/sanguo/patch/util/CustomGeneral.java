@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.sf.feeling.sanguo.patch.Patch;
 import org.sf.feeling.sanguo.patch.model.Unit;
+import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 
@@ -301,13 +302,16 @@ public class CustomGeneral
 		ImageData bigImageData = null;
 		if ( generalImages[1] == null )
 		{
-			smallImageData = generalImages[0].scaledTo( 44, 63 );
-			bigImageData = generalImages[0].scaledTo( 69, 96 );
+			smallImageData = GraphicsUtil.resizeImage( generalImages[0],
+					44,
+					63,
+					true );
+			bigImageData = generalImages[0];
 		}
 		else
 		{
-			smallImageData = generalImages[1].scaledTo( 44, 63 );
-			bigImageData = generalImages[0].scaledTo( 69, 96 );
+			smallImageData = generalImages[1];
+			bigImageData = generalImages[0];
 		}
 
 		try
