@@ -517,13 +517,20 @@ public class GeneralParser
 									for ( int j = 0; j < desc.length( ); j++ )
 									{
 										char ch = desc.charAt( j );
-										if ( ch == '\\' && desc.charAt( j + 1 ) =='n')
+										if ( ch == '\\'
+												&& desc.charAt( j + 1 ) == 'n' )
 										{
 											j++;
 											continue;
 										}
-										else if ( ch == '\r' || ch == '\n')
+										else if ( ch == '\r' )
 										{
+											continue;
+										}
+										else if ( ch == '\n' )
+										{
+											buffer.append( "\\n" );
+											x = 0;
 											continue;
 										}
 										else
@@ -531,7 +538,7 @@ public class GeneralParser
 											buffer.append( ch );
 											x++;
 										}
-										if ( x % 26 == 0 )
+										if ( x > 0 && x % 26 == 0 )
 										{
 											buffer.append( "\\n" );
 											x = 0;
