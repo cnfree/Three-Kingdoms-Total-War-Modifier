@@ -60,7 +60,6 @@ import org.sf.feeling.swt.win32.extension.util.SortMap;
 public class StartPatchPage extends SimpleTabPage
 {
 
-	private static final SortMap factionProperty = FileUtil.loadProperties( "faction" );
 	private static final String re1 = "(denari)"; // Variable Name 1
 	private static final String re2 = "(\\s+)"; // White Space 1
 	private static final String re3 = "(\\d+)"; // Integer Number 1
@@ -199,7 +198,9 @@ public class StartPatchPage extends SimpleTabPage
 							BakUtil.bakData( "势力金钱修改："
 									+ moneyFactionCombo.getText( )
 									+ addMoneyText.getText( ) );
-							String faction = (String) factionProperty.get( moneyFactionCombo.getText( ) );
+							String faction = (String) factionMap.getKeyList( )
+									.get( factionMap.getValueList( )
+											.indexOf( moneyFactionCombo.getText( ) ) );
 							String line = null;
 							StringWriter writer = new StringWriter( );
 							PrintWriter printer = new PrintWriter( writer );
@@ -254,10 +255,23 @@ public class StartPatchPage extends SimpleTabPage
 							}
 						}
 					}
-					addMoneyApply.setEnabled( true );
+					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
 				}
 			} );
 
+			ModifyListener listener = new ModifyListener( ) {
+				public void modifyText( ModifyEvent arg0 )
+				{
+					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
+				}
+			};
+			moneyFactionCombo.addModifyListener( listener );
+			addMoneyText.addModifyListener( listener );
+			
 			addMoneyRestore.addSelectionListener( new SelectionAdapter( ) {
 
 				public void widgetSelected( SelectionEvent e )
@@ -265,6 +279,9 @@ public class StartPatchPage extends SimpleTabPage
 					addMoneyRestore.setEnabled( false );
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
+					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
 					addMoneyRestore.setEnabled( true );
 				}
 			} );
@@ -275,7 +292,9 @@ public class StartPatchPage extends SimpleTabPage
 				{
 					moneyFactionCombo.setEnabled( addMoneyBtn.getSelection( ) );
 					addMoneyText.setEnabled( addMoneyBtn.getSelection( ) );
-					addMoneyApply.setEnabled( addMoneyBtn.getSelection( ) );
+					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
 				}
 
 			} );
@@ -1139,7 +1158,9 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.bakData( "最大化减小势力武将年龄：" + ageFactionCombo.getText( ) );
 					if ( ageFactionCombo.getSelectionIndex( ) > 0 )
 					{
-						String faction = (String) factionProperty.get( ageFactionCombo.getText( ) );
+						String faction = (String) factionMap.getKeyList( )
+								.get( factionMap.getValueList( )
+										.indexOf( ageFactionCombo.getText( ) ) );
 						GeneralAgeUtil.convertFactionAges( new String[]{
 							faction
 						} );
@@ -1147,7 +1168,7 @@ public class StartPatchPage extends SimpleTabPage
 					else if ( ageFactionCombo.getSelectionIndex( ) == 0 )
 					{
 						List factions = new ArrayList( );
-						factions.addAll( factionProperty.values( ) );
+						factions.addAll( factionMap.keySet( ) );
 						GeneralAgeUtil.convertFactionAges( (String[]) factions.toArray( new String[0] ) );
 					}
 					refreshPage( );
@@ -1240,6 +1261,7 @@ public class StartPatchPage extends SimpleTabPage
 		{
 			moneyFactionCombo.add( (String) factionMap.get( i ) );
 		}
+		moneyFactionCombo.add( "全部势力", 0 );
 
 		if ( factionMap.containsValue( faction ) )
 			moneyFactionCombo.setText( faction );
