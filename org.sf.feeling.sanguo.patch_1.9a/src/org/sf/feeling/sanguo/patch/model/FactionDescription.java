@@ -10,7 +10,20 @@ public class FactionDescription
 	private String standard_index;
 	private String custom_battle_availability;
 	private String prefers_naval_invasions;
+	private String symbol;
 	
+	
+	public String getSymbol( )
+	{
+		return symbol;
+	}
+	
+	public void setSymbol( String symbol )
+	{
+		this.symbol = symbol;
+	}
+
+
 	public String getCulture( )
 	{
 		return culture;

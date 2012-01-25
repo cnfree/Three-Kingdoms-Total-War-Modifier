@@ -131,6 +131,54 @@ public class GeneralParser
 		}
 	}
 
+	public static void changeFactionFirstName( String faction, String firstName )
+	{
+		if ( FileConstants.nameFile.exists( ) )
+		{
+			try
+			{
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.nameFile ),
+						"UTF-16LE" ) );
+				String line = null;
+				StringWriter writer = new StringWriter( );
+				PrintWriter printer = new PrintWriter( writer );
+				while ( ( line = in.readLine( ) ) != null )
+				{
+					if ( line.indexOf( "M-" + faction ) > -1 )
+					{
+						String name = line.substring( line.lastIndexOf( '}' ) + 1 )
+								.trim( );
+						if ( name.toCharArray( ).length > 2 )
+						{
+							String newName = ChangeCode.toShort( firstName
+									+ name.substring( 2 ) );
+							printer.println( line.replaceAll( name, newName ) );
+						}
+						else
+						{
+							String newName = ChangeCode.toShort( firstName
+									+ name.substring( 1 ) );
+							printer.println( line.replaceAll( name, newName ) );
+						}
+					}
+					else
+						printer.println( line );
+				}
+				in.close( );
+				PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.nameFile ),
+						"UTF-16LE" ) ),
+						false );
+				out.print( writer.getBuffer( ) );
+				out.close( );
+				printer.close( );
+			}
+			catch ( IOException e )
+			{
+				e.printStackTrace( );
+			}
+		}
+	}
+
 	public static void setGeneralName( String general, String name )
 	{
 		if ( FileConstants.nameFile.exists( ) )
@@ -511,43 +559,10 @@ public class GeneralParser
 									printer.println( line );
 								else
 								{
-									String desc = ChangeCode.toShort( generalDescription );
-									StringBuffer buffer = new StringBuffer( );
-									int x = 0;
-									for ( int j = 0; j < desc.length( ); j++ )
-									{
-										char ch = desc.charAt( j );
-										if ( ch == '\\'
-												&& desc.charAt( j + 1 ) == 'n' )
-										{
-											j++;
-											continue;
-										}
-										else if ( ch == '\r' )
-										{
-											continue;
-										}
-										else if ( ch == '\n' )
-										{
-											buffer.append( "\\n" );
-											x = 0;
-											continue;
-										}
-										else
-										{
-											buffer.append( ch );
-											x++;
-										}
-										if ( x > 0 && x % 26 == 0 )
-										{
-											buffer.append( "\\n" );
-											x = 0;
-										}
-									}
 									printer.println( "{"
 											+ jueweiLevels[i]
 											+ "_desc}"
-											+ buffer.toString( ) );
+											+ escapeDescription( generalDescription ) );
 								}
 							}
 							else if ( line.indexOf( "{"
@@ -609,6 +624,43 @@ public class GeneralParser
 				e.printStackTrace( );
 			}
 		}
+	}
+
+	private static String escapeDescription( String generalDescription )
+	{
+		String desc = ChangeCode.toShort( generalDescription );
+		StringBuffer buffer = new StringBuffer( );
+		int x = 0;
+		for ( int j = 0; j < desc.length( ); j++ )
+		{
+			char ch = desc.charAt( j );
+			if ( ch == '\\' && desc.charAt( j + 1 ) == 'n' )
+			{
+				j++;
+				continue;
+			}
+			else if ( ch == '\r' )
+			{
+				continue;
+			}
+			else if ( ch == '\n' )
+			{
+				buffer.append( "\\n" );
+				x = 0;
+				continue;
+			}
+			else
+			{
+				buffer.append( ch );
+				x++;
+			}
+			if ( x > 0 && x % 26 == 0 )
+			{
+				buffer.append( "\\n" );
+				x = 0;
+			}
+		}
+		return buffer.toString( );
 	}
 
 	public static String[] getGeneralJueweis( String juewei )
@@ -813,7 +865,7 @@ public class GeneralParser
 					out.println( "{"
 							+ level
 							+ "_desc}"
-							+ ChangeCode.toShort( generalDescription ) );
+							+ escapeDescription( ChangeCode.toShort( generalDescription ) ) );
 					if ( i == 0 )
 					{
 						out.println( "{" + level + "_effects_desc}▲" );

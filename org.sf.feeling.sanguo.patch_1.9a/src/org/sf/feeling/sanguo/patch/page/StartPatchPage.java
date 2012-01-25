@@ -256,22 +256,23 @@ public class StartPatchPage extends SimpleTabPage
 						}
 					}
 					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
-							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0
 							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
 				}
 			} );
 
 			ModifyListener listener = new ModifyListener( ) {
+
 				public void modifyText( ModifyEvent arg0 )
 				{
 					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
-							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0
 							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
 				}
 			};
 			moneyFactionCombo.addModifyListener( listener );
 			addMoneyText.addModifyListener( listener );
-			
+
 			addMoneyRestore.addSelectionListener( new SelectionAdapter( ) {
 
 				public void widgetSelected( SelectionEvent e )
@@ -280,7 +281,7 @@ public class StartPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
-							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0
 							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
 					addMoneyRestore.setEnabled( true );
 				}
@@ -293,7 +294,7 @@ public class StartPatchPage extends SimpleTabPage
 					moneyFactionCombo.setEnabled( addMoneyBtn.getSelection( ) );
 					addMoneyText.setEnabled( addMoneyBtn.getSelection( ) );
 					addMoneyApply.setEnabled( addMoneyBtn.getSelection( )
-							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0 
+							&& moneyFactionCombo.getText( ).trim( ).length( ) > 0
 							&& addMoneyText.getText( ).trim( ).length( ) > 0 );
 				}
 
@@ -393,7 +394,8 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalSwitchInFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			GridData gd = new GridData( );
+			gd.widthHint = 80;
 			generalSwitchInFactionCombo.setLayoutData( gd );
 			generalSwitchInFactionCombo.setEnabled( false );
 			generalSwitchInFactionCombo.addSelectionListener( new SelectionAdapter( ) {
@@ -447,7 +449,8 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalSwitchOutFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd = new GridData( );
+			gd.widthHint = 80;
 			generalSwitchOutFactionCombo.setLayoutData( gd );
 			generalSwitchOutFactionCombo.setEnabled( false );
 			generalSwitchOutFactionCombo.addSelectionListener( new SelectionAdapter( ) {
@@ -581,7 +584,8 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalChangeOutFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			GridData gd = new GridData( );
+			gd.widthHint = 80;
 			generalChangeOutFactionCombo.setLayoutData( gd );
 			generalChangeOutFactionCombo.setEnabled( false );
 			generalChangeOutFactionCombo.addSelectionListener( new SelectionAdapter( ) {
@@ -854,7 +858,8 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalIdentityFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			GridData gd = new GridData( );
+			gd.widthHint = 80;
 			generalIdentityFactionCombo.setLayoutData( gd );
 			generalIdentityFactionCombo.setEnabled( false );
 			generalIdentityFactionCombo.addSelectionListener( new SelectionAdapter( ) {

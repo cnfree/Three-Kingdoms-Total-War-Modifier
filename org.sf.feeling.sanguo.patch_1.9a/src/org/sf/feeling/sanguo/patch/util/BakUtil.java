@@ -124,6 +124,42 @@ public class BakUtil
 		}
 	};
 
+	private static FileFilter generalBannerFilter = new FileFilter( ) {
+
+		public boolean accept( File file )
+		{
+			if ( file.isDirectory( )
+					|| file.getName( ).toLowerCase( ).endsWith( ".dds" ) )
+			{
+				if ( file.getName( )
+						.toLowerCase( )
+						.indexOf( "zhangqiguantongyong" ) > -1 )
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	};
+	
+	private static FileFilter cityBannerFilter = new FileFilter( ) {
+
+		public boolean accept( File file )
+		{
+			if ( file.isDirectory( )
+					|| file.getName( ).toLowerCase( ).endsWith( ".dds" ) )
+			{
+				if ( file.getName( )
+						.toLowerCase( )
+						.indexOf( "#banner_symbol_" ) > -1 )
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	};
+
 	private static FileFilter mapFilter = new FileFilter( ) {
 
 		public boolean accept( File file )
@@ -469,9 +505,16 @@ public class BakUtil
 									ddsFilter,
 									true );
 							zipResourceFile( zos,
+									FileConstants.cityBannerPath,
+									cityBannerFilter,
+									true );
+							zipResourceFile( zos,
 									FileConstants.menuSymbolsPath,
 									true );
-
+							zipResourceFile( zos,
+									FileConstants.generalBannerPath,
+									generalBannerFilter,
+									true );
 							zos.close( );
 						}
 					}

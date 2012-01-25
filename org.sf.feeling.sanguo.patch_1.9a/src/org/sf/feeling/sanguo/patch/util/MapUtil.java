@@ -314,6 +314,18 @@ public class MapUtil
 						}
 					}
 					{
+						Pattern pattern = Pattern.compile( "^\\s*(symbol)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							String symbol = line.replaceFirst( "(?i)symbol", "" )
+									.trim( );
+							( (FactionDescription) factionDescriptionMap.get( faction ) ).setSymbol( symbol );
+							continue;
+						}
+					}
+					{
 						Pattern pattern = Pattern.compile( "^\\s*(primary_colour)(\\s+)",
 								Pattern.CASE_INSENSITIVE );
 						Matcher matcher = pattern.matcher( line );
@@ -696,7 +708,7 @@ public class MapUtil
 	{
 		factionGeneralMap = new SortMap( );
 		factionLeaderMap = new SortMap( );
-		factionHeirMap = new SortMap();
+		factionHeirMap = new SortMap( );
 		generalUnitTypeMap = new SortMap( );
 		generalModelMap = new SortMap( );
 		if ( FileConstants.stratFile.exists( ) )
@@ -773,7 +785,7 @@ public class MapUtil
 										else if ( args[0].equalsIgnoreCase( "heir" ) )
 										{
 											model.setHeir( true );
-											factionHeirMap.put(  faction,
+											factionHeirMap.put( faction,
 													general );
 										}
 										else if ( args.length == 2 )
@@ -860,7 +872,7 @@ public class MapUtil
 		for ( int i = 0; i < availableGeneralList.size( ); i++ )
 		{
 			Object key = availableGeneralList.get( i );
-			String generalName = ChangeCode.toLong((String) generalNameMap.get( key ));
+			String generalName = ChangeCode.toLong( (String) generalNameMap.get( key ) );
 			if ( availableGeneralMap.containsValue( generalName ) )
 			{
 				for ( int j = 0; j < availableGeneralMap.getKeyList( ).size( ); j++ )

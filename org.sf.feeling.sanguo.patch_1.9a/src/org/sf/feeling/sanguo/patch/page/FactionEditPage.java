@@ -21,6 +21,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.FocusAdapter;
@@ -63,6 +69,7 @@ import org.sf.feeling.sanguo.patch.util.MapUtil;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.ColorSelector;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
+import org.sf.feeling.sanguo.patch.widget.SWTGraphics;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
 import org.sf.feeling.swt.win32.extension.graphics.DDSLoader;
 import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
@@ -153,12 +160,23 @@ public class FactionEditPage extends SimpleTabPage
 	private CCombo factionCombo;
 
 	private ImageData bigCaptionBannerImage;
-	private ImageData smallCaptionBannerImage;
-	private ImageData battleBannerImage;
+	private ImageData[] smallCaptionBannerImage;
+	private ImageData[] battleBannerImage;
+	private ImageData generalBannerImage;
+	private ImageData cityBannerImage;
 	private ImageData stratBannerImage;
 	private ImageData factionTextImage;
 	private ImageData leaderImage;
 	private ImageData factionImage;
+	private CCombo generalBannerFontSizeCombo;
+	private Text generalBannerText;
+	private ColorSelector generalBannerColorSelector;
+	private CCombo generalBannerFontCombo;
+	private Text firstNameText;
+	private CCombo cityBannerFontSizeCombo;
+	private CCombo cityBannerFontCombo;
+	private Text cityBannerText;
+	private ColorSelector cityBannerColorSelector;
 
 	public void buildUI( Composite parent )
 	{
@@ -228,7 +246,7 @@ public class FactionEditPage extends SimpleTabPage
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );
-		gd.verticalSpan = 11;
+		gd.verticalSpan = 14;
 		gd.widthHint = 256;
 		gd.minimumHeight = 256;
 		imageCanvas.setLayoutData( gd );
@@ -262,10 +280,18 @@ public class FactionEditPage extends SimpleTabPage
 			cultureCombo.add( (String) cultureMap.get( i ) );
 		}
 
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置后代武将姓氏：" );
+
+		firstNameText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 4;
+		firstNameText.setLayoutData( gd );
+
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑派系大旗帜：" );
 		bigCaptionBannerText = WidgetUtil.getToolkit( )
 				.createText( patchClient, "" );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd = new GridData( );
+		gd.widthHint = 60;
 		bigCaptionBannerText.setLayoutData( gd );
 		ModifyListener bigCaptionBannerModifyListener = new ModifyListener( ) {
 
@@ -324,15 +350,18 @@ public class FactionEditPage extends SimpleTabPage
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑派系小旗帜：" );
 		smallCaptionBannerText = WidgetUtil.getToolkit( )
 				.createText( patchClient, "" );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd = new GridData( );
+		gd.widthHint = 60;
 		smallCaptionBannerText.setLayoutData( gd );
 		ModifyListener smallCaptionModifyListener = new ModifyListener( ) {
 
 			public void modifyText( ModifyEvent e )
 			{
 				smallCaptionBannerImage = createSmallCatpionBannerImage( );
-				if ( smallCaptionBannerImage != null )
-					imageCanvas.setImageData( smallCaptionBannerImage );
+				if ( smallCaptionBannerImage != null
+						&& smallCaptionBannerImage.length == 2
+						&& smallCaptionBannerImage[0] != null )
+					imageCanvas.setImageData( smallCaptionBannerImage[0] );
 			}
 
 		};
@@ -366,6 +395,52 @@ public class FactionEditPage extends SimpleTabPage
 		gd.widthHint = 60;
 		smallCaptionBannerFontSizeCombo.setLayoutData( gd );
 		smallCaptionBannerFontSizeCombo.addModifyListener( smallCaptionModifyListener );
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑城市旗帜：" );
+		cityBannerText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		cityBannerText.setLayoutData( gd );
+
+		ModifyListener cityBannerModifyListener = new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				cityBannerImage = createCityBannerImage( );
+				if ( cityBannerImage != null )
+					imageCanvas.setImageData( cityBannerImage );
+			}
+		};
+		cityBannerText.addModifyListener( cityBannerModifyListener );
+
+		cityBannerColorSelector = new ColorSelector( patchClient );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		cityBannerColorSelector.getButton( ).setLayoutData( gd );
+		cityBannerColorSelector.setColorValue( new RGB( 21, 21, 21 ) );
+		cityBannerColorSelector.addModifyListener( cityBannerModifyListener );
+
+		cityBannerFontCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		cityBannerFontCombo.setItems( fontNames );
+		cityBannerFontCombo.setText( "楷体" );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		cityBannerFontCombo.setLayoutData( gd );
+		cityBannerFontCombo.addModifyListener( cityBannerModifyListener );
+
+		cityBannerFontSizeCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		for ( int i = 8; i < 72; i++ )
+		{
+			cityBannerFontSizeCombo.add( "" + i );
+		}
+		cityBannerFontSizeCombo.setText( "14" );
+
+		gd = new GridData( );
+		gd.widthHint = 60;
+		cityBannerFontSizeCombo.setLayoutData( gd );
+		cityBannerFontSizeCombo.addModifyListener( cityBannerModifyListener );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑战役旗帜：" );
 		stratBannerText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
@@ -409,16 +484,19 @@ public class FactionEditPage extends SimpleTabPage
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑战场旗帜：" );
 		battleBannerText = WidgetUtil.getToolkit( )
 				.createText( patchClient, "" );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd = new GridData( );
+		gd.widthHint = 60;
 		battleBannerText.setLayoutData( gd );
 		ModifyListener battleModifyListener = new ModifyListener( ) {
 
 			public void modifyText( ModifyEvent e )
 			{
 				battleBannerImage = createBattleBannerImage( );
-				if ( battleBannerImage != null )
+				if ( battleBannerImage != null
+						&& battleBannerImage.length == 3
+						&& battleBannerImage[0] != null )
 				{
-					imageCanvas.setImageData( battleBannerImage );
+					imageCanvas.setImageData( battleBannerImage[0] );
 				}
 			}
 		};
@@ -452,6 +530,54 @@ public class FactionEditPage extends SimpleTabPage
 		gd.widthHint = 60;
 		battleBannerFontSizeCombo.setLayoutData( gd );
 		battleBannerFontSizeCombo.addModifyListener( battleModifyListener );
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑掌旗官旗帜：" );
+		generalBannerText = WidgetUtil.getToolkit( ).createText( patchClient,
+				"" );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		generalBannerText.setLayoutData( gd );
+		ModifyListener generalBannerModifyListener = new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				generalBannerImage = createGeneralBannerImage( );
+				if ( generalBannerImage != null )
+				{
+					imageCanvas.setImageData( generalBannerImage );
+				}
+			}
+		};
+		generalBannerText.addModifyListener( generalBannerModifyListener );
+
+		generalBannerColorSelector = new ColorSelector( patchClient );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		generalBannerColorSelector.getButton( ).setLayoutData( gd );
+		generalBannerColorSelector.setColorValue( new RGB( 21, 21, 21 ) );
+		generalBannerColorSelector.addModifyListener( generalBannerModifyListener );
+
+		generalBannerFontCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		generalBannerFontCombo.setItems( fontNames );
+		generalBannerFontCombo.setText( "楷体" );
+		gd = new GridData( );
+		gd.widthHint = 60;
+		generalBannerFontCombo.setLayoutData( gd );
+		generalBannerFontCombo.addModifyListener( generalBannerModifyListener );
+
+		generalBannerFontSizeCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		for ( int i = 8; i < 72; i++ )
+		{
+			generalBannerFontSizeCombo.add( "" + i );
+		}
+		generalBannerFontSizeCombo.setText( "30" );
+
+		gd = new GridData( );
+		gd.widthHint = 60;
+		generalBannerFontSizeCombo.setLayoutData( gd );
+		generalBannerFontSizeCombo.addModifyListener( generalBannerModifyListener );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置开场画面头像：" );
 		startImageCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
@@ -633,7 +759,8 @@ public class FactionEditPage extends SimpleTabPage
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "编辑势力外交文字：" );
 		factionTextText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd = new GridData( );
+		gd.widthHint = 60;
 		factionTextText.setLayoutData( gd );
 		ModifyListener factionTextModifyListener = new ModifyListener( ) {
 
@@ -709,6 +836,10 @@ public class FactionEditPage extends SimpleTabPage
 					txtFiles.add( FileConstants.campaignDescriptionFile );
 					txtFiles.add( FileConstants.factionPropertiesFile );
 				}
+				if ( firstNameText.getText( ).trim( ).length( ) > 0 )
+				{
+					txtFiles.add( FileConstants.nameFile );
+				}
 
 				FactionDescription desc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
 						.get( idText.getText( ) );
@@ -729,6 +860,21 @@ public class FactionEditPage extends SimpleTabPage
 				{
 					imageFiles.add( new File( FileConstants.captainBannerPath,
 							"captain_card_" + idText.getText( ) + ".tga" ) );
+					imageFiles.add( new File( FileConstants.captainBannerPath
+							+ "\\dead", "captain_card_"
+							+ idText.getText( )
+							+ ".tga" ) );
+				}
+				if ( cityBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					imageFiles.add( getCityBannerFile( ) );
+				}
+				if ( firstNameText.getText( ).trim( ).length( ) > 0 )
+				{
+					String factionId = (String) FileUtil.loadProperties( "firstname" )
+							.get( idText.getText( ).trim( ) );
+					GeneralParser.changeFactionFirstName( factionId.trim( ),
+							firstNameText.getText( ).trim( ) );
 				}
 				if ( stratBannerText.getText( ).trim( ).length( ) > 0 )
 				{
@@ -738,12 +884,31 @@ public class FactionEditPage extends SimpleTabPage
 					imageFiles.add( new File( FileConstants.stratBannerPath,
 							"symbols" + index + ".tga.dds" ) );
 				}
+				if ( generalBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					try
+					{
+						String factionPinyin = getFactionPinyin( );
+						imageFiles.add( new File( FileConstants.generalBannerPath
+								+ "\\ZhangQiGuanTongYong_"
+								+ factionPinyin
+								+ ".tga.dds" ) );
+					}
+					catch ( BadHanyuPinyinOutputFormatCombination e1 )
+					{
+						e1.printStackTrace( );
+					}
+				}
 				if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
 				{
 					FactionTexture texture = (FactionTexture) BattleUtil.getFactionTextureMap( )
 							.get( idText.getText( ) );
 					imageFiles.add( new File( FileConstants.dataFile,
 							texture.getStandard_texture( ) + ".dds" ) );
+					imageFiles.add( new File( FileConstants.dataFile,
+							texture.getStandard_texture( ) + "_ally.dds" ) );
+					imageFiles.add( new File( FileConstants.dataFile,
+							texture.getStandard_texture( ) + "_routing.dds" ) );
 				}
 				if ( factionTextText.getText( ).trim( ).length( ) > 0 )
 				{
@@ -990,7 +1155,13 @@ public class FactionEditPage extends SimpleTabPage
 									"captain_card_"
 											+ idText.getText( )
 											+ ".tga" ) ),
-									smallCaptionBannerImage );
+									smallCaptionBannerImage[0] );
+							TgaLoader.saveImage( new FileOutputStream( new File( FileConstants.captainBannerPath
+									+ "\\dead",
+									"captain_card_"
+											+ idText.getText( )
+											+ ".tga" ) ),
+									smallCaptionBannerImage[1] );
 						}
 						catch ( IOException e1 )
 						{
@@ -1043,6 +1214,48 @@ public class FactionEditPage extends SimpleTabPage
 						}
 					}
 				}
+				if ( cityBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( cityBannerImage != null )
+					{
+						try
+						{
+							File file = getCityBannerFile( );
+							DDSImage image = DDSLoader.loadDDSImage( new FileInputStream( file ) );
+							DDSLoader.saveImage( new FileOutputStream( file ),
+									cityBannerImage,
+									image.getPixelFormat( ),
+									image.getNumMipMaps( ) > 1 );
+						}
+						catch ( Exception e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
+				if ( generalBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					if ( generalBannerImage != null )
+					{
+						try
+						{
+							String factionPinyin = getFactionPinyin( );
+							File file = new File( FileConstants.generalBannerPath
+									+ "\\ZhangQiGuanTongYong_"
+									+ factionPinyin
+									+ ".tga.dds" );
+							DDSImage image = DDSLoader.loadDDSImage( new FileInputStream( file ) );
+							DDSLoader.saveImage( new FileOutputStream( file ),
+									generalBannerImage,
+									image.getPixelFormat( ),
+									image.getNumMipMaps( ) > 1 );
+						}
+						catch ( Exception e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
 				if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
 				{
 					if ( battleBannerImage != null )
@@ -1051,13 +1264,24 @@ public class FactionEditPage extends SimpleTabPage
 						{
 							FactionTexture texture = (FactionTexture) BattleUtil.getFactionTextureMap( )
 									.get( idText.getText( ) );
-							File ddsFile = new File( FileConstants.dataFile,
+							File[] ddsFiles = new File[3];
+							ddsFiles[0] = new File( FileConstants.dataFile,
 									texture.getStandard_texture( ) + ".dds" );
-							DDSImage image = DDSLoader.loadDDSImage( new FileInputStream( ddsFile ) );
-							DDSLoader.saveImage( new FileOutputStream( ddsFile ),
-									battleBannerImage,
-									image.getPixelFormat( ),
-									image.getNumMipMaps( ) > 1 );
+							ddsFiles[1] = new File( FileConstants.dataFile,
+									texture.getStandard_texture( )
+											+ "_ally.dds" );
+							ddsFiles[2] = new File( FileConstants.dataFile,
+									texture.getStandard_texture( )
+											+ "_routing.dds" );
+
+							for ( int i = 0; i < ddsFiles.length; i++ )
+							{
+								DDSImage image = DDSLoader.loadDDSImage( new FileInputStream( ddsFiles[i] ) );
+								DDSLoader.saveImage( new FileOutputStream( ddsFiles[i] ),
+										battleBannerImage[i],
+										image.getPixelFormat( ),
+										image.getNumMipMaps( ) > 1 );
+							}
 						}
 						catch ( IOException e1 )
 						{
@@ -1279,6 +1503,116 @@ public class FactionEditPage extends SimpleTabPage
 		patchSection.setClient( patchClient );
 	}
 
+	protected ImageData createGeneralBannerImage( )
+	{
+		ImageData imageData = null;
+
+		try
+		{
+			String factionPinyin = getFactionPinyin( );
+			if ( factionPinyin != null )
+			{
+				DDSImage ddsImage = DDSLoader.loadDDSImage( new FileInputStream( new File( FileConstants.generalBannerPath
+						+ "\\ZhangQiGuanTongYong_"
+						+ factionPinyin
+						+ ".tga.dds" ) ) );
+				imageData = DDSLoader.getImageData( ddsImage );
+				int pixel = imageData.getPixel( 161 + 55, 429 );
+				for ( int x = 161; x < 161 + 55; x++ )
+				{
+					for ( int y = 409; y < 410 + 39; y++ )
+					{
+						imageData.setPixel( x, y, pixel );
+					}
+				}
+
+				Image image = new Image( null, imageData );
+				GC gc = new GC( image );
+				gc.setAdvanced( true );
+				gc.setAntialias( SWT.ON );
+				gc.setTextAntialias( SWT.ON );
+
+				FontData fontData = new FontData( generalBannerFontCombo.getText( ),
+						Integer.parseInt( generalBannerFontSizeCombo.getText( ) ),
+						SWT.BOLD );
+				Font font = new Font( null, fontData );
+				gc.setFont( font );
+				gc.setForeground( ColorCache.getInstance( )
+						.getColor( generalBannerColorSelector.getColorValue( ) ) );
+				if ( generalBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					SWTGraphics draw2d = new SWTGraphics( gc );
+					draw2d.rotate( 90f );
+
+					char[] chars = ChangeCode.toShort( generalBannerText.getText( )
+							.trim( ) )
+							.toCharArray( );
+					if ( chars.length == 1 )
+					{
+						Point fontSize = gc.stringExtent( "" + chars[0] );
+						draw2d.drawText( "" + chars[0],
+								409 + ( 40 - fontSize.x ) / 2,
+								297 - 512 + ( 55 - fontSize.y ) / 2 );
+					}
+					else if ( chars.length >= 2 )
+					{
+						Point fontSize = gc.stringExtent( "" + chars[0] );
+						draw2d.drawText( "" + chars[0],
+								409 + ( 40 - fontSize.x ) / 2,
+								297 - 512 + ( 55 - fontSize.y * 2 ) / 2 );
+						draw2d.drawText( "" + chars[1],
+								409 + ( 40 - fontSize.x ) / 2,
+								297
+										- 512
+										+ ( 55 - fontSize.y * 2 )
+										/ 2
+										+ fontSize.y );
+					}
+
+					draw2d.dispose( );
+				}
+				imageData = image.getImageData( );
+				font.dispose( );
+				gc.dispose( );
+				image.dispose( );
+
+			}
+		}
+		catch ( Exception e )
+		{
+			e.printStackTrace( );
+		}
+		return imageData;
+	}
+
+	protected String getFactionPinyin( )
+			throws BadHanyuPinyinOutputFormatCombination
+	{
+		String factionPinyin;
+		SortMap factionMap = FileUtil.loadProperties( "faction", true );
+		String faction = idText.getText( ).trim( );
+		String factionName = (String) factionMap.getKeyList( )
+				.get( factionMap.getValueList( ).indexOf( faction ) );
+		if ( "ROMANS_BRUTII".equals( faction ) )
+		{
+			factionPinyin = "sunce";
+		}
+		else if ( "MACEDON".equals( faction ) )
+		{
+			factionPinyin = "lvbu";
+		}
+		else
+		{
+			HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat( );
+			defaultFormat.setCaseType( HanyuPinyinCaseType.LOWERCASE );
+			defaultFormat.setToneType( HanyuPinyinToneType.WITHOUT_TONE );
+			factionPinyin = PinyinHelper.toHanyuPinyinString( factionName,
+					defaultFormat,
+					"" );
+		}
+		return factionPinyin;
+	}
+
 	protected ImageData getFactionImage( ImageData imageData )
 	{
 		Image image = new Image( null, imageData );
@@ -1306,6 +1640,9 @@ public class FactionEditPage extends SimpleTabPage
 			battleBannerText.setEnabled( true );
 			battleBannerFontCombo.setEnabled( true );
 			battleBannerFontSizeCombo.setEnabled( true );
+			generalBannerText.setEnabled( true );
+			generalBannerFontCombo.setEnabled( true );
+			generalBannerFontSizeCombo.setEnabled( true );
 			stratBannerText.setEnabled( true );
 			stratBannerFontCombo.setEnabled( true );
 			stratBannerFontSizeCombo.setEnabled( true );
@@ -1322,6 +1659,7 @@ public class FactionEditPage extends SimpleTabPage
 			factionTextColorSelector.setEnabled( true );
 			factionTextFontCombo.setEnabled( true );
 			factionTextFontSizeCombo.setEnabled( true );
+			firstNameText.setEnabled( true );
 			applyButton.setEnabled( true );
 		}
 		else
@@ -1335,6 +1673,9 @@ public class FactionEditPage extends SimpleTabPage
 			battleBannerText.setEnabled( false );
 			battleBannerFontCombo.setEnabled( false );
 			battleBannerFontSizeCombo.setEnabled( false );
+			generalBannerText.setEnabled( false );
+			generalBannerFontCombo.setEnabled( false );
+			generalBannerFontSizeCombo.setEnabled( false );
 			stratBannerText.setEnabled( false );
 			stratBannerFontCombo.setEnabled( false );
 			stratBannerFontSizeCombo.setEnabled( false );
@@ -1351,6 +1692,7 @@ public class FactionEditPage extends SimpleTabPage
 			factionTextColorSelector.setEnabled( false );
 			factionTextFontCombo.setEnabled( false );
 			factionTextFontSizeCombo.setEnabled( false );
+			firstNameText.setEnabled( false );
 			applyButton.setEnabled( false );
 		}
 	}
@@ -1740,7 +2082,7 @@ public class FactionEditPage extends SimpleTabPage
 					true,
 					true );
 			int pixel = imageData.getPixel( 26, 60 );
-			for ( int x = 20; x < 20 + 18; x++ )
+			for ( int x = 19; x < 19 + 19; x++ )
 			{
 				for ( int y = 24; y < 24 + 41; y++ )
 				{
@@ -1767,13 +2109,13 @@ public class FactionEditPage extends SimpleTabPage
 				Point fontSize = gc.stringExtent( "" + chars[0] );
 				gc.setTextAntialias( SWT.ON );
 				gc.drawText( "" + chars[0],
-						( 18 - fontSize.x ) / 2 + 21,
+						( 19 - fontSize.x ) / 2 + 19,
 						29,
 						true );
 				if ( chars.length >= 2 )
 				{
 					gc.drawText( "" + chars[1],
-							( 18 - fontSize.x ) / 2 + 21,
+							( 19 - fontSize.x ) / 2 + 19,
 							29 + fontSize.y,
 							true );
 				}
@@ -1792,20 +2134,18 @@ public class FactionEditPage extends SimpleTabPage
 		return captionBannerImage;
 	}
 
-	private ImageData createSmallCatpionBannerImage( )
+	private ImageData createCityBannerImage( )
 	{
-		ImageData smallCaptionBannerImage = null;
-		File file = new File( FileConstants.captainBannerPath,
-				"captain_card_romans_julii.tga" );
+		ImageData cityBannerImage = null;
+		File file = getCityBannerFile( );
 		try
 		{
-			ImageData imageData = TgaLoader.loadImage( new FileInputStream( file ),
-					true,
-					true );
-			int pixel = imageData.getPixel( 16, 45 );
-			for ( int x = 7; x < 7 + 16; x++ )
+			DDSImage ddsImage = DDSLoader.loadDDSImage( new FileInputStream( file ) );
+			ImageData imageData = DDSLoader.getImageData( ddsImage );
+			int pixel = imageData.getPixel( 20, 7 );
+			for ( int x = 8; x < 8 + 23; x++ )
 			{
-				for ( int y = 16; y < 16 + 35; y++ )
+				for ( int y = 6; y < 6 + 51; y++ )
 				{
 					imageData.setPixel( x, y, pixel );
 				}
@@ -1815,39 +2155,138 @@ public class FactionEditPage extends SimpleTabPage
 			GC gc = new GC( oldImage );
 			gc.setAdvanced( true );
 			gc.setAntialias( SWT.ON );
-			FontData fontData = new FontData( smallCaptionBannerFontCombo.getText( ),
-					Integer.parseInt( smallCaptionBannerFontSizeCombo.getText( ) ),
+			FontData fontData = new FontData( cityBannerFontCombo.getText( ),
+					Integer.parseInt( cityBannerFontSizeCombo.getText( ) ),
 					SWT.BOLD );
 			Font font = new Font( null, fontData );
 			gc.setFont( font );
 			gc.setForeground( ColorCache.getInstance( )
-					.getColor( smallCaptionBannerColorSelector.getColorValue( ) ) );
-			if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+					.getColor( cityBannerColorSelector.getColorValue( ) ) );
+			if ( cityBannerText.getText( ).trim( ).length( ) > 0 )
 			{
-				char[] chars = ChangeCode.toShort( smallCaptionBannerText.getText( )
-						.trim( ) )
-						.toCharArray( );
+				char[] chars = ChangeCode.toShort( cityBannerText.getText( )
+						.trim( ) ).toCharArray( );
 				Point fontSize = gc.stringExtent( "" + chars[0] );
+				gc.setTextAntialias( SWT.ON );
 				gc.drawText( "" + chars[0],
-						( 16 - fontSize.x ) / 2 + 8,
-						17,
+						( 23 - fontSize.x ) / 2 + 8,
+						10,
 						true );
 				if ( chars.length >= 2 )
 				{
 					gc.drawText( "" + chars[1],
-							( 16 - fontSize.x ) / 2 + 8,
-							17 + fontSize.y,
+							( 23 - fontSize.x ) / 2 + 8,
+							10 + fontSize.y,
 							true );
 				}
 			}
-			smallCaptionBannerImage = oldImage.getImageData( );
-			gc.dispose( );
+
+			cityBannerImage = oldImage.getImageData( );
 			font.dispose( );
+			gc.dispose( );
 			oldImage.dispose( );
 		}
 		catch ( IOException e1 )
 		{
 			e1.printStackTrace( );
+		}
+
+		return cityBannerImage;
+	}
+
+	private File getCityBannerFile( )
+	{
+		FactionDescription factionDesc = null;
+		if ( "SLAVE".equals( idText.getText( ).trim( ) ) )
+		{
+			factionDesc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+					.get( 0 );
+		}
+		else
+		{
+			factionDesc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
+					.get( idText.getText( ).trim( ) );
+		}
+		String factionSymbol = factionDesc.getSymbol( )
+				.substring( factionDesc.getSymbol( ).lastIndexOf( '/' ) + 1,
+						factionDesc.getSymbol( ).lastIndexOf( '.' ) );
+		File file = new File( FileConstants.cityBannerPath, "#banner_"
+				+ factionSymbol
+				+ ".tga.dds" );
+		return file;
+	}
+
+	private ImageData[] createSmallCatpionBannerImage( )
+	{
+		ImageData[] smallCaptionBannerImage = new ImageData[2];
+		File[] files = new File[2];
+		files[0] = new File( FileConstants.captainBannerPath,
+				"captain_card_romans_julii.tga" );
+		files[1] = new File( FileConstants.captainBannerPath + "\\dead",
+				"captain_card_romans_julii.tga" );
+		for ( int i = 0; i < 2; i++ )
+		{
+			try
+			{
+				ImageData imageData = TgaLoader.loadImage( new FileInputStream( files[i] ),
+						true,
+						true );
+				int pixel = imageData.getPixel( 16, 45 );
+				for ( int x = 7; x < 7 + 16; x++ )
+				{
+					for ( int y = 16; y < 16 + 35; y++ )
+					{
+						imageData.setPixel( x, y, pixel );
+					}
+				}
+
+				Image oldImage = new Image( null, imageData );
+				GC gc = new GC( oldImage );
+				gc.setAdvanced( true );
+				gc.setAntialias( SWT.ON );
+				FontData fontData = new FontData( smallCaptionBannerFontCombo.getText( ),
+						Integer.parseInt( smallCaptionBannerFontSizeCombo.getText( ) ),
+						SWT.BOLD );
+				Font font = new Font( null, fontData );
+				gc.setFont( font );
+				if ( i == 0 )
+				{
+					gc.setForeground( ColorCache.getInstance( )
+							.getColor( smallCaptionBannerColorSelector.getColorValue( ) ) );
+				}
+				else
+				{
+					gc.setForeground( ColorCache.getInstance( ).getColor( 15,
+							15,
+							15 ) );
+				}
+				if ( smallCaptionBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					char[] chars = ChangeCode.toShort( smallCaptionBannerText.getText( )
+							.trim( ) )
+							.toCharArray( );
+					Point fontSize = gc.stringExtent( "" + chars[0] );
+					gc.drawText( "" + chars[0],
+							( 16 - fontSize.x ) / 2 + 8,
+							17,
+							true );
+					if ( chars.length >= 2 )
+					{
+						gc.drawText( "" + chars[1],
+								( 16 - fontSize.x ) / 2 + 8,
+								17 + fontSize.y,
+								true );
+					}
+				}
+				smallCaptionBannerImage[i] = oldImage.getImageData( );
+				gc.dispose( );
+				font.dispose( );
+				oldImage.dispose( );
+			}
+			catch ( IOException e1 )
+			{
+				e1.printStackTrace( );
+			}
 		}
 		return smallCaptionBannerImage;
 	}
@@ -1899,64 +2338,83 @@ public class FactionEditPage extends SimpleTabPage
 		return stratBanner;
 	}
 
-	private ImageData createBattleBannerImage( )
+	private ImageData[] createBattleBannerImage( )
 	{
-		ImageData battleBanner = null;
+		ImageData[] battleBanner = new ImageData[3];
 		FactionTexture texture = (FactionTexture) BattleUtil.getFactionTextureMap( )
 				.get( idText.getText( ) );
-		File file = new File( FileConstants.dataFile,
+		File[] files = new File[3];
+		files[0] = new File( FileConstants.dataFile,
 				texture.getStandard_texture( ) + ".dds" );
-		try
+		files[1] = new File( FileConstants.dataFile,
+				texture.getStandard_texture( ) + "_ally.dds" );
+		files[2] = new File( FileConstants.dataFile,
+				texture.getStandard_texture( ) + "_routing.dds" );
+		for ( int i = 0; i < files.length; i++ )
 		{
-			DDSImage ddsImage = DDSLoader.loadDDSImage( new FileInputStream( file ) );
-			ImageData imageData = DDSLoader.getImageData( ddsImage );
-			int pixel = imageData.getPixel( 126, 140 );
-			for ( int x = 125; x < 125 + 53; x++ )
+			try
 			{
-				for ( int y = 20; y < 20 + 123; y++ )
+				DDSImage ddsImage = DDSLoader.loadDDSImage( new FileInputStream( files[i] ) );
+				ImageData imageData = DDSLoader.getImageData( ddsImage );
+				int pixel = imageData.getPixel( 126, 140 );
+				for ( int x = 125; x < 125 + 53; x++ )
 				{
-					imageData.setPixel( x, y, pixel );
+					for ( int y = 20; y < 20 + 123; y++ )
+					{
+						imageData.setPixel( x, y, pixel );
+					}
 				}
-			}
 
-			Image image = new Image( null, imageData );
-			GC gc = new GC( image );
-			gc.setAdvanced( true );
-			gc.setAntialias( SWT.ON );
-			gc.setTextAntialias( SWT.ON );
-			gc.setLineWidth( 10 );
-			FontData fontData = new FontData( battleBannerFontCombo.getText( ),
-					Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
-					SWT.BOLD );
-			Font font = new Font( null, fontData );
-			gc.setFont( font );
-			gc.setForeground( ColorCache.getInstance( )
-					.getColor( battleBannerColorSelector.getColorValue( ) ) );
-			if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
-			{
-				char[] chars = ChangeCode.toShort( battleBannerText.getText( )
-						.trim( ) ).toCharArray( );
-				Point fontSize = gc.stringExtent( "" + chars[0] );
-				gc.drawText( "" + chars[0],
-						( 53 - fontSize.x ) / 2 + 125,
-						30,
-						true );
-				if ( chars.length >= 2 )
+				Image image = new Image( null, imageData );
+				GC gc = new GC( image );
+				gc.setAdvanced( true );
+				gc.setAntialias( SWT.ON );
+				gc.setTextAntialias( SWT.ON );
+				gc.setLineWidth( 10 );
+				FontData fontData = new FontData( battleBannerFontCombo.getText( ),
+						Integer.parseInt( battleBannerFontSizeCombo.getText( ) ),
+						SWT.BOLD );
+				Font font = new Font( null, fontData );
+				gc.setFont( font );
+				if ( i == 0 )
 				{
-					gc.drawText( "" + chars[1],
-							( 53 - fontSize.x ) / 2 + 125,
-							30 + fontSize.y,
-							true );
+					gc.setForeground( ColorCache.getInstance( )
+							.getColor( battleBannerColorSelector.getColorValue( ) ) );
 				}
+				else
+				{
+					gc.setForeground( ColorCache.getInstance( ).getColor( 99,
+							97,
+							99 ) );
+				}
+				if ( battleBannerText.getText( ).trim( ).length( ) > 0 )
+				{
+					char[] chars = ChangeCode.toShort( battleBannerText.getText( )
+							.trim( ) )
+							.toCharArray( );
+					Point fontSize = gc.stringExtent( "" + chars[0] );
+					gc.drawText( "" + chars[0],
+							( 53 - fontSize.x ) / 2 + 125,
+							30,
+							true );
+					if ( chars.length >= 2 )
+					{
+						gc.drawText( "" + chars[1],
+								( 53 - fontSize.x ) / 2 + 125,
+								30 + fontSize.y,
+								true );
+					}
+				}
+				battleBanner[i] = image.getImageData( );
+				font.dispose( );
+				gc.dispose( );
+				image.dispose( );
+
 			}
-			battleBanner = image.getImageData( );
-			font.dispose( );
-			gc.dispose( );
-			image.dispose( );
-		}
-		catch ( IOException e1 )
-		{
-			e1.printStackTrace( );
+			catch ( IOException e1 )
+			{
+				e1.printStackTrace( );
+			}
 		}
 		return battleBanner;
 	}

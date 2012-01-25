@@ -370,11 +370,16 @@ public class FileUtil
 
 	public static Properties loadProperties( String property )
 	{
+		return loadProperties( property, false );
+	}
+
+	public static Properties loadProperties( String property, boolean fromJar )
+	{
 		try
 		{
 			Properties props = new Properties( );
 			InputStream in = null;
-			if ( "faction".equals( property ) )
+			if ( "faction".equals( property ) && !fromJar )
 			{
 				in = new FileInputStream( FileConstants.factionPropertiesFile );
 			}

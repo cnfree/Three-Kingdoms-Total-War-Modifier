@@ -14,7 +14,7 @@ public class FileConstants
 	public static String factionPropertiesPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\faction.properties";
 	public static File factionPropertiesFile = new File( factionPropertiesPath );
-	
+
 	public static String menuSymbolsPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\menu\\symbols";
 	public static File menuSymbolsFile = new File( menuSymbolsPath );
@@ -133,8 +133,13 @@ public class FileConstants
 			+ "\\Data\\banners";
 	public final static String battleBannerPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\models\\textures";
+	public final static String cityBannerPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\models_strat\\textures";
 	public final static String factionMapsPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\world\\maps\\campaign\\Alexander";
+
+	public final static String generalBannerPath = Patch.GAME_ROOT
+			+ "\\alexander\\data\\models_unit\\sanguo\\textures";
 
 	public final static String campaignDescriptionPath = Patch.GAME_ROOT
 			+ "\\alexander\\data\\text\\campaign_descriptions.txt";
