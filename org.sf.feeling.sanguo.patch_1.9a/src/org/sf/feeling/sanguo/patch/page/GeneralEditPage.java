@@ -1296,6 +1296,12 @@ public class GeneralEditPage extends SimpleTabPage
 
 	private Point computeGeneralPosition( Point point, boolean x, boolean y )
 	{
+		return computeGeneralPosition( point, x, y, true );
+	}
+
+	private Point computeGeneralPosition( Point point, boolean x, boolean y,
+			boolean xory )
+	{
 		String general = (String) generalMap.getKeyList( )
 				.get( generalCombo.getSelectionIndex( ) );
 		General model = (General) UnitUtil.getGeneralModels( ).get( general );
@@ -1319,23 +1325,29 @@ public class GeneralEditPage extends SimpleTabPage
 				{
 					y = false;
 				}
-				if ( x )
+				if ( xory )
 				{
-					point.x = point.x + 1;
+					if ( x )
+					{
+						point.x = point.x + 1;
+					}
+					else
+					{
+						point.x = point.x - 1;
+					}
 				}
 				else
 				{
-					point.x = point.x - 1;
+					if ( y )
+					{
+						point.y = point.y + 1;
+					}
+					else
+					{
+						point.y = point.y - 1;
+					}
 				}
-				if ( y )
-				{
-					point.y = point.y + 1;
-				}
-				else
-				{
-					point.y = point.y - 1;
-				}
-				return computeGeneralPosition( point, x, y );
+				return computeGeneralPosition( point, x, y, !xory );
 			}
 		}
 

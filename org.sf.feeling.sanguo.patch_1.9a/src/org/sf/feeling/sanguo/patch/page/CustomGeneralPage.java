@@ -1153,6 +1153,12 @@ public class CustomGeneralPage extends SimpleTabPage
 
 	private Point computeGeneralPosition( Point point, boolean x, boolean y )
 	{
+		return computeGeneralPosition( point, x, y, true );
+	}
+	
+	private Point computeGeneralPosition( Point point, boolean x, boolean y,
+			boolean xory )
+	{
 		Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
 
 		while ( iter.hasNext( ) )
@@ -1170,23 +1176,29 @@ public class CustomGeneralPage extends SimpleTabPage
 				{
 					y = false;
 				}
-				if ( x )
+				if ( xory )
 				{
-					point.x = point.x + 1;
+					if ( x )
+					{
+						point.x = point.x + 1;
+					}
+					else
+					{
+						point.x = point.x - 1;
+					}
 				}
 				else
 				{
-					point.x = point.x - 1;
+					if ( y )
+					{
+						point.y = point.y + 1;
+					}
+					else
+					{
+						point.y = point.y - 1;
+					}
 				}
-				if ( y )
-				{
-					point.y = point.y + 1;
-				}
-				else
-				{
-					point.y = point.y - 1;
-				}
-				return computeGeneralPosition( point, x, y );
+				return computeGeneralPosition( point, x, y, !xory );
 			}
 		}
 

@@ -120,7 +120,7 @@ public class MapUtil
 
 			ImageData mapGround = TgaLoader.loadImage( new FileInputStream( FileConstants.mapGroundFile ) );
 			List exclueds = Arrays.asList( new RGB[]{
-					new RGB( 192, 128, 128 ),
+					new RGB( 196, 128, 128 ),
 					new RGB( 98, 65, 65 ),
 					new RGB( 64, 0, 0 ),
 					new RGB( 196, 0, 0 ),

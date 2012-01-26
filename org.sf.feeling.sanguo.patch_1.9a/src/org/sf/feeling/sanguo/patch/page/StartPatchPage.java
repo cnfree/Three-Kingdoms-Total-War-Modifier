@@ -107,10 +107,11 @@ public class StartPatchPage extends SimpleTabPage
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
 				"<form><p>注意：<br/>1、武将交换功能将交换2个武将所属势力，身份，年龄，后代及大地图所在位置。"
 						+ "比如马腾和马超交换，马超将成为马腾势力的君主，而马腾则会成为马超的儿子。<br/>"
-						+ "2、更换所属势力的武将不能有儿子，并且不能是势力君主或者继承人。<br/>"
-						+ "3、“武将年龄设置”能减小的岁数有限，想最大化减小武将年龄，需使用“最大化减小势力武将年龄”功能。<br/>"
-						+ "4、收买武将对势力武将有年龄要求，设置势力部分垃圾武将年龄大于40岁更有利于武将的收买。<br/>"
-						+ "5、修改器会在应用前自动计算武将可用坐标，以保证武将初始位置为合法坐标。</p></form>",
+						+ "2、名字带有（刘备）、（曹操）、（孙吴）的武将不能被交换到其它势力，否则开局会被脚本自动杀死。<br/>"
+						+ "3、更换所属势力的武将不能有儿子，并且不能是势力君主或者继承人。<br/>"
+						+ "4、“武将年龄设置”能减小的岁数有限，想最大化减小武将年龄，需使用“最大化减小势力武将年龄”功能。<br/>"
+						+ "5、收买武将对势力武将有年龄要求，设置势力部分垃圾武将年龄大于40岁更有利于武将的收买。<br/>"
+						+ "6、修改器会在应用前自动计算武将可用坐标，以保证武将初始位置为合法坐标。</p></form>",
 				true,
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
@@ -1441,6 +1442,12 @@ public class StartPatchPage extends SimpleTabPage
 
 	private Point computeGeneralPosition( Point point, boolean x, boolean y )
 	{
+		return computeGeneralPosition( point, x, y, true );
+	}
+
+	private Point computeGeneralPosition( Point point, boolean x, boolean y,
+			boolean xory )
+	{
 		String general = (String) nonRelativeGeneralList.get( generalChangeCombo.getSelectionIndex( ) );
 		General model = (General) UnitUtil.getGeneralModels( ).get( general );
 
@@ -1464,23 +1471,29 @@ public class StartPatchPage extends SimpleTabPage
 				{
 					y = false;
 				}
-				if ( x )
+				if ( xory )
 				{
-					point.x = point.x + 1;
+					if ( x )
+					{
+						point.x = point.x + 1;
+					}
+					else
+					{
+						point.x = point.x - 1;
+					}
 				}
 				else
 				{
-					point.x = point.x - 1;
+					if ( y )
+					{
+						point.y = point.y + 1;
+					}
+					else
+					{
+						point.y = point.y - 1;
+					}
 				}
-				if ( y )
-				{
-					point.y = point.y + 1;
-				}
-				else
-				{
-					point.y = point.y - 1;
-				}
-				return computeGeneralPosition( point, x, y );
+				return computeGeneralPosition( point, x, y, !xory );
 			}
 		}
 
