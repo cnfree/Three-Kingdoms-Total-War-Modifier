@@ -124,7 +124,8 @@ public class MapUtil
 					new RGB( 98, 65, 65 ),
 					new RGB( 64, 0, 0 ),
 					new RGB( 196, 0, 0 ),
-					new RGB( 128, 0, 0 )
+					new RGB( 128, 0, 0 ),
+					new RGB( 0, 64, 0 )
 			} );
 
 			for ( x = 1; x < 381; x++ )
