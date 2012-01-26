@@ -719,7 +719,7 @@ public class GeneralParser
 					Pattern pattern = Pattern.compile( "^\\s*(character)(.+)(named)(\\s+)(character)" );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ general
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
@@ -788,7 +788,7 @@ public class GeneralParser
 					Pattern pattern = Pattern.compile( "^\\s*(character)(.+)(named)(\\s+)(character)" );
 					Matcher matcher = pattern.matcher( line );
 					if ( matcher.find( )
-							&& line.split( "(?i)(\\s+)("
+							&& line.split( "(?i)(character.+)("
 									+ general
 									+ ")(\\s*)(,)" ).length == 2 )
 					{
