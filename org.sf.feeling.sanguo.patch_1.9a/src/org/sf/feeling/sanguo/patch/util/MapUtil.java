@@ -1134,8 +1134,22 @@ public class MapUtil
 						{
 							model = line.split( ";" )[0].replaceAll( "model",
 									"" ).trim( );
-							mountTypeToModelMap.put( type, model );
-							mountModelToTypeMap.put( model, type );
+							if ( !mountModelToTypeMap.containsKey( model ) )
+							{
+								mountTypeToModelMap.put( type, model );
+								mountModelToTypeMap.put( model, type );
+							}
+							else
+							{
+								if ( type.toLowerCase( )
+										.compareTo( mountModelToTypeMap.get( model )
+												.toString( )
+												.toLowerCase( ) ) > 0 )
+								{
+									mountModelToTypeMap.put( model, type );
+								}
+								mountTypeToModelMap.put( type, model );
+							}
 							startMount = false;
 							continue;
 						}
