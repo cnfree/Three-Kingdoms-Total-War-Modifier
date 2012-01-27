@@ -142,6 +142,21 @@ public class MapUtil
 					}
 				}
 			}
+
+			for ( x = 1; x < 381; x++ )
+			{
+				for ( y = 1; y < 361; y++ )
+				{
+					RGB rgb = mapGround.palette.getRGB( mapGround.getPixel( x,
+							y ) );
+					if ( !exclueds.contains( rgb ) )
+					{
+						int posX = ( x - 1 ) / 2;
+						int posY = 179 - y / 2;
+						unAvailableGeneralPoints.remove( new Point( posX, posY ) );
+					}
+				}
+			}
 		}
 		catch ( IOException e )
 		{
