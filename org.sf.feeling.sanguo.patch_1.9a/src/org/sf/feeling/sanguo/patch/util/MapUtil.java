@@ -1141,10 +1141,13 @@ public class MapUtil
 							}
 							else
 							{
-								if ( type.toLowerCase( )
-										.compareTo( mountModelToTypeMap.get( model )
-												.toString( )
-												.toLowerCase( ) ) > 0 )
+								String type1 = type.trim( );
+								String type2 = mountModelToTypeMap.get( model )
+										.toString( )
+										.trim( );
+								if ( type1.length( ) > type2.length( )
+										|| type1.toLowerCase( )
+												.compareTo( type2.toLowerCase( ) ) > 0 )
 								{
 									mountModelToTypeMap.put( model, type );
 								}
