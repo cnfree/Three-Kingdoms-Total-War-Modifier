@@ -121,7 +121,7 @@ public class UnitModify
 					.get( i ) ) );
 			if ( this.generalUnitMap.containsKey( soldierQiMap.getKeyList( )
 					.get( i ) ) )
-				soldierQi[i] += "卫队士兵";
+				soldierQi[i] += "卫队";
 			else
 				soldierQi[i] += "士兵";
 		}
