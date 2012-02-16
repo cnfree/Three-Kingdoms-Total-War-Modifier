@@ -444,7 +444,9 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalInCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd = new GridData( );
+			gd.minimumWidth = 80;
+			gd.horizontalAlignment = SWT.FILL;
 			generalInCombo.setLayoutData( gd );
 			generalInCombo.setEnabled( false );
 
@@ -499,7 +501,9 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalOutCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd = new GridData( );
+			gd.minimumWidth = 80;
+			gd.horizontalAlignment = SWT.FILL;
 			generalOutCombo.setLayoutData( gd );
 			generalOutCombo.setEnabled( false );
 
@@ -662,8 +666,9 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalChangeFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.widthHint = 150;
+			gd = new GridData( );
+			gd.minimumWidth = 150;
+			gd.horizontalAlignment = SWT.FILL;
 			gd.horizontalSpan = 2;
 			generalChangeFactionCombo.setLayoutData( gd );
 			generalChangeFactionCombo.setEnabled( false );
@@ -924,8 +929,9 @@ public class StartPatchPage extends SimpleTabPage
 
 			identityCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 					SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.widthHint = 150;
+			gd = new GridData( );
+			gd.minimumWidth = 150;
+			gd.horizontalAlignment = SWT.FILL;
 			gd.horizontalSpan = 2;
 			identityCombo.setLayoutData( gd );
 			identityCombo.setEnabled( false );
@@ -1023,9 +1029,10 @@ public class StartPatchPage extends SimpleTabPage
 					.createButton( patchClient, "武将年龄设置", SWT.CHECK );
 			generalCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 					SWT.READ_ONLY );
-			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			GridData gd = new GridData( );
+			gd.minimumWidth = 150;
+			gd.horizontalAlignment = SWT.FILL;
 			gd.horizontalSpan = 2;
-			gd.widthHint = 150;
 			generalCombo.setLayoutData( gd );
 			generalCombo.setEnabled( false );
 			generalCombo.addSelectionListener( new SelectionAdapter( ) {
@@ -1043,8 +1050,9 @@ public class StartPatchPage extends SimpleTabPage
 			} );
 			generalAgeCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.widthHint = 150;
+			gd = new GridData( );
+			gd.minimumWidth = 150;
+			gd.horizontalAlignment = SWT.FILL;
 			gd.horizontalSpan = 2;
 			generalAgeCombo.setLayoutData( gd );
 			generalAgeCombo.setEnabled( false );
