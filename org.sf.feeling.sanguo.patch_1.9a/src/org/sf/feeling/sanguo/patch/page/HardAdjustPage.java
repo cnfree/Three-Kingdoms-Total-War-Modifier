@@ -66,7 +66,7 @@ public class HardAdjustPage extends SimpleTabPage
 		createPatchArea( );
 
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
-				"<form><p>说明：<br/>1、游戏简易版无任何驿站加成，不喜欢曹总暴兵的也可选择简易版。<br/>2、 禁止驿站暴兵后，仍然觉得曹总兵太多的，可以尝试修改曹总兵种的<a>造兵回合</a>，比如设置青州兵的造兵回合为3回合。</p></form>",
+				"<form><p>说明：禁用驿站暴兵后，仍然觉得曹总兵太多的，可以尝试修改曹总兵种的<a>造兵回合</a>，比如设置青州兵的造兵回合为3回合。</p></form>",
 				true,
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
@@ -98,52 +98,7 @@ public class HardAdjustPage extends SimpleTabPage
 		layout.numColumns = 5;
 		patchClient.setLayout( layout );
 
-		// {
-		// if (FileConstants.scriptFile.exists()) {
-		// final Button forceAlliedBtn = WidgetUtil.getToolkit()
-		// .createButton(patchClient, "解除雾隐补丁吕布曹操强制同盟(吕布难度增加)",
-		// SWT.CHECK);
-		// GridData gd = new GridData();
-		// gd.horizontalSpan = 3;
-		// forceAlliedBtn.setLayoutData(gd);
-		// final Button forceAlliedApply = WidgetUtil.getToolkit()
-		// .createButton(patchClient, "应用", SWT.PUSH);
-		// forceAlliedApply.setEnabled(false);
-		// final Button forceAlliedRestore = WidgetUtil.getToolkit()
-		// .createButton(patchClient, "还原", SWT.PUSH);
-		//
-		// forceAlliedApply.addSelectionListener(new SelectionAdapter() {
-		//
-		// public void widgetSelected(SelectionEvent e) {
-		// forceAlliedApply.setEnabled(false);
-		// BakUtil.bakData("解除雾隐补丁吕布曹操强制同盟");
-		// String regex =
-		// "(console_command)(\\s+)(diplomatic_stance)(\\s+)(ostrogoths)(\\s+)(goths)(\\s+)(allied)";
-		// FileUtil.replaceFile(FileConstants.scriptFile, regex,
-		// regex, "");
-		// forceAlliedApply.setEnabled(true);
-		// }
-		// });
-		//
-		// forceAlliedRestore.addSelectionListener(new SelectionAdapter() {
-		//
-		// public void widgetSelected(SelectionEvent e) {
-		// forceAlliedRestore.setEnabled(false);
-		// BakUtil.restoreCurrectVersionBakFile();
-		// forceAlliedRestore.setEnabled(true);
-		// }
-		// });
-		//
-		// forceAlliedBtn.addSelectionListener(new SelectionAdapter() {
-		//
-		// public void widgetSelected(SelectionEvent e) {
-		// forceAlliedApply.setEnabled(forceAlliedBtn
-		// .getSelection());
-		// }
-		//
-		// });
-		// }
-		// }
+		
 		{
 			final Button toushiBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "禁用投石车", SWT.CHECK );
@@ -283,17 +238,10 @@ public class HardAdjustPage extends SimpleTabPage
 
 			} );
 		}
-		// {
-		// Label info = WidgetUtil.getToolkit().createLabel(patchClient, true);
-		// info.setText("没有投石想rush曹总绝对是天方夜谭，这也正是原版和雾隐补丁最大的区别所在。");
-		// GridData gd = new GridData();
-		// gd.heightHint = info.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 10;
-		// gd.horizontalSpan = 5;
-		// info.setLayoutData(gd);
-		// }
+
 		{
 			final Button baoBingBtn = WidgetUtil.getToolkit( )
-					.createButton( patchClient, "禁止电脑驿站暴兵", SWT.CHECK );
+					.createButton( patchClient, "禁用电脑驿站暴兵", SWT.CHECK );
 
 			final CCombo soldierCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
@@ -338,7 +286,7 @@ public class HardAdjustPage extends SimpleTabPage
 					if ( soldierCombo.getSelectionIndex( ) == -1 )
 						return;
 					baoBingApply.setEnabled( false );
-					BakUtil.bakData( "禁止电脑驿站暴兵:" + soldierCombo.getText( ) );
+					BakUtil.bakData( "禁用电脑驿站暴兵:" + soldierCombo.getText( ) );
 
 					String line = null;
 
@@ -410,13 +358,156 @@ public class HardAdjustPage extends SimpleTabPage
 				}
 			} );
 		}
+		
+		{
+			final Button bounsBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "禁用电脑驿站加成", SWT.CHECK );
+
+			final CCombo bonusCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+
+			bonusCombo.add( "全部加成", 0 );
+			bonusCombo.add( "法律加成", 1 );
+			bonusCombo.add( "快乐加成", 2 );
+			bonusCombo.add( "税收加成", 3 );
+			bonusCombo.add( "健康加成", 4 );
+			bonusCombo.add( "部队装备加成", 5 );
+			bonusCombo.add( "部队士气加成", 6 );
+			bonusCombo.add( "部队经验加成", 7 );
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 2;
+			gd.widthHint = 150;
+			bonusCombo.setLayoutData( gd );
+			bonusCombo.setEnabled( false );
+
+			final Button bonusApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			bonusApply.setEnabled( false );
+			final Button bonusRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+
+			bounsBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					bonusCombo.setEnabled( bounsBtn.getSelection( ) );
+					bonusApply.setEnabled( bounsBtn.getSelection( ) );
+				}
+
+			} );
+
+			bonusRestore.addSelectionListener( new RestoreListener( ) );
+			bonusApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( bonusCombo.getSelectionIndex( ) == -1 )
+						return;
+					bonusApply.setEnabled( false );
+					BakUtil.bakData( "禁用电脑驿站加成:" + bonusCombo.getText( ) );
+
+					String line = null;
+
+					StringWriter writer = new StringWriter( );
+					PrintWriter printer = new PrintWriter( writer );
+
+					String regex = "^\\s*(recruit)(\\s+)";
+					if ( bonusCombo.getSelectionIndex( ) == 1 )
+					{
+						regex = "^\\s*(law_bonus)(\\s+)(bonus)";
+					}
+					else if( bonusCombo.getSelectionIndex( ) == 2 )
+					{
+						regex = "^\\s*(happiness_bonus)(\\s+)(bonus)";
+					}
+					else if( bonusCombo.getSelectionIndex( ) == 3 )
+					{
+						regex = "^\\s*(taxable_income_bonus)(\\s+)(bonus)";
+					}
+					else if( bonusCombo.getSelectionIndex( ) == 4 )
+					{
+						regex = "^\\s*(population_health_bonus)(\\s+)(bonus)";
+					}
+					else if( bonusCombo.getSelectionIndex( ) == 5 )
+					{
+						regex = "^\\s*((weapon_simple)|(weapon_bladed)|(weapon_missile)|(armour))(\\s+)(bonus)";
+					}
+					else if( bonusCombo.getSelectionIndex( ) == 6 )
+					{
+						regex = "^\\s*(recruits_morale_bonus)(\\s+)(bonus)";
+					}
+					else if( bonusCombo.getSelectionIndex( ) == 7 )
+					{
+						regex = "^\\s*(recruits_exp_bonus)(\\s+)(bonus)";
+					}
+					else if( bonusCombo.getSelectionIndex( ) == 0 )
+					{
+						regex = "(bonus)";
+					}
+
+					try
+					{
+						BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.buildingsFile ),
+								"GBK" ) );
+						boolean startTemple = false;
+						while ( ( line = in.readLine( ) ) != null )
+						{
+							if ( !startTemple )
+							{
+								printer.println( line );
+								Pattern pattern = Pattern.compile( "^\\s*(hrr_farms)",
+										Pattern.CASE_INSENSITIVE );
+								Matcher matcher = pattern.matcher( line );
+								if ( matcher.find( ) )
+								{
+									startTemple = true;
+								}
+							}
+							else
+							{
+
+								Pattern pattern = Pattern.compile( regex );
+								Matcher matcher = pattern.matcher( line );
+								if ( matcher.find( ) )
+								{
+									continue;
+								}
+								else
+								{
+									printer.println( line );
+									Pattern pattern1 = Pattern.compile( "^\\s*(construction)",
+											Pattern.CASE_INSENSITIVE );
+									Matcher matcher1 = pattern1.matcher( line );
+									if ( matcher1.find( ) )
+									{
+										startTemple = false;
+									}
+								}
+							}
+						}
+						in.close( );
+						PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.buildingsFile ),
+								"GBK" ) ),
+								false );
+						out.print( writer.getBuffer( ) );
+						out.close( );
+						printer.close( );
+					}
+					catch ( IOException e1 )
+					{
+						e1.printStackTrace( );
+					}
+					bonusApply.setEnabled( true );
+				}
+			} );
+		}
 		patchSection.setClient( patchClient );
 	}
 
 	private void createTitle( )
 	{
 		WidgetUtil.createFormText( container.getBody( ),
-				"本页面可以通过修改某些脚本，比如强制结盟，限制兵种等等来改变游戏的难易程度，配置完毕后重启游戏即可生效。" );
+				"本页面可以通过修改某些脚本，比如限制兵种，驿站加成等来改变游戏的难易程度，配置完毕后重启游戏即可生效。" );
 	}
 
 	public String getDisplayName( )
