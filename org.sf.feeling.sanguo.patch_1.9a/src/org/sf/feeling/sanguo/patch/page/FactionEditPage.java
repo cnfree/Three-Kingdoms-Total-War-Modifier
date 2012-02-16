@@ -1643,6 +1643,11 @@ public class FactionEditPage extends SimpleTabPage
 			generalBannerText.setEnabled( true );
 			generalBannerFontCombo.setEnabled( true );
 			generalBannerFontSizeCombo.setEnabled( true );
+			generalBannerColorSelector.setEnabled( true );
+			cityBannerText.setEnabled( true );
+			cityBannerFontCombo.setEnabled( true );
+			cityBannerFontSizeCombo.setEnabled( true );
+			cityBannerColorSelector.setEnabled( true );
 			stratBannerText.setEnabled( true );
 			stratBannerFontCombo.setEnabled( true );
 			stratBannerFontSizeCombo.setEnabled( true );
@@ -1676,6 +1681,11 @@ public class FactionEditPage extends SimpleTabPage
 			generalBannerText.setEnabled( false );
 			generalBannerFontCombo.setEnabled( false );
 			generalBannerFontSizeCombo.setEnabled( false );
+			generalBannerColorSelector.setEnabled( false );
+			cityBannerText.setEnabled( false );
+			cityBannerFontCombo.setEnabled( false );
+			cityBannerFontSizeCombo.setEnabled( false );
+			cityBannerColorSelector.setEnabled( false );
 			stratBannerText.setEnabled( false );
 			stratBannerFontCombo.setEnabled( false );
 			stratBannerFontSizeCombo.setEnabled( false );
@@ -1683,7 +1693,7 @@ public class FactionEditPage extends SimpleTabPage
 			startImageButton.setEnabled( false );
 			leaderCombo.setEnabled( false );
 			leaderFontCombo.setEnabled( false );
-			leaderFontSizeCombo.setEnabled( false );
+			leaderFontSizeCombo.setEnabled( false );	
 			bigCaptionBannerColorSelector.setEnabled( false );
 			smallCaptionBannerColorSelector.setEnabled( false );
 			battleBannerColorSelector.setEnabled( false );

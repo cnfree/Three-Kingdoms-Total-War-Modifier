@@ -993,7 +993,7 @@ public class BakUtil
 					"修改器检测到您尚未设置游戏数据备份原始档，您是否愿意现在开始设置？" ) )
 			{
 				Patch.getInstance( ).select( Patch.getInstance( )
-						.getPageCount( ) - 5 );
+						.getPageCount( ) - 4 );
 			}
 		}
 		else if ( !defalutResourceBakFile.exists( ) )
@@ -1008,7 +1008,7 @@ public class BakUtil
 				if ( propertiesFile.exists( ) )
 					propertiesFile.delete( );
 				Patch.getInstance( ).select( Patch.getInstance( )
-						.getPageCount( ) - 5 );
+						.getPageCount( ) - 4 );
 			}
 		}
 		else
