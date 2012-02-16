@@ -218,55 +218,57 @@ public class MapUtil
 					}
 					if ( startFaction )
 					{
-						Pattern pattern = Pattern.compile( "^\\s*(standard_texture)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
 						{
-							String standard_texture = line.replaceAll( "(?i)(standard_texture)",
-									"" )
-									.trim( );
-							( (FactionTexture) factionTextureMap.get( faction ) ).setStandard_texture( standard_texture );
-							continue;
+							Pattern pattern = Pattern.compile( "^\\s*(standard_texture)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String standard_texture = line.replaceAll( "(?i)(standard_texture)",
+										"" )
+										.trim( );
+								( (FactionTexture) factionTextureMap.get( faction ) ).setStandard_texture( standard_texture );
+								continue;
+							}
 						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(rebels_texture)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
 						{
-							String rebels_texture = line.replaceAll( "(?i)rebels_texture",
-									"" )
-									.trim( );
-							( (FactionTexture) factionTextureMap.get( faction ) ).setRebels_texture( rebels_texture );
-							continue;
+							Pattern pattern = Pattern.compile( "^\\s*(rebels_texture)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String rebels_texture = line.replaceAll( "(?i)rebels_texture",
+										"" )
+										.trim( );
+								( (FactionTexture) factionTextureMap.get( faction ) ).setRebels_texture( rebels_texture );
+								continue;
+							}
 						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(routing_texture)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
 						{
-							String routing_texture = line.replaceAll( "(?i)routing_texture",
-									"" )
-									.trim( );
-							( (FactionTexture) factionTextureMap.get( faction ) ).setRouting_texture( routing_texture );
-							continue;
+							Pattern pattern = Pattern.compile( "^\\s*(routing_texture)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String routing_texture = line.replaceAll( "(?i)routing_texture",
+										"" )
+										.trim( );
+								( (FactionTexture) factionTextureMap.get( faction ) ).setRouting_texture( routing_texture );
+								continue;
+							}
 						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(ally_texture)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
 						{
-							String ally_texture = line.replaceAll( "(?i)ally_texture",
-									"" )
-									.trim( );
-							( (FactionTexture) factionTextureMap.get( faction ) ).setAlly_texture( ally_texture );
-							continue;
+							Pattern pattern = Pattern.compile( "^\\s*(ally_texture)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String ally_texture = line.replaceAll( "(?i)ally_texture",
+										"" )
+										.trim( );
+								( (FactionTexture) factionTextureMap.get( faction ) ).setAlly_texture( ally_texture );
+								continue;
+							}
 						}
 					}
 				}

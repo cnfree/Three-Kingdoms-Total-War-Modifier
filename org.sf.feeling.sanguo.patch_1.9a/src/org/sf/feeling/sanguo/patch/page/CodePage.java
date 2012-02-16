@@ -106,13 +106,15 @@ public class CodePage extends SimpleTabPage
 
 		} );
 
-		generalCodeCombo.setItems( (String[]) generalMap.getKeyList( )
-				.toArray( new String[0] ) );
+		String[] generals = (String[]) generalMap.getKeyList( )
+				.toArray( new String[0] );
+		Arrays.sort( generals );
+		generalCodeCombo.setItems( generals );
 		generalCodeCombo.addSelectionListener( new SelectionAdapter( ) {
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				String code = ChangeCode.toLong( (String) generalMap.get( generalCodeCombo.getSelectionIndex( ) ) );
+				String code = ChangeCode.toLong( (String) generalMap.get( generalCodeCombo.getText( ) ) );
 				if ( code != null )
 					generalText.setText( code );
 				else
@@ -140,13 +142,15 @@ public class CodePage extends SimpleTabPage
 
 		} );
 
-		soldierCodeCombo.setItems( (String[]) soldierUnitMap.getKeyList( )
-				.toArray( new String[0] ) );
+		String[] soldiers = (String[]) soldierUnitMap.getKeyList( )
+				.toArray( new String[0] );
+		Arrays.sort( soldiers );
+		soldierCodeCombo.setItems( soldiers );
 		soldierCodeCombo.addSelectionListener( new SelectionAdapter( ) {
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				String code = ChangeCode.toLong( (String) soldierUnitMap.get( soldierCodeCombo.getSelectionIndex( ) ) );
+				String code = ChangeCode.toLong( (String) soldierUnitMap.get( soldierCodeCombo.getText( ) ) );
 				if ( code != null )
 					soldierText.setText( code );
 				else
@@ -469,7 +473,7 @@ public class CodePage extends SimpleTabPage
 	private void refreshPage( )
 	{
 		factionMap = UnitUtil.getFactionMap( );
-		
+
 		String faction = factionCombo.getText( );
 
 		factionCombo.removeAll( );
