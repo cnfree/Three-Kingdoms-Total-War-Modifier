@@ -761,31 +761,38 @@ public class StartPatchPage extends SimpleTabPage
 				{
 					changeGeneralFactionApply.setEnabled( false );
 
-					Point point = computeGeneralPosition( new Point( posXSpinner.getSelection( ),
-							posYSpinner.getSelection( ) ),
-							true,
-							true );
+					Point point = new Point( posXSpinner.getSelection( ),
+							posYSpinner.getSelection( ) );
 
 					String generalCode = (String) generalMap.getKeyList( )
 							.get( generalMap.getValueList( )
 									.indexOf( generalChangeCombo.getText( ) ) );
 					String factionCode = (String) factionMap.getKeyList( )
 							.get( generalChangeFactionCombo.getSelectionIndex( ) );
+					General model = (General) UnitUtil.getGeneralModels( )
+							.get( generalCode );
+					
+					if ( !model.getPosX( ).equals( "" + point.x )
+							|| !model.getPosY( ).equals( "" + point.y ) )
+					{
+						BakUtil.bakData( "更换武将势力："
+								+ generalChangeCombo.getText( )
+								+ "-->"
+								+ generalChangeFactionCombo.getText( )
+								+ "势力，坐标（"
+								+ point.x
+								+ "，"
+								+ point.y
+								+ "）" );
 
-					BakUtil.bakData( "更换武将势力："
-							+ generalChangeCombo.getText( )
-							+ "-->"
-							+ generalChangeFactionCombo.getText( )
-							+ "势力，坐标（"
-							+ point.x
-							+ "，"
-							+ point.y
-							+ "）" );
+						point = computeGeneralPosition( point, true, true );
 
-					UnitUtil.changeGeneral( generalCode, factionCode, ""
-							+ point.x, "" + point.y );
-					MapUtil.initMap( );
-					refreshPage( );
+						UnitUtil.changeGeneral( generalCode, factionCode, ""
+								+ point.x, "" + point.y );
+						MapUtil.initMap( );
+						refreshPage( );
+					}
+					
 					changeGeneralFactionApply.setEnabled( generalChangeBtn.getSelection( )
 							&& generalChangeCombo.getSelectionIndex( ) != -1
 							&& generalChangeFactionCombo.getSelectionIndex( ) != -1 );

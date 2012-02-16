@@ -969,17 +969,17 @@ public class GeneralEditPage extends SimpleTabPage
 
 				General model = (General) generalModelMap.get( general );
 
-				Point point = computeGeneralPosition( new Point( posXSpinner.getSelection( ),
-						posYSpinner.getSelection( ) ),
-						true,
-						true );
+				Point point = new Point( posXSpinner.getSelection( ),
+						posYSpinner.getSelection( ) );
 
 				if ( !model.getPosX( ).equals( "" + point.x )
 						|| !model.getPosY( ).equals( "" + point.y ) )
 				{
+					point = computeGeneralPosition( point, true, true );
 					customGeneral.setPosX( "" + point.x );
 					customGeneral.setPosY( "" + point.y );
 				}
+				
 				boolean modelChange = false;
 				String generalModel = null;
 				String battleModel = null;
