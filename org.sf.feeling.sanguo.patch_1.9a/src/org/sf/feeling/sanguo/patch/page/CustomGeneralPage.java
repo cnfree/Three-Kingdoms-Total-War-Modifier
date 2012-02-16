@@ -22,6 +22,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.ImageData;
@@ -739,6 +740,13 @@ public class CustomGeneralPage extends SimpleTabPage
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.widthHint = 160;
 		jueweiCombo.setLayoutData( gd );
+		jueweiCombo.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				jueweis = null;
+			}
+		} );
 
 		jueweiButton = WidgetUtil.getToolkit( ).createButton( patchClient,
 				SWT.PUSH,
@@ -774,6 +782,9 @@ public class CustomGeneralPage extends SimpleTabPage
 						&& jueweis.length > 0
 						&& jueweis[jueweis.length - 1] != null )
 				{
+					if ( jueweis[jueweis.length - 1].startsWith( "·" ) )
+						jueweis[jueweis.length - 1] = jueweis[jueweis.length - 1].replaceFirst( "·",
+								"" );
 					jueweiCombo.setText( jueweis[jueweis.length - 1] );
 				}
 				checkEnableStatus( );
@@ -1020,7 +1031,7 @@ public class CustomGeneralPage extends SimpleTabPage
 					soldier = null;
 					soldierButton.setText( "设置（未设置）" );
 				}
-				
+
 				skills = null;
 				baowus = null;
 				jueweis = null;
@@ -1207,7 +1218,7 @@ public class CustomGeneralPage extends SimpleTabPage
 			this.generalModelCombo.add( (String) officerMap.get( i ) );
 			this.battleModelCombo.add( (String) officerMap.get( i ) );
 		}
-		
+
 		checkEnableStatus( );
 	}
 
