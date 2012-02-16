@@ -1476,23 +1476,27 @@ public class UnitUtil
 				boolean startBuilding = false;
 				boolean startBuildingLeft = false;
 
+				StringBuffer buildingStr = new StringBuffer( );
+				buildingStr.append( "(" );
+				for ( int i = 0; i < buildings.length; i++ )
+				{
+					buildingStr.append( "(" + buildings[i] + ")" );
+					if ( i + 1 < buildings.length )
+						buildingStr.append( "|" );
+				}
+				buildingStr.append( ")" );
+
+				String buildingRegex = buildingStr.toString( )
+						+ "(\\s+)(requires)(\\s+)(factions)";
+
 				StringWriter writer = new StringWriter( );
 				PrintWriter printer = new PrintWriter( writer );
 				while ( ( line = in.readLine( ) ) != null )
 				{
 					if ( !building )
 					{
-						StringBuffer buildingStr = new StringBuffer( );
-						buildingStr.append( "(" );
-						for ( int i = 0; i < buildings.length; i++ )
-						{
-							buildingStr.append( "(" + buildings[i] + ")" );
-							if ( i + 1 < buildings.length )
-								buildingStr.append( "|" );
-						}
-						buildingStr.append( ")" );
-						Pattern pattern = Pattern.compile( buildingStr.append( "(\\s+)(requires)(\\s+)(factions)" )
-								.toString( ),
+
+						Pattern pattern = Pattern.compile( buildingRegex,
 								Pattern.CASE_INSENSITIVE );
 						Matcher matcher = pattern.matcher( line );
 						if ( matcher.find( ) )
@@ -1914,7 +1918,6 @@ public class UnitUtil
 		return MapUtil.factionHeirMap;
 	}
 
-	
 	public static void createGeneral( String general, String faction, int posX,
 			int posY, String strat_model, String battle_model, SortMap skills,
 			String[] baowus, String soldierType )

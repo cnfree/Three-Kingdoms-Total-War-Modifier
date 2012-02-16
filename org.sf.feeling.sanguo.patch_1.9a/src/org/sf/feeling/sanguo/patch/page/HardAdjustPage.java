@@ -51,6 +51,7 @@ public class HardAdjustPage extends SimpleTabPage
 	private SortMap soldierUnitMap;
 	private CCombo factionCombo;
 	private SortMap factionMap;
+	private CCombo userFactionCombo;
 
 	public void buildUI( Composite parent )
 	{
@@ -98,7 +99,6 @@ public class HardAdjustPage extends SimpleTabPage
 		layout.numColumns = 5;
 		patchClient.setLayout( layout );
 
-		
 		{
 			final Button toushiBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "禁用投石车", SWT.CHECK );
@@ -358,7 +358,7 @@ public class HardAdjustPage extends SimpleTabPage
 				}
 			} );
 		}
-		
+
 		{
 			final Button bounsBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "禁用电脑驿站加成", SWT.CHECK );
@@ -416,31 +416,31 @@ public class HardAdjustPage extends SimpleTabPage
 					{
 						regex = "^\\s*(law_bonus)(\\s+)(bonus)";
 					}
-					else if( bonusCombo.getSelectionIndex( ) == 2 )
+					else if ( bonusCombo.getSelectionIndex( ) == 2 )
 					{
 						regex = "^\\s*(happiness_bonus)(\\s+)(bonus)";
 					}
-					else if( bonusCombo.getSelectionIndex( ) == 3 )
+					else if ( bonusCombo.getSelectionIndex( ) == 3 )
 					{
 						regex = "^\\s*(taxable_income_bonus)(\\s+)(bonus)";
 					}
-					else if( bonusCombo.getSelectionIndex( ) == 4 )
+					else if ( bonusCombo.getSelectionIndex( ) == 4 )
 					{
 						regex = "^\\s*(population_health_bonus)(\\s+)(bonus)";
 					}
-					else if( bonusCombo.getSelectionIndex( ) == 5 )
+					else if ( bonusCombo.getSelectionIndex( ) == 5 )
 					{
 						regex = "^\\s*((weapon_simple)|(weapon_bladed)|(weapon_missile)|(armour))(\\s+)(bonus)";
 					}
-					else if( bonusCombo.getSelectionIndex( ) == 6 )
+					else if ( bonusCombo.getSelectionIndex( ) == 6 )
 					{
 						regex = "^\\s*(recruits_morale_bonus)(\\s+)(bonus)";
 					}
-					else if( bonusCombo.getSelectionIndex( ) == 7 )
+					else if ( bonusCombo.getSelectionIndex( ) == 7 )
 					{
 						regex = "^\\s*(recruits_exp_bonus)(\\s+)(bonus)";
 					}
-					else if( bonusCombo.getSelectionIndex( ) == 0 )
+					else if ( bonusCombo.getSelectionIndex( ) == 0 )
 					{
 						regex = "(bonus)";
 					}
@@ -501,6 +501,141 @@ public class HardAdjustPage extends SimpleTabPage
 				}
 			} );
 		}
+
+		{
+			final Button cikeBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "禁止电脑生产刺客", SWT.CHECK );
+
+			userFactionCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 2;
+			gd.widthHint = 150;
+			userFactionCombo.setLayoutData( gd );
+			userFactionCombo.setEnabled( false );
+
+			final Button cikeApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			cikeApply.setEnabled( false );
+			final Button cikeRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+
+			cikeBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					userFactionCombo.setEnabled( cikeBtn.getSelection( ) );
+					cikeApply.setEnabled( cikeBtn.getSelection( ) );
+				}
+
+			} );
+
+			cikeRestore.addSelectionListener( new RestoreListener( ) );
+			cikeApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( userFactionCombo.getSelectionIndex( ) == -1 )
+						return;
+					cikeApply.setEnabled( false );
+					BakUtil.bakData( "禁止电脑生产刺客" );
+
+					String line = null;
+
+					StringWriter writer = new StringWriter( );
+					PrintWriter printer = new PrintWriter( writer );
+					String regex = "^\\s*(agent)(\\s+)assassin";
+
+					String[] buildings = new String[]{
+							"governors_palace",
+							"proconsuls_palace",
+							"imperial_palace"
+					};
+
+					StringBuffer buildingStr = new StringBuffer( );
+					buildingStr.append( "(" );
+					for ( int i = 0; i < buildings.length; i++ )
+					{
+						buildingStr.append( "(" + buildings[i] + ")" );
+						if ( i + 1 < buildings.length )
+							buildingStr.append( "|" );
+					}
+					buildingStr.append( ")" );
+
+					String buildingRegex = buildingStr.toString( )
+							+ "(\\s+)(requires)(\\s+)(factions)";
+
+					try
+					{
+						BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.buildingsFile ),
+								"GBK" ) );
+						boolean startTemple = false;
+						boolean addCikeToUserFaction = false;
+						while ( ( line = in.readLine( ) ) != null )
+						{
+							if ( !startTemple )
+							{
+								printer.println( line );
+								Pattern pattern = Pattern.compile( buildingRegex,
+										Pattern.CASE_INSENSITIVE );
+								Matcher matcher = pattern.matcher( line );
+								if ( matcher.find( ) )
+								{
+									startTemple = true;
+									addCikeToUserFaction = false;
+								}
+							}
+							else
+							{
+
+								Pattern pattern = Pattern.compile( regex );
+								Matcher matcher = pattern.matcher( line );
+								if ( matcher.find( ) )
+								{
+									if ( !addCikeToUserFaction )
+									{
+										addCikeToUserFaction = true;
+										if ( userFactionCombo.getSelectionIndex( ) > 0 )
+										{
+											String faction = (String) factionMap.getKeyList( )
+													.get( userFactionCombo.getSelectionIndex( ) - 1 );
+											printer.println( "                agent assassin  0  requires factions { "
+													+ faction
+													+ ", } and hidden_resource swg" );
+										}
+									}
+									continue;
+								}
+								else
+								{
+									printer.println( line );
+									Pattern pattern1 = Pattern.compile( "^\\s*(construction)",
+											Pattern.CASE_INSENSITIVE );
+									Matcher matcher1 = pattern1.matcher( line );
+									if ( matcher1.find( ) )
+									{
+										startTemple = false;
+									}
+								}
+							}
+						}
+						in.close( );
+						PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.buildingsFile ),
+								"GBK" ) ),
+								false );
+						out.print( writer.getBuffer( ) );
+						out.close( );
+						printer.close( );
+					}
+					catch ( IOException e1 )
+					{
+						e1.printStackTrace( );
+					}
+					cikeApply.setEnabled( true );
+				}
+			} );
+		}
 		patchSection.setClient( patchClient );
 	}
 
@@ -534,5 +669,17 @@ public class HardAdjustPage extends SimpleTabPage
 
 		if ( factionMap.containsValue( faction ) )
 			factionCombo.setText( faction );
+
+		String userFaction = userFactionCombo.getText( );
+		userFactionCombo.removeAll( );
+		userFactionCombo.add( "--选择玩家势力--", 0 );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			userFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		if ( factionMap.containsValue( userFaction ) )
+			userFactionCombo.setText( userFaction );
+		else
+			userFactionCombo.select( 0 );
 	}
 }
