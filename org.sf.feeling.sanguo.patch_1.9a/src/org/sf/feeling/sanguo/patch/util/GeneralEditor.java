@@ -216,8 +216,13 @@ public class GeneralEditor
 		if ( generalImages != null )
 			changeGeneralImages( );
 		changeGeneralDescription( );
+
+		String generalName = (String) generalMap.get( general );
+		if ( generalName != null && generalName.indexOf( "（" ) != -1 )
+			generalName = generalName.substring( 0, generalName.indexOf( "（" ) );
+
 		if ( !ChangeCode.toLong( displayName )
-				.equals( ChangeCode.toLong( (String) generalMap.get( general ) ) ) )
+				.equals( ChangeCode.toLong( generalName ) ) )
 		{
 			changeGeneralName( );
 		}
@@ -257,15 +262,13 @@ public class GeneralEditor
 			}
 		}
 	}
-	
+
 	private void changeGeneralPositions( )
 	{
 		if ( posX == null || posY == null )
 			return;
 		GeneralParser.setGeneralPosition( general, posX, posY );
 	}
-
-
 
 	private void changeGeneralBaowus( )
 	{

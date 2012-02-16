@@ -911,7 +911,7 @@ public class GeneralEditPage extends SimpleTabPage
 						imageFiles.addAll( Arrays.asList( BakUtil.getUnitImageFiles( UnitUtil.getGeneralFaction( general ),
 								generalUnit ) ) );
 					}
-					BakUtil.bakDataAndResources( "编辑武将：" + nameText.getText( ),
+					BakUtil.bakDataAndResources( "编辑武将：" + generalCombo.getText( ),
 							(File[]) imageFiles.toArray( new File[0] ) );
 				}
 				GeneralEditor customGeneral = new GeneralEditor( );
@@ -979,7 +979,7 @@ public class GeneralEditPage extends SimpleTabPage
 					customGeneral.setPosX( "" + point.x );
 					customGeneral.setPosY( "" + point.y );
 				}
-				
+
 				boolean modelChange = false;
 				String generalModel = null;
 				String battleModel = null;
@@ -1079,7 +1079,11 @@ public class GeneralEditPage extends SimpleTabPage
 				String general = (String) generalMap.getKeyList( )
 						.get( generalCombo.getSelectionIndex( ) );
 				idText.setText( general );
-				nameText.setText( generalCombo.getText( ) );
+
+				String name = generalCombo.getText( );
+				if ( name.indexOf( "（" ) != -1 )
+					name = name.substring( 0, name.indexOf( "（" ) );
+				nameText.setText( name );
 
 				GeneralEditPage.this.general = general;
 
