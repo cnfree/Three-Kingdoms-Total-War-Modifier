@@ -42,6 +42,7 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.sf.feeling.sanguo.patch.Patch;
 import org.sf.feeling.sanguo.patch.dialog.BaowuHolderModifyDialog;
 import org.sf.feeling.sanguo.patch.dialog.GeneralModifyDialog;
+import org.sf.feeling.sanguo.patch.dialog.JueweiDialog;
 import org.sf.feeling.sanguo.patch.dialog.PositionDialog;
 import org.sf.feeling.sanguo.patch.dialog.SkillDialog;
 import org.sf.feeling.sanguo.patch.dialog.UnitModifyDialog;
@@ -78,6 +79,7 @@ public class CustomGeneralPage extends SimpleTabPage
 	private ImageData bigImage = null;
 	private ImageData soldierImage = null;
 	private String[] baowus = null;
+	private String[] jueweis = null;
 	private String faction = null;
 
 	ModifyListener nameListener = new ModifyListener( ) {
@@ -114,6 +116,7 @@ public class CustomGeneralPage extends SimpleTabPage
 	private Spinner posYSpinner;
 	private CCombo factionCombo;
 	private Button tejiButton;
+	private Button jueweiButton;
 
 	public void buildUI( Composite parent )
 	{
@@ -153,6 +156,7 @@ public class CustomGeneralPage extends SimpleTabPage
 			ch4Button.setEnabled( true );
 			baowuButton.setEnabled( true );
 			jueweiCombo.setEnabled( true );
+			jueweiButton.setEnabled( true );
 			positionButton.setEnabled( true );
 			posXSpinner.setEnabled( true );
 			posYSpinner.setEnabled( true );
@@ -190,6 +194,7 @@ public class CustomGeneralPage extends SimpleTabPage
 			applyButton.setEnabled( false );
 			baowuButton.setEnabled( false );
 			jueweiCombo.setEnabled( false );
+			jueweiButton.setEnabled( false );
 			positionButton.setEnabled( false );
 			posXSpinner.setEnabled( false );
 			posYSpinner.setEnabled( false );
@@ -732,9 +737,48 @@ public class CustomGeneralPage extends SimpleTabPage
 		jueweiCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 				SWT.READ_ONLY );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.widthHint = 180;
-		gd.horizontalSpan = 2;
+		gd.widthHint = 160;
 		jueweiCombo.setLayoutData( gd );
+
+		jueweiButton = WidgetUtil.getToolkit( ).createButton( patchClient,
+				SWT.PUSH,
+				true );
+		jueweiButton.setText( "自定义" );
+		jueweiButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				JueweiDialog dialog = new JueweiDialog( "设置武将爵位" );
+				if ( jueweis != null )
+					dialog.setGeneralJueweis( jueweis );
+				else
+				{
+					if ( jueweiCombo.getSelectionIndex( ) > -1 )
+					{
+						dialog.setGeneralJueweis( (String[]) jueweiProperty.get( jueweiCombo.getItem( jueweiCombo.getSelectionIndex( ) ) )
+								.toString( )
+								.split( "\\s+" ) );
+					}
+					else
+					{
+						dialog.setGeneralJueweis( (String[]) jueweiProperty.get( jueweiCombo.getItem( 0 ) )
+								.toString( )
+								.split( "\\s+" ) );
+					}
+				}
+				if ( dialog.open( ) == Window.OK )
+				{
+					jueweis = (String[]) dialog.getResult( );
+				}
+				if ( jueweis != null
+						&& jueweis.length > 0
+						&& jueweis[jueweis.length - 1] != null )
+				{
+					jueweiCombo.setText( jueweis[jueweis.length - 1] );
+				}
+				checkEnableStatus( );
+			}
+		} );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "13.设置新武将宝物(可选)：" );
 		baowuButton = WidgetUtil.getToolkit( ).createButton( patchClient,
@@ -931,7 +975,11 @@ public class CustomGeneralPage extends SimpleTabPage
 				} );
 				customGeneral.setGeneralSoldier( soldier );
 				customGeneral.setGeneralBaowus( baowus );
-				if ( jueweiCombo.getSelectionIndex( ) > -1 )
+				if ( jueweis != null )
+				{
+					customGeneral.setGeneralJueweis( jueweis );
+				}
+				else if ( jueweiCombo.getSelectionIndex( ) > -1 )
 				{
 					customGeneral.setGeneralJueweis( (String[]) jueweiProperty.get( jueweiCombo.getText( ) )
 							.toString( )
@@ -961,6 +1009,22 @@ public class CustomGeneralPage extends SimpleTabPage
 				customGeneral.createCustomGeneral( );
 				MapUtil.initMap( );
 				applyButton.setEnabled( true );
+
+				if ( skills != null )
+				{
+					skills.clear( );
+					skillButton.setText( "设置（未设置）" );
+				}
+				if ( soldier != null )
+				{
+					soldier = null;
+					soldierButton.setText( "设置（未设置）" );
+				}
+				
+				skills = null;
+				baowus = null;
+				jueweis = null;
+
 				checkEnableStatus( );
 			}
 		} );
@@ -1143,11 +1207,7 @@ public class CustomGeneralPage extends SimpleTabPage
 			this.generalModelCombo.add( (String) officerMap.get( i ) );
 			this.battleModelCombo.add( (String) officerMap.get( i ) );
 		}
-		if ( skills != null )
-		{
-			skills.clear( );
-			skillButton.setText( "设置（未设置）" );
-		}
+		
 		checkEnableStatus( );
 	}
 
@@ -1155,7 +1215,7 @@ public class CustomGeneralPage extends SimpleTabPage
 	{
 		return computeGeneralPosition( point, x, y, true );
 	}
-	
+
 	private Point computeGeneralPosition( Point point, boolean x, boolean y,
 			boolean xory )
 	{
