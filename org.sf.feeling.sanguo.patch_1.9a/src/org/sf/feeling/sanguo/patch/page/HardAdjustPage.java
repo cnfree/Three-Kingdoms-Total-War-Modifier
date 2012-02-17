@@ -67,7 +67,7 @@ public class HardAdjustPage extends SimpleTabPage
 		createPatchArea( );
 
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
-				"<form><p>说明：禁用驿站暴兵后，仍然觉得曹总兵太多的，可以尝试修改曹总兵种的<a>造兵回合</a>，比如设置青州兵的造兵回合为3回合。</p></form>",
+				"<form><p>说明：<br/>1、禁用驿站暴兵后仍觉得曹操兵太多的，可以尝试修改曹操兵种的<a>造兵回合</a>，或者降低电脑的经济加成。<br/>2、禁用电脑税收加成并设置电脑太守加成几率为0时，电脑将和玩家一样，需要面对高昂的军队维护费。</p></form>",
 				true,
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
