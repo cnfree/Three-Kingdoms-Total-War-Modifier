@@ -123,7 +123,7 @@ public class HardAdjustPage extends SimpleTabPage
 				private void appendToString( StringBuffer buffer, String temp,
 						String replacement )
 				{
-					Pattern pattern = Pattern.compile( "engine(\\s+)(heavy_onager)" ,
+					Pattern pattern = Pattern.compile( "engine(\\s+)(heavy_onager)",
 							Pattern.CASE_INSENSITIVE );
 					Matcher matcher = pattern.matcher( temp );
 					if ( matcher.find( ) )
@@ -131,8 +131,8 @@ public class HardAdjustPage extends SimpleTabPage
 						int start = matcher.end( );
 						buffer.append( temp.substring( 0, start ) );
 						String lastString = temp.substring( start );
-						Pattern pattern1 = Pattern.compile( "(ownership)(.+)(\\s)" ,
-								Pattern.CASE_INSENSITIVE);
+						Pattern pattern1 = Pattern.compile( "(ownership)(.+)(\\s)",
+								Pattern.CASE_INSENSITIVE );
 						Matcher matcher1 = pattern1.matcher( lastString );
 						if ( matcher1.find( ) )
 						{
@@ -474,6 +474,8 @@ public class HardAdjustPage extends SimpleTabPage
 								Matcher matcher = pattern.matcher( line );
 								if ( matcher.find( ) )
 								{
+									if ( line.matches( "(?i).+AA12\\-GuanAi.*" ) )
+										printer.println( line );
 									continue;
 								}
 								else
@@ -643,7 +645,7 @@ public class HardAdjustPage extends SimpleTabPage
 
 		{
 			final Button cikeBtn = WidgetUtil.getToolkit( )
-					.createButton( patchClient, "调整电脑太守加成几率", SWT.CHECK );
+					.createButton( patchClient, "电脑太守加成几率", SWT.CHECK );
 
 			final CCombo chanceCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
@@ -738,7 +740,7 @@ public class HardAdjustPage extends SimpleTabPage
 				}
 			} );
 		}
-		
+
 		patchSection.setClient( patchClient );
 	}
 
