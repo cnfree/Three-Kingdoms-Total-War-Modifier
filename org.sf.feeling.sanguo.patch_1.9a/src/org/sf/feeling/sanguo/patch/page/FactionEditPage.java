@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.Section;
@@ -138,6 +139,7 @@ public class FactionEditPage extends SimpleTabPage
 	private ImageData grey24Image;
 	private ImageData roll24Image;
 	private ImageData select24Image;
+	private RGB primaryColor;
 
 	private SortMap factionDescriptionMap;
 
@@ -177,6 +179,7 @@ public class FactionEditPage extends SimpleTabPage
 	private CCombo cityBannerFontCombo;
 	private Text cityBannerText;
 	private ColorSelector cityBannerColorSelector;
+	private ColorSelector primaryColorSelector;
 
 	public void buildUI( Composite parent )
 	{
@@ -231,6 +234,8 @@ public class FactionEditPage extends SimpleTabPage
 					if ( culture != null )
 						cultureCombo.setText( culture );
 					nameText.setEnabled( true );
+					primaryColorSelector.setColorValue( desc.parseRGB( desc.getPrimary_colour( ) ) );
+					primaryColor = null;
 				}
 				else
 				{
@@ -238,6 +243,7 @@ public class FactionEditPage extends SimpleTabPage
 					nameText.setText( "" );
 					cultureCombo.setText( "" );
 					nameText.setEnabled( false );
+					primaryColorSelector.setColorValue( new RGB( 0, 0, 0 ) );
 				}
 				checkEnableStatus( );
 			}
@@ -279,6 +285,22 @@ public class FactionEditPage extends SimpleTabPage
 		{
 			cultureCombo.add( (String) cultureMap.get( i ) );
 		}
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置势力地图颜色：" );
+		primaryColorSelector = new ColorSelector( patchClient );
+		gd = new GridData( );
+		gd.horizontalSpan = 4;
+		gd.widthHint = 60;
+		primaryColorSelector.getButton( ).setLayoutData( gd );
+		primaryColorSelector.setColorValue( new RGB( 21, 21, 21 ) );
+		primaryColorSelector.addModifyListener( new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				primaryColor = primaryColorSelector.getColorValue( );
+			}
+
+		} );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置后代武将姓氏：" );
 
@@ -845,7 +867,8 @@ public class FactionEditPage extends SimpleTabPage
 						.get( idText.getText( ) );
 				String culture = (String) cultureMap.get( desc.getCulture( ) );
 
-				if ( !culture.equals( cultureCombo.getText( ) ) )
+				if ( !culture.equals( cultureCombo.getText( ) )
+						|| primaryColor != null )
 				{
 					txtFiles.add( FileConstants.descrFactionsFile );
 				}
@@ -965,7 +988,8 @@ public class FactionEditPage extends SimpleTabPage
 					}
 				}
 
-				if ( !culture.equals( cultureCombo.getText( ) ) )
+				if ( !culture.equals( cultureCombo.getText( ) )
+						|| primaryColor != null )
 				{
 					if ( FileConstants.descrFactionsFile.exists( ) )
 					{
@@ -996,17 +1020,44 @@ public class FactionEditPage extends SimpleTabPage
 									}
 									else
 									{
-										Pattern pattern = Pattern.compile( "^\\s*culture\\s+",
-												Pattern.CASE_INSENSITIVE );
-										Matcher matcher = pattern.matcher( line );
-										if ( matcher.find( ) )
+										if ( !culture.equals( cultureCombo.getText( ) ) )
 										{
-											printer.println( "culture						"
-													+ cultureMap.getKeyList( )
-															.get( cultureCombo.getSelectionIndex( ) ) );
-											startFaction = true;
-											isEnd = true;
-											continue;
+											Pattern pattern = Pattern.compile( "^\\s*culture\\s+",
+													Pattern.CASE_INSENSITIVE );
+											Matcher matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												printer.println( "culture						"
+														+ cultureMap.getKeyList( )
+																.get( cultureCombo.getSelectionIndex( ) ) );
+												continue;
+											}
+										}
+										if ( primaryColor != null )
+										{
+											Pattern pattern = Pattern.compile( "^\\s*primary_colour\\s+",
+													Pattern.CASE_INSENSITIVE );
+											Matcher matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												printer.println( "primary_colour				"
+														+ "red "
+														+ primaryColor.red
+														+ ", green "
+														+ primaryColor.green
+														+ ", blue "
+														+ primaryColor.blue );
+												continue;
+											}
+										}
+										{
+											Pattern pattern = Pattern.compile( "^\\s*faction\\s+",
+													Pattern.CASE_INSENSITIVE );
+											Matcher matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												isEnd = true;
+											}
 										}
 									}
 								}
@@ -1631,6 +1682,7 @@ public class FactionEditPage extends SimpleTabPage
 		if ( nameText.getText( ).trim( ).length( ) > 0
 				&& idText.getText( ).trim( ).length( ) > 0 )
 		{
+			primaryColorSelector.setEnabled( true );
 			bigCaptionBannerText.setEnabled( true );
 			bigCaptionBannerFontCombo.setEnabled( true );
 			bigCaptionBannerFontSizeCombo.setEnabled( true );
@@ -1669,6 +1721,7 @@ public class FactionEditPage extends SimpleTabPage
 		}
 		else
 		{
+			primaryColorSelector.setEnabled( false );
 			bigCaptionBannerText.setEnabled( false );
 			bigCaptionBannerFontCombo.setEnabled( false );
 			bigCaptionBannerFontSizeCombo.setEnabled( false );
@@ -1693,7 +1746,7 @@ public class FactionEditPage extends SimpleTabPage
 			startImageButton.setEnabled( false );
 			leaderCombo.setEnabled( false );
 			leaderFontCombo.setEnabled( false );
-			leaderFontSizeCombo.setEnabled( false );	
+			leaderFontSizeCombo.setEnabled( false );
 			bigCaptionBannerColorSelector.setEnabled( false );
 			smallCaptionBannerColorSelector.setEnabled( false );
 			battleBannerColorSelector.setEnabled( false );

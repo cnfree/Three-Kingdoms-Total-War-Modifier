@@ -308,10 +308,18 @@ public class GeneralEditor
 
 	private void changeGeneralName( )
 	{
-		String unitType = UnitUtil.getGeneralUnitType( general );
-		if ( UnitUtil.getGeneralUnits( ).containsKey( unitType ) )
+		if ( soldierType == null )
 		{
-			UnitUtil.setUnitName( unitType, displayName );
+			String unitType = UnitUtil.getGeneralUnitType( general );
+			if ( UnitUtil.getGeneralUnits( ).containsKey( unitType ) )
+			{
+				String unitName = (String) UnitUtil.getGeneralUnits( )
+						.get( unitType );
+				if ( !MapUtil.isNormalGeneral( unitName ) )
+				{
+					UnitUtil.setUnitName( unitType, displayName );
+				}
+			}
 		}
 		UnitUtil.setGeneralDescriptionName( general, displayName );
 		GeneralParser.setGeneralName( general, displayName );

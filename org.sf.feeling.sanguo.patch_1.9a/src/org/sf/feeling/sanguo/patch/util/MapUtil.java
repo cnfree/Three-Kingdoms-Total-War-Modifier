@@ -1184,14 +1184,14 @@ public class MapUtil
 		}
 	}
 
-	public static boolean isNormalGeneral( String name1 )
+	public static boolean isNormalGeneral( String name )
 	{
-		return name1.indexOf( "重步" ) != -1
-				|| name1.indexOf( "步弓" ) != -1
-				|| name1.indexOf( "重騎" ) != -1
-				|| name1.indexOf( "弓騎" ) != -1
-				|| name1.indexOf( "將軍" ) != -1
-				|| name1.indexOf( "精銳" ) != -1;
+		return name.indexOf( "重步" ) != -1
+				|| name.indexOf( "步弓" ) != -1
+				|| name.indexOf( "重騎" ) != -1
+				|| name.indexOf( "弓騎" ) != -1
+				|| name.indexOf( "將軍" ) != -1
+				|| name.indexOf( "精銳" ) != -1;
 	}
 
 }
