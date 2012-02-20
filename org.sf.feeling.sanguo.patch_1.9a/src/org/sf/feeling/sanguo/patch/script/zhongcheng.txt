@@ -1,0 +1,9 @@
+;------------------------------------------
+Trigger ZhongCheng-Patch
+    WhenToTest CharacterTurnEnd
+
+    Condition IsGeneral
+          and not IsFactionLeader
+          and not FactionIsLocal
+
+    Affects JnA8000-B  1000  Chance  100

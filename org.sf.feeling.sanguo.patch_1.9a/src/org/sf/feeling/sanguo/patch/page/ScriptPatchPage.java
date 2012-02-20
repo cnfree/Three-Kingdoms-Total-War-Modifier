@@ -74,7 +74,7 @@ public class ScriptPatchPage extends SimpleTabPage
 		createPatchArea( );
 
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
-				"<form><p>注意：<br/>1、灾害次数值越小越好。<br/>2、投石误差值越小越精准，但过于精准将无法射中移动目标。<br/>3、三国全面战争1.7a版巨型城墙生命值为250，仅供参考。</p></form>",
+				"<form><p>注意：<br/>1、灾害次数值越小越好。<br/>2、投石误差值越小越精准，但过于精准将无法射中移动目标。<br/>3、三国全面战争1.7a版巨型城墙生命值为250，仅供参考。<br/>4、心灰意冷状态的武将无法被收买，解除该状态后武将负面效果依然存在，并可被收买。<br/>5、降低所有武将忠诚度不包括本势力武将。</p></form>",
 				true,
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
@@ -493,6 +493,108 @@ public class ScriptPatchPage extends SimpleTabPage
 					BakUtil.restoreCurrectVersionBakFile( );
 					refreshPage( );
 					caocaoRestore.setEnabled( true );
+				}
+			} );
+		}
+		{
+			final Button xinhuiyilengBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "解除部分武将心灰意冷状态", SWT.CHECK );
+			GridData gd = new GridData( );
+
+			gd.horizontalSpan = 3;
+			xinhuiyilengBtn.setLayoutData( gd );
+			final Button xinhuiyilengApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			xinhuiyilengApply.setEnabled( false );
+			final Button xinhuiyilengRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			xinhuiyilengBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					xinhuiyilengApply.setEnabled( xinhuiyilengBtn.getSelection( ) );
+				}
+
+			} );
+			xinhuiyilengApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+
+					if ( FileConstants.characterTraitFile.exists( ) )
+					{
+						xinhuiyilengApply.setEnabled( false );
+						BakUtil.bakData( "解除部分武将心灰意冷状态" );
+						// FileUtil.bakFile(FileConstants.characterTraitFile);
+						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
+								"(Trigger ZhongCheng3100-Patch)" ) ) )
+						{
+							FileUtil.appendToFile( FileConstants.characterTraitFile,
+									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/xinhuiyileng.txt" ) );
+						}
+						xinhuiyilengApply.setEnabled( true );
+					}
+				}
+			} );
+			xinhuiyilengRestore.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					xinhuiyilengRestore.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					xinhuiyilengRestore.setEnabled( true );
+				}
+			} );
+		}
+		{
+			final Button zhongchengBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "降低所有武将忠诚度", SWT.CHECK );
+			GridData gd = new GridData( );
+
+			gd.horizontalSpan = 3;
+			zhongchengBtn.setLayoutData( gd );
+			final Button zhongchengApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			zhongchengApply.setEnabled( false );
+			final Button zhongchengRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			zhongchengBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					zhongchengApply.setEnabled( zhongchengBtn.getSelection( ) );
+				}
+
+			} );
+			zhongchengApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+
+					if ( FileConstants.characterTraitFile.exists( ) )
+					{
+						zhongchengApply.setEnabled( false );
+						BakUtil.bakData( "降低所有武将忠诚度" );
+						// FileUtil.bakFile(FileConstants.characterTraitFile);
+						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
+								"(Trigger ZhongCheng-Patch)" ) ) )
+						{
+							FileUtil.appendToFile( FileConstants.characterTraitFile,
+									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/zhongcheng.txt" ) );
+						}
+						zhongchengApply.setEnabled( true );
+					}
+				}
+			} );
+			zhongchengRestore.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					zhongchengRestore.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					zhongchengRestore.setEnabled( true );
 				}
 			} );
 		}

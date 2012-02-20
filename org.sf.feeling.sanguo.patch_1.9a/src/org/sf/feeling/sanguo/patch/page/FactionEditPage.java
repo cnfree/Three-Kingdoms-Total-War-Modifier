@@ -252,7 +252,7 @@ public class FactionEditPage extends SimpleTabPage
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );
-		gd.verticalSpan = 14;
+		gd.verticalSpan = 15;
 		gd.widthHint = 256;
 		gd.minimumHeight = 256;
 		imageCanvas.setLayoutData( gd );

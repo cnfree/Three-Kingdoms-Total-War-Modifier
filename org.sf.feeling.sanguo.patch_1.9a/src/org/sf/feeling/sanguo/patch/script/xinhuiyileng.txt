@@ -1,0 +1,8 @@
+;------------------------------------------
+Trigger ZhongCheng3100-Patch
+    WhenToTest CharacterTurnEnd
+
+    Condition IsGeneral
+          and Trait ZhongCheng3100 = 1
+
+    Affects ZhongCheng3200  1000  Chance  100    
