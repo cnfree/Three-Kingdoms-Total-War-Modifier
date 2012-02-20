@@ -31,6 +31,7 @@ import org.sf.feeling.sanguo.patch.page.StartPatchPage;
 import org.sf.feeling.sanguo.patch.page.TiebaPage;
 import org.sf.feeling.sanguo.patch.page.UnitModifyPage;
 import org.sf.feeling.sanguo.patch.page.UnitPatchPage;
+import org.sf.feeling.sanguo.patch.page.UsagePage;
 
 public class CategoryProviderFactory 
 {
@@ -70,6 +71,7 @@ public class CategoryProviderFactory
 				//"功能或Bug提交",
 				"三国全战百度贴吧",
 				"修改器反馈中心",
+				"修改器使用手册",
 				"注意事项"
 		};
 		List list = new ArrayList();
@@ -97,6 +99,7 @@ public class CategoryProviderFactory
 				//BugSubmitPage.class,
 				TiebaPage.class,
 				FeedbackPage.class,
+				UsagePage.class,
 				AboutPage.class,
 		};
 		List list = new ArrayList();
