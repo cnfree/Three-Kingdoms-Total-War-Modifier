@@ -638,8 +638,8 @@ public class FactionEditPage extends SimpleTabPage
 		startImageButton = WidgetUtil.getToolkit( ).createButton( patchClient,
 				SWT.PUSH,
 				true );
-		gd = new GridData( );
-		gd.horizontalAlignment = SWT.FILL;
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.widthHint = 60;
 		startImageButton.setLayoutData( gd );
 		startImageButton.setText( "自定义" );
 		startImageButton.addSelectionListener( new SelectionAdapter( ) {
