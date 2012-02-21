@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
@@ -71,6 +72,14 @@ public class GeneralUnitPage extends SimpleTabPage {
 		});
 		createTitle();
 		createPatchArea();
+		
+		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
+				"<form><p>注意：收买在野名将，可以在收买前先自定义将军卫队，无需重新开局。推荐为王双，李严，郝昭等创建卫队。</p></form>",
+				true,
+				true );
+		TableWrapData data = new TableWrapData( TableWrapData.FILL );
+		data.maxWidth = 390;
+		noteText.setLayoutData( data );
 	}
 
 	private void createPatchArea() {
