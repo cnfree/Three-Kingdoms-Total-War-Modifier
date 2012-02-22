@@ -74,7 +74,7 @@ public class ScriptPatchPage extends SimpleTabPage
 		createPatchArea( );
 
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
-				"<form><p>注意：<br/>1、灾害次数值越小越好。<br/>2、投石误差值越小越精准，但过于精准将无法射中移动目标。<br/>3、三国全面战争1.7a版巨型城墙生命值为250，仅供参考。<br/>4、心灰意冷状态的武将无法被收买，解除该状态后武将负面效果依然存在，并可被收买。</p></form>",
+				"<form><p>注意：<br/>1、灾害次数值越小越好。<br/>2、投石误差值越小越精准，但过于精准将无法射中移动目标。<br/>3、三国全面战争1.7a版巨型城墙生命值为250，仅供参考。<br/>4、心灰意冷或心怀不满状态的武将无法被收买，解除该状态后武将负面效果依然存在，并可被收买。</p></form>",
 				true,
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
@@ -498,7 +498,7 @@ public class ScriptPatchPage extends SimpleTabPage
 		}
 		{
 			final Button xinhuiyilengBtn = WidgetUtil.getToolkit( )
-					.createButton( patchClient, "解除部分武将心灰意冷状态", SWT.CHECK );
+					.createButton( patchClient, "解除部分武将心灰意冷或心怀不满状态", SWT.CHECK );
 			GridData gd = new GridData( );
 
 			gd.horizontalSpan = 3;
@@ -524,13 +524,19 @@ public class ScriptPatchPage extends SimpleTabPage
 					if ( FileConstants.characterTraitFile.exists( ) )
 					{
 						xinhuiyilengApply.setEnabled( false );
-						BakUtil.bakData( "解除部分武将心灰意冷状态" );
+						BakUtil.bakData( "解除部分武将心灰意冷或心怀不满状态" );
 						// FileUtil.bakFile(FileConstants.characterTraitFile);
 						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
 								"(Trigger ZhongCheng3100-Patch)" ) ) )
 						{
 							FileUtil.appendToFile( FileConstants.characterTraitFile,
 									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/xinhuiyileng.txt" ) );
+						}
+						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
+								"(Trigger ZhongCheng2100-Patch)" ) ) )
+						{
+							FileUtil.appendToFile( FileConstants.characterTraitFile,
+									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/xinhuaibuman.txt" ) );
 						}
 						xinhuiyilengApply.setEnabled( true );
 					}
