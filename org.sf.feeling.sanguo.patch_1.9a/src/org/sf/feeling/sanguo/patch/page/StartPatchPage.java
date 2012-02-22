@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -444,7 +445,7 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalInCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL);
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 80;
 			generalInCombo.setLayoutData( gd );
 			generalInCombo.setEnabled( false );
@@ -500,7 +501,7 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalOutCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL);
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 80;
 			generalOutCombo.setLayoutData( gd );
 			generalOutCombo.setEnabled( false );
@@ -639,7 +640,7 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalChangeCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL);
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 80;
 			generalChangeCombo.setLayoutData( gd );
 			generalChangeCombo.setEnabled( false );
@@ -665,7 +666,7 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalChangeFactionCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL);
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
 			gd.horizontalSpan = 2;
 			generalChangeFactionCombo.setLayoutData( gd );
@@ -790,7 +791,7 @@ public class StartPatchPage extends SimpleTabPage
 					{
 						point = computeGeneralPosition( point, true, true );
 					}
-					
+
 					UnitUtil.changeGeneral( generalCode, factionCode, ""
 							+ point.x, "" + point.y );
 					MapUtil.initMap( );
@@ -921,14 +922,14 @@ public class StartPatchPage extends SimpleTabPage
 
 			generalIdentityChangeCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL);
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 80;
 			generalIdentityChangeCombo.setLayoutData( gd );
 			generalIdentityChangeCombo.setEnabled( false );
 
 			identityCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 					SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL);
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
 			gd.horizontalSpan = 2;
 			identityCombo.setLayoutData( gd );
@@ -1027,7 +1028,7 @@ public class StartPatchPage extends SimpleTabPage
 					.createButton( patchClient, "武将年龄设置", SWT.CHECK );
 			generalCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 					SWT.READ_ONLY );
-			GridData gd = new GridData( GridData.FILL_HORIZONTAL);
+			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
 			gd.horizontalSpan = 2;
 			generalCombo.setLayoutData( gd );
@@ -1047,7 +1048,7 @@ public class StartPatchPage extends SimpleTabPage
 			} );
 			generalAgeCombo = WidgetUtil.getToolkit( )
 					.createCCombo( patchClient, SWT.READ_ONLY );
-			gd = new GridData( GridData.FILL_HORIZONTAL);
+			gd = new GridData( GridData.FILL_HORIZONTAL );
 			gd.widthHint = 150;
 			gd.horizontalSpan = 2;
 			generalAgeCombo.setLayoutData( gd );
@@ -1213,6 +1214,181 @@ public class StartPatchPage extends SimpleTabPage
 				}
 			};
 			ageFactionCombo.addSelectionListener( listener );
+		}
+		{
+			final Button spawnBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "乱军出现概率", SWT.CHECK );
+			final CCombo spawnCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+
+			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.horizontalSpan = 2;
+			gd.widthHint = 150;
+			spawnCombo.setLayoutData( gd );
+			spawnCombo.setEnabled( false );
+
+			spawnCombo.setItems( new String[]{
+					"0", "10", "25", "50", "100","200"
+			} );
+
+			final Button spawnApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			spawnApply.setEnabled( false );
+			gd = new GridData( );
+			gd.horizontalSpan = 3;
+			gd.horizontalAlignment = SWT.END;
+			spawnApply.setLayoutData( gd );
+
+			final Button spawnRestoreApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			gd = new GridData( );
+			gd.horizontalSpan = 2;
+			spawnRestoreApply.setLayoutData( gd );
+
+			spawnRestoreApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					spawnRestoreApply.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					spawnRestoreApply.setEnabled( true );
+					spawnApply.setEnabled( spawnBtn.getSelection( )
+							&& spawnCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			spawnApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( FileConstants.stratFile.exists( )
+							&& spawnCombo.getSelectionIndex( ) > -1 )
+					{
+						spawnApply.setEnabled( false );
+						BakUtil.bakData( "乱军出现概率：" + spawnCombo.getText( ) );
+						// FileUtil.bakFile(FileConstants.characterTraitFile);
+						try
+						{
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.stratFile ),
+									"GBK" ) );
+							boolean startBrigandSpawn = false;
+							boolean startPirateSpawn = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+								if ( !startBrigandSpawn || !startPirateSpawn )
+								{
+									if ( !startBrigandSpawn )
+									{
+										Pattern pattern = Pattern.compile( "^\\s*(brigand_spawn_value)(\\s*)(\\d+)" );
+										Matcher matcher = pattern.matcher( line );
+										if ( matcher.find( ) )
+										{
+											int value = 10;
+											if ( spawnCombo.getSelectionIndex( ) == 0 )
+											{
+												value = 9999;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 1 )
+											{
+												value = value * 10;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 2 )
+											{
+												value = value * 4;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 3 )
+											{
+												value = value * 2;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 5 )
+											{
+												value = value / 2;
+											}
+											startBrigandSpawn = true;
+											printer.println( "brigand_spawn_value "
+													+ value );
+											continue;
+										}
+									}
+									if ( !startPirateSpawn )
+									{
+										Pattern pattern = Pattern.compile( "^\\s*(pirate_spawn_value)(\\s*)(\\d+)" );
+										Matcher matcher = pattern.matcher( line );
+										if ( matcher.find( ) )
+										{
+											int value = 12;
+											if ( spawnCombo.getSelectionIndex( ) == 0 )
+											{
+												value = 9999;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 1 )
+											{
+												value = value * 10;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 2 )
+											{
+												value = value * 4;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 3 )
+											{
+												value = value * 2;
+											}
+											else if ( spawnCombo.getSelectionIndex( ) == 5 )
+											{
+												value = value / 2;
+											}
+											startPirateSpawn = true;
+											printer.println( "pirate_spawn_value "
+													+ value );
+											continue;
+										}
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.stratFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+
+						refreshPage( );
+						spawnApply.setEnabled( spawnBtn.getSelection( )
+								&& spawnCombo.getSelectionIndex( ) != -1 );
+					}
+				}
+			} );
+
+			spawnBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					spawnCombo.setEnabled( spawnBtn.getSelection( ) );
+					spawnApply.setEnabled( spawnBtn.getSelection( )
+							&& spawnCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
+			SelectionAdapter listener = new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					spawnApply.setEnabled( spawnBtn.getSelection( )
+							&& spawnCombo.getSelectionIndex( ) != -1 );
+				}
+			};
+			spawnCombo.addSelectionListener( listener );
 		}
 		patchSection.setClient( patchClient );
 	}
