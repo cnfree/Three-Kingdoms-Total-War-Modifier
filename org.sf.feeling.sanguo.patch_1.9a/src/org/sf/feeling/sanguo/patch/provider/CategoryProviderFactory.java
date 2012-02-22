@@ -26,6 +26,7 @@ import org.sf.feeling.sanguo.patch.page.FeedbackPage;
 import org.sf.feeling.sanguo.patch.page.GeneralEditPage;
 import org.sf.feeling.sanguo.patch.page.GeneralUnitPage;
 import org.sf.feeling.sanguo.patch.page.HardAdjustPage;
+import org.sf.feeling.sanguo.patch.page.ModelPatchPage;
 import org.sf.feeling.sanguo.patch.page.ScriptPatchPage;
 import org.sf.feeling.sanguo.patch.page.StartPatchPage;
 import org.sf.feeling.sanguo.patch.page.TiebaPage;
@@ -57,7 +58,7 @@ public class CategoryProviderFactory
 				"开局初始化修改",
 				"脚本修改",
 				"难度调整",
-				//"模型导入",
+				"模型导入",
 				"建筑加成修改",
 				"兵种修改",
 				"宝物修改",
@@ -85,7 +86,7 @@ public class CategoryProviderFactory
 				StartPatchPage.class,
 				ScriptPatchPage.class,
 				HardAdjustPage.class,
-				//ModelPatchPage.class,
+				ModelPatchPage.class,
 				BuildingBonusPage.class,
 				UnitModifyPage.class,
 				BaowuModifyPage.class,

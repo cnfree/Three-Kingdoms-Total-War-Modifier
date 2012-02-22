@@ -1,0 +1,11 @@
+;ÏÝÕóÓª-¸ßË³×¨ÓÃ£¬¹­Æï£¬Ç¹Æï
+type               Xianzhenyin_Lvbu_Horse
+skeleton           fs_hc_archer, fs_hc_spearman
+indiv_range        40
+texture            patch/bi/data/models_unit/sanguo/textures/Xianzhenyin_Lvbu.tga
+model_flexi        patch/bi/data/models_unit/sanguo/Xianzhenyin_Lvbu.cas, 15
+model_flexi        patch/bi/data/models_unit/sanguo/Xianzhenyin_Lvbu1.cas, 30
+model_flexi        patch/bi/data/models_unit/sanguo/Xianzhenyin_Lvbu2.cas, 40
+model_flexi        patch/bi/data/models_unit/sanguo/Xianzhenyin_Lvbu3.cas, max
+model_sprite       60.0, bi/data/sprites/goths_Xianzhenyin_Lvbu_sprite.spr
+model_tri          400, 0.5f, 0.5f, 0.5f
