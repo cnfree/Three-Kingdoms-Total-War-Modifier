@@ -578,6 +578,8 @@ public class MapUtil
 							type = line.split( ";" )[0].replaceAll( "(?i)type",
 									"" ).trim( );
 							startSoldier = true;
+							if ( type.toLowerCase( ).startsWith( "merc" ) )
+								guyongUnitList.add( type );
 						}
 					}
 					else
@@ -650,7 +652,7 @@ public class MapUtil
 								factions.add( ownerships[i].trim( )
 										.toUpperCase( ) );
 							}
-							unitFactionMap.put( dictionary, factions );
+							unitFactionMap.put( type, factions );
 							dictionary = null;
 							type = null;
 							startSoldier = false;
@@ -664,9 +666,6 @@ public class MapUtil
 							if ( line.toLowerCase( ).indexOf( "general_unit" ) == -1 )
 							{
 								soldierUnitList.add( type );
-								if ( line.toLowerCase( )
-										.indexOf( "mercenary_unit" ) > -1 )
-									guyongUnitList.add( type );
 							}
 							else
 								generalUnitList.add( type );
@@ -960,6 +959,9 @@ public class MapUtil
 			}
 			if ( generalUnitList.contains( unit ) )
 			{
+				if ( generalUnitMap.getValueList( )
+						.contains( unitMap.get( unit ) ) )
+					renameSoldierNameList.add( unitMap.get( unit ) );
 				generalUnitMap.put( unit, unitMap.get( unit ) );
 			}
 			else if ( soldierUnitList.contains( unit ) )
@@ -1015,9 +1017,9 @@ public class MapUtil
 					}
 					else
 					{
-						List list = (List) unitFactionMap.get( unitTypeToDictionaryMap.get( type ) );
+						List list = (List) unitFactionMap.get( type );
 						String factionName = (String) factionMap.get( list.get( 0 ) );
-						if ( list.get( 0 ).toString( ).equalsIgnoreCase( "all" ) )
+						if ( factionName == null || list.get( 0 ).toString( ).equalsIgnoreCase( "all" ) )
 							soldierUnitMap.put( type, name );
 						else
 							soldierUnitMap.put( type, name
@@ -1025,6 +1027,19 @@ public class MapUtil
 									+ factionName
 									+ "）" );
 					}
+				}
+			}
+			for ( int j = 0; j < generalUnitMap.size( ); j++ )
+			{
+				if ( generalUnitMap.get( j ).equals( name ) )
+				{
+					String type = (String) generalUnitMap.getKeyList( ).get( j );
+					if ( type.toLowerCase( ).endsWith( "_b" ) )
+						generalUnitMap.put( type, name + "（点将台）" );
+					else if(type.toLowerCase( ).endsWith( "az" ))
+						generalUnitMap.put( type, name + "（对战）" );
+					else if(type.toLowerCase( ).endsWith( "ec" ))
+						generalUnitMap.put( type, name + "（电脑）" );
 				}
 			}
 		}
