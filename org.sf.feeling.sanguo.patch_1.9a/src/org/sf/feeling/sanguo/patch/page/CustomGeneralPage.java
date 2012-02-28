@@ -22,7 +22,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.ImageData;
@@ -1021,22 +1020,8 @@ public class CustomGeneralPage extends SimpleTabPage
 				MapUtil.initMap( );
 				applyButton.setEnabled( true );
 
-				if ( skills != null )
-				{
-					skills.clear( );
-					skillButton.setText( "设置（未设置）" );
-				}
-				if ( soldier != null )
-				{
-					soldier = null;
-					soldierButton.setText( "设置（未设置）" );
-				}
-
-				skills = null;
-				baowus = null;
-				jueweis = null;
-
-				checkEnableStatus( );
+				resetStatus( );
+				refreshPage( );
 			}
 		} );
 
@@ -1274,5 +1259,52 @@ public class CustomGeneralPage extends SimpleTabPage
 		}
 
 		return point;
+	}
+
+	private void resetStatus( )
+	{
+		nameText.setText( "" );
+		idText.setText( "" );
+		generalDesc.setText( "" );
+		factionCombo.clearSelection( );
+		factionCombo.setText( "" );
+		smallImageCombo.clearSelection( );
+		smallImageCombo.setText( "" );
+		bigImageCombo.clearSelection( );
+		bigImageCombo.setText( "" );
+		soldierImageCombo.clearSelection( );
+		soldierImageCombo.setText( "" );
+		generalModelCombo.clearSelection( );
+		generalModelCombo.setText( "" );
+		battleModelCombo.clearSelection( );
+		battleModelCombo.setText( "" );
+		jueweiCombo.clearSelection( );
+		jueweiCombo.setText( "" );
+		ch1Button.setSelection( false );
+		ch2Button.setSelection( false );
+		ch3Button.setSelection( false );
+		ch4Button.setSelection( false );
+		posXSpinner.setSelection( 0 );
+		posYSpinner.setSelection( 0 );	
+		if ( skills != null )
+		{
+			skills.clear( );
+			skillButton.setText( "设置（未设置）" );
+		}
+		if ( soldier != null )
+		{
+			soldier = null;
+			soldierButton.setText( "设置（未设置）" );
+		}
+		skills = null;
+		baowus = null;
+		jueweis = null;	
+		soldier = null;
+		smallImage = null;
+		bigImage = null;
+		soldierImage = null;
+		faction = null;
+		imageCanvas.clear( );
+		checkEnableStatus( );
 	}
 }

@@ -215,7 +215,6 @@ public class ModelPatchPage extends SimpleTabPage
 								&& !FileUtil.containMatchString( FileConstants.battleFile,
 										"(Xianzhenyin_Lvbu_Crossbow)" ) )
 						{
-							updateAvailableModels( );
 							FileUtil.appendToFile( FileConstants.battleFile,
 									ModelPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/models/xianzhenying_battle.txt" ) );
 							try
@@ -389,7 +388,6 @@ public class ModelPatchPage extends SimpleTabPage
 							&& !FileUtil.containMatchString( FileConstants.battleFile,
 									"(Xianzhenyin_Lvbu_Horse)" ) )
 					{
-						updateAvailableModels( );
 						FileUtil.appendToFile( FileConstants.battleFile,
 								ModelPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/models/gaoshun_battle.txt" ) );
 						try
