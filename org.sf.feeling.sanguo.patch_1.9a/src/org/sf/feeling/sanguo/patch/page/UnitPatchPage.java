@@ -41,6 +41,7 @@ public class UnitPatchPage extends SimpleTabPage
 	private SortMap soldierUnitMap;
 	private SortMap factionMap;
 	private CCombo factionCombo;
+	private CCombo soldierCombo;
 
 	public void buildUI( Composite parent )
 	{
@@ -82,8 +83,8 @@ public class UnitPatchPage extends SimpleTabPage
 		factionCombo.setLayoutData( gd );
 		factionCombo.setEnabled( false );
 
-		final CCombo soldierCombo = WidgetUtil.getToolkit( )
-				.createCCombo( patchClient, SWT.READ_ONLY );
+		soldierCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
 		soldierUnitMap = UnitUtil.getAllSoldierUnits( );
 		if ( soldierUnitMap != null )
 		{
@@ -293,5 +294,18 @@ public class UnitPatchPage extends SimpleTabPage
 
 		if ( factionMap.containsValue( faction ) )
 			factionCombo.setText( faction );
+
+		soldierUnitMap = UnitUtil.getAllSoldierUnits( );
+		String soldier = soldierCombo.getText( );
+		if ( soldierUnitMap != null )
+		{
+			soldierCombo.removeAll( );
+			for ( int i = 0; i < soldierUnitMap.getKeyList( ).size( ); i++ )
+			{
+				soldierCombo.add( ChangeCode.toLong( (String) soldierUnitMap.get( i ) ) );
+			}
+		}
+		if ( soldierUnitMap.containsValue( ChangeCode.toShort( soldier ) ) )
+			soldierCombo.setText( soldier );
 	}
 }
