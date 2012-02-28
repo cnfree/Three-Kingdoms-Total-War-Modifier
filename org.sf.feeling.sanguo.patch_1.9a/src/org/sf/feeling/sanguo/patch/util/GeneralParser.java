@@ -42,7 +42,10 @@ public class GeneralParser
 					{
 						Pattern pattern = Pattern.compile( "^\\s*(character)(.+)(named)(\\s+)(character)" );
 						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) && line.indexOf( general ) > -1 )
+						if ( matcher.find( )
+								&& line.split( "(?i)(character.+)("
+										+ general
+										+ ")(\\s*)(,)" ).length == 2 )
 						{
 							startGeneral = true;
 						}
@@ -235,7 +238,10 @@ public class GeneralParser
 					{
 						Pattern pattern = Pattern.compile( "^\\s*(character)(.+)(named)(\\s+)(character)" );
 						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) && line.indexOf( general ) > -1 )
+						if ( matcher.find( )
+								&& line.split( "(?i)(character.+)("
+										+ general
+										+ ")(\\s*)(,)" ).length == 2 )
 						{
 							startGeneral = true;
 						}
@@ -297,12 +303,16 @@ public class GeneralParser
 							while ( iter.hasNext( ) )
 							{
 								String key = (String) iter.next( );
-								if ( line.indexOf( key ) > -1 )
-								{
-									startGeneral = true;
-									general = key;
-									continue;
-								}
+								if ( line.split( "(?i)(character.+)("
+										+ key
+										+ ")(\\s*)(,)" ).length == 2 )
+
+									if ( line.indexOf( key ) > -1 )
+									{
+										startGeneral = true;
+										general = key;
+										continue;
+									}
 							}
 						}
 					}
@@ -374,7 +384,10 @@ public class GeneralParser
 					{
 						Pattern pattern = Pattern.compile( "^\\s*(character)(.+)(named)(\\s+)(character)" );
 						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) && line.indexOf( general ) > -1 )
+						if ( matcher.find( )
+								&& line.split( "(?i)(character.+)("
+										+ general
+										+ ")(\\s*)(,)" ).length == 2 )
 						{
 							startGeneral = true;
 						}

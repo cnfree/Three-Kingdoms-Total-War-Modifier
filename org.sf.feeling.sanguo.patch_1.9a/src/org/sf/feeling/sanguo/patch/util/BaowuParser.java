@@ -264,7 +264,9 @@ public class BaowuParser {
 						Pattern pattern = Pattern
 								.compile("^\\s*(character)(.+)(named)(\\s+)(character)");
 						Matcher matcher = pattern.matcher(line);
-						if (matcher.find() && line.indexOf(general) > -1) {
+						if (matcher.find() && line.split( "(?i)(character.+)("
+								+ general
+								+ ")(\\s*)(,)" ).length == 2) {
 							startGerenal = true;
 						}
 					} else {

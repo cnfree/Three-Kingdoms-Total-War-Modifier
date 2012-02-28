@@ -1022,6 +1022,21 @@ public class GeneralEditPage extends SimpleTabPage
 						.trim( ) );
 				customGeneral.editGeneral( );
 				MapUtil.initMap( );
+				
+				soldier = null;
+				skills = null;
+				smallImage = null;
+				bigImage = null;
+				soldierImage = null;
+				general = null;
+				baowus = null;
+				jueweis = null;
+				imageCanvas.clear( );
+				generalDesc.setText( "" );
+				
+				generalCombo.notifyListeners( SWT.Selection,
+						new Event( ) );
+				
 				applyButton.setEnabled( true );
 				checkEnableStatus( );
 				refresh( );
