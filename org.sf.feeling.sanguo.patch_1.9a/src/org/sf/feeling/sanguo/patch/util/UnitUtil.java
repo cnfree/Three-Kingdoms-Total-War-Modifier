@@ -1281,6 +1281,10 @@ public class UnitUtil
 	{
 		String dictionary = (String) MapUtil.unitTypeToDictionaryMap.get( unitType );
 		String oldName = (String) UnitUtil.getGeneralUnits( ).get( unitType );
+		if(oldName == null)
+			oldName = (String) UnitUtil.getSoldierUnits( ).get( unitType );
+		if(oldName == null)
+			return;
 		String newName = ChangeCode.toShort( name );
 		if ( FileConstants.exportUnitFile.exists( ) )
 		{

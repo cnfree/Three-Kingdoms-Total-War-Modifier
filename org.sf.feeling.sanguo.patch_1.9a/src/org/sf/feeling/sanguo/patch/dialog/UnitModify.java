@@ -23,9 +23,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
 import org.sf.feeling.sanguo.patch.model.Unit;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
+import org.sf.feeling.sanguo.patch.util.MapUtil;
 import org.sf.feeling.sanguo.patch.util.UnitParser;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
@@ -97,75 +99,78 @@ public class UnitModify
 	private Button applyButton;
 	private Button restoreButton;
 
-	String[] officers = new String[officerMap.size( )];
+	private void initModels( )
 	{
-		for ( int i = 0; i < officers.length; i++ )
+		officers = new String[officerMap.size( )];
 		{
-			officers[i] = (String) officerMap.get( i );
+			for ( int i = 0; i < officers.length; i++ )
+			{
+				officers[i] = (String) officerMap.get( i );
+			}
 		}
-	}
 
-	String[] horses = new String[horseMap.size( )];
-	{
-		for ( int i = 0; i < horses.length; i++ )
+		horses = new String[horseMap.size( )];
 		{
-			horses[i] = (String) horseMap.get( i );
+			for ( int i = 0; i < horses.length; i++ )
+			{
+				horses[i] = (String) horseMap.get( i );
+			}
 		}
-	}
 
-	String[] soldierQi = new String[soldierQiMap.size( )];
-	{
-		for ( int i = 0; i < soldierQi.length; i++ )
+		soldierQis = new String[soldierQiMap.size( )];
 		{
-			soldierQi[i] = ChangeCode.toLong( (String) unitMap.get( soldierQiMap.getKeyList( )
-					.get( i ) ) );
-			if ( this.generalUnitMap.containsKey( soldierQiMap.getKeyList( )
-					.get( i ) ) )
-				soldierQi[i] += "卫队";
-			else
-				soldierQi[i] += "士兵";
+			for ( int i = 0; i < soldierQis.length; i++ )
+			{
+				soldierQis[i] = ChangeCode.toLong( (String) unitMap.get( soldierQiMap.getKeyList( )
+						.get( i ) ) );
+				if ( this.generalUnitMap.containsKey( soldierQiMap.getKeyList( )
+						.get( i ) ) )
+					soldierQis[i] += "卫队";
+				else
+					soldierQis[i] += "士兵";
+			}
 		}
-	}
 
-	String[] soldierBu = new String[soldierBuMap.size( )];
-	{
-		for ( int i = 0; i < soldierBu.length; i++ )
+		soldierBus = new String[soldierBuMap.size( )];
 		{
-			soldierBu[i] = ChangeCode.toLong( (String) unitMap.get( soldierBuMap.getKeyList( )
-					.get( i ) ) );
-			if ( this.generalUnitMap.containsKey( soldierBuMap.getKeyList( )
-					.get( i ) ) )
-				soldierBu[i] += "卫队";
-			else
-				soldierBu[i] += "士兵";
+			for ( int i = 0; i < soldierBus.length; i++ )
+			{
+				soldierBus[i] = ChangeCode.toLong( (String) unitMap.get( soldierBuMap.getKeyList( )
+						.get( i ) ) );
+				if ( this.generalUnitMap.containsKey( soldierBuMap.getKeyList( )
+						.get( i ) ) )
+					soldierBus[i] += "卫队";
+				else
+					soldierBus[i] += "士兵";
+			}
 		}
-	}
 
-	String[] soldierSiege = new String[soldierSiegeMap.size( )];
-	{
-		for ( int i = 0; i < soldierSiege.length; i++ )
+		soldierSieges = new String[soldierSiegeMap.size( )];
 		{
-			soldierSiege[i] = ChangeCode.toLong( (String) unitMap.get( soldierSiegeMap.getKeyList( )
-					.get( i ) ) );
-			if ( this.generalUnitMap.containsKey( soldierSiegeMap.getKeyList( )
-					.get( i ) ) )
-				soldierSiege[i] += "卫队";
-			else
-				soldierSiege[i] += "士兵";
+			for ( int i = 0; i < soldierSieges.length; i++ )
+			{
+				soldierSieges[i] = ChangeCode.toLong( (String) unitMap.get( soldierSiegeMap.getKeyList( )
+						.get( i ) ) );
+				if ( this.generalUnitMap.containsKey( soldierSiegeMap.getKeyList( )
+						.get( i ) ) )
+					soldierSieges[i] += "卫队";
+				else
+					soldierSieges[i] += "士兵";
+			}
 		}
-	}
 
-	String[] soldierHandler = new String[soldierHandlerMap.size( )];
-	{
-		for ( int i = 0; i < soldierHandler.length; i++ )
+		soldierHandlers = new String[soldierHandlerMap.size( )];
 		{
-			soldierHandler[i] = ChangeCode.toLong( (String) unitMap.get( soldierHandlerMap.getKeyList( )
-					.get( i ) ) );
-			if ( this.generalUnitMap.containsKey( soldierHandlerMap.getKeyList( )
-					.get( i ) ) )
-				soldierHandler[i] += "卫队";
-			else
-				soldierHandler[i] += "士兵";
+			for ( int i = 0; i < soldierHandlers.length; i++ )
+			{
+				soldierHandlers[i] = ChangeCode.toLong( (String) unitMap.get( soldierHandlerMap.getKeyList( )
+						.get( i ) ) );
+				if ( this.generalUnitMap.containsKey( soldierHandlerMap.getKeyList( )
+						.get( i ) ) )
+					soldierHandlers[i] += "卫队";
+				else
+					soldierHandlers[i] += "士兵";
+			}
 		}
 	}
 
@@ -222,15 +227,26 @@ public class UnitModify
 
 		initSoldierCombo( );
 
-		gd = new GridData( );
-		gd.horizontalSpan = 2;
-		Label label = WidgetUtil.getToolkit( )
-				.createLabel( clientContainer, "" );
 		if ( isMemory )
 		{
-			label.setText( "(修改数据不会影响原兵种属性)" );
+			gd = new GridData( );
+			gd.horizontalSpan = 2;
+
+			Label label = WidgetUtil.getToolkit( )
+					.createLabel( clientContainer, "(修改数据不会影响原兵种属性)" );
+			label.setLayoutData( gd );
 		}
-		label.setLayoutData( gd );
+		else
+		{
+			nameLabel = WidgetUtil.getToolkit( ).createLabel( clientContainer,
+					"编辑名称：" );
+
+			gd = new GridData( );
+			gd.widthHint = 147;
+			nameText = WidgetUtil.getToolkit( )
+					.createText( clientContainer, "" );
+			nameText.setLayoutData( gd );
+		}
 
 		final Composite patchClient = WidgetUtil.getToolkit( )
 				.createComposite( clientContainer );
@@ -286,7 +302,8 @@ public class UnitModify
 		officer1Combo.setItems( officers );
 		officer1Combo.add( "", 0 );
 
-		WidgetUtil.getToolkit( ).createLabel( patchClient, "将军2模型：" );
+		Label general2Label = WidgetUtil.getToolkit( )
+				.createLabel( patchClient, "将军2模型：" );
 		officer2Combo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 				SWT.READ_ONLY );
 		gd = new GridData( );
@@ -308,6 +325,13 @@ public class UnitModify
 		gd = new GridData( );
 		gd.widthHint = general3Label.computeSize( SWT.DEFAULT, SWT.DEFAULT ).x + 1;
 		soldierLabel.setLayoutData( gd );
+
+		if ( nameLabel != null )
+		{
+			gd = new GridData( );
+			gd.widthHint = general2Label.computeSize( SWT.DEFAULT, SWT.DEFAULT ).x;
+			nameLabel.setLayoutData( gd );
+		}
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "马匹模型：" );
 		mountCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
@@ -336,7 +360,7 @@ public class UnitModify
 					patchClient.setEnabled( true );
 					String soldierType = null;
 					int index = soldierCombo.getSelectionIndex( )
-							- ( soldierCombo.getItemCount( ) - soldierUnitMap .size( ) );
+							- ( soldierCombo.getItemCount( ) - soldierUnitMap.size( ) );
 					if ( index > -1 )
 					{
 						soldierType = (String) soldierUnitMap.getKeyList( )
@@ -1102,7 +1126,17 @@ public class UnitModify
 	private void initSoldierCombo( )
 	{
 		List soldierList = new ArrayList( );
+		unitMap = UnitUtil.getUnits( );
 		generalUnitMap = UnitUtil.getGeneralUnits( );
+		officerMap = UnitUtil.getAvailableOfficers( );
+		horseMap = UnitUtil.getAvailableHorses( );
+		soldierQiMap = UnitUtil.getCavalryMap( );
+		soldierBuMap = UnitUtil.getInfantryMap( );
+		soldierSiegeMap = UnitUtil.getSiegeMap( );
+		soldierHandlerMap = UnitUtil.getHandlerMap( );
+		
+		initModels();
+		
 		for ( int i = 0; i < generalUnitMap.getKeyList( ).size( ); i++ )
 		{
 			soldierList.add( ChangeCode.toLong( (String) generalUnitMap.get( i ) ) );
@@ -1610,6 +1644,31 @@ public class UnitModify
 					// ".unit.patch.bak")
 					// .deleteOnExit();
 					UnitParser.saveSoldier( soldier );
+					if ( nameText != null
+							&& nameText.getText( ).trim( ).length( ) > 0 )
+					{
+						UnitUtil.setUnitName( soldier.getType( ),
+								nameText.getText( ).trim( ) );
+						MapUtil.initMap( );
+						refresh( );
+						if ( soldierType != null )
+						{
+							String name = (String) UnitUtil.getGeneralUnits( )
+									.get( soldierType );
+							if ( name == null )
+								name = (String) UnitUtil.getSoldierUnits( )
+										.get( soldierType );
+							if ( name != null )
+							{
+								String newName = ChangeCode.toLong( name );
+								soldierCombo.setText( newName );
+							}
+							else
+							{
+								soldierCombo.clearSelection( );
+							}
+						}
+					}
 				}
 				return soldier;
 			}
@@ -1619,6 +1678,10 @@ public class UnitModify
 
 	private void initSoldier( Unit soldier )
 	{
+		if ( nameText != null )
+		{
+			nameText.setText( "" );
+		}
 		String[] soldierSoldier = soldier.getSoldier( );
 		soldierNumberCombo.setText( "" );
 		if ( soldierSoldier != null && soldierSoldier.length == 4 )
@@ -1832,7 +1895,7 @@ public class UnitModify
 		if ( ( "infantry".equals( soldier.getCategory( ) ) ) )
 		{
 			soldierModelCombo.removeAll( );
-			soldierModelCombo.setItems( this.soldierBu );
+			soldierModelCombo.setItems( this.soldierBus );
 			soldierModelCombo.add( "", 0 );
 
 			int index = soldierBuMap.getKeyList( ).indexOf( soldier.getType( ) );
@@ -1847,7 +1910,7 @@ public class UnitModify
 				&& mountCombo.isEnabled( ) )
 		{
 			soldierModelCombo.removeAll( );
-			soldierModelCombo.setItems( this.soldierQi );
+			soldierModelCombo.setItems( this.soldierQis );
 			soldierModelCombo.add( "", 0 );
 
 			int index = soldierQiMap.getKeyList( ).indexOf( soldier.getType( ) );
@@ -1861,7 +1924,7 @@ public class UnitModify
 		else if ( ( "siege".equals( soldier.getCategory( ) ) ) )
 		{
 			soldierModelCombo.removeAll( );
-			soldierModelCombo.setItems( this.soldierSiege );
+			soldierModelCombo.setItems( this.soldierSieges );
 			soldierModelCombo.add( "", 0 );
 
 			int index = soldierSiegeMap.getKeyList( )
@@ -1876,7 +1939,7 @@ public class UnitModify
 		else if ( ( "handler".equals( soldier.getCategory( ) ) ) )
 		{
 			soldierModelCombo.removeAll( );
-			soldierModelCombo.setItems( this.soldierHandler );
+			soldierModelCombo.setItems( this.soldierHandlers );
 			soldierModelCombo.add( "", 0 );
 
 			int index = soldierHandlerMap.getKeyList( )
@@ -2181,6 +2244,14 @@ public class UnitModify
 
 	private SortMap soldierUnitMap;
 	private Group horseGroup;
+	private Text nameText;
+	private Label nameLabel;
+	private String[] officers;
+	private String[] horses;
+	private String[] soldierQis;
+	private String[] soldierBus;
+	private String[] soldierSieges;
+	private String[] soldierHandlers;
 
 	public void setSoldier( Unit soldier )
 	{
