@@ -172,9 +172,9 @@ public class CustomGeneralUnitDialog extends BaseDialog {
 							.get(soldierImageCombo.getSelectionIndex());
 					if (soldierType != null) {
 						Unit soldier = UnitParser.getUnit(soldierType);
-						String dictionary = soldier.getDictionary();
+						String dictionary = soldier.getType( );
 						String[] factions = UnitUtil
-								.getFactionsFromSoldierDictionary(dictionary);
+								.getFactionsFromSoldierType(soldierType);
 						for (int i = 0; i < factions.length; i++) {
 							File file = new File(Patch.GAME_ROOT
 									+ "\\alexander\\data\\ui\\unit_info\\"
@@ -316,7 +316,7 @@ public class CustomGeneralUnitDialog extends BaseDialog {
 		else {
 			String dictionary = soldier.getDictionary();
 			String[] factions = UnitUtil
-					.getFactionsFromSoldierDictionary(dictionary);
+					.getFactionsFromSoldierType(soldier.getType( ));
 			for (int i = 0; i < factions.length; i++) {
 				File file = new File(Patch.GAME_ROOT
 						+ "\\alexander\\data\\ui\\unit_info\\" + factions[i] + "\\"

@@ -58,7 +58,7 @@ public class MapUtil
 	// name
 	static SortMap generalUnitTypeMap; // key-value:general code - unit type
 	static SortMap unitTypeToDictionaryMap; // key-value:unit type - unit
-	// dictionary
+//	// dictionary
 	static SortMap unitDictionaryToTypeMap; // key-value:unit dictionary - unit
 	// type
 	static List soldierUnitList;

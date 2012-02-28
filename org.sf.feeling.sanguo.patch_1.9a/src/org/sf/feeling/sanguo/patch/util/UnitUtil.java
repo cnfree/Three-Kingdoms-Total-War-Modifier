@@ -410,14 +410,12 @@ public class UnitUtil
 
 	public static String[] getFactionsByUnitType( String soldierType )
 	{
-		String soldierDictionary = UnitUtil.getUnitDictionary( soldierType );
-		return getFactionsFromSoldierDictionary( soldierDictionary );
+		return getFactionsFromSoldierType( soldierType );
 	}
 
-	public static String[] getFactionsFromSoldierDictionary(
-			String soldierDictionary )
+	public static String[] getFactionsFromSoldierType( String soldierType )
 	{
-		List factions = (List) MapUtil.unitFactionMap.get( soldierDictionary );
+		List factions = (List) MapUtil.unitFactionMap.get( soldierType );
 		if ( factions != null )
 			return (String[]) factions.toArray( new String[0] );
 		return new String[0];
@@ -1293,14 +1291,70 @@ public class UnitUtil
 				String line = null;
 				StringWriter writer = new StringWriter( );
 				PrintWriter printer = new PrintWriter( writer );
+				boolean startName = false;
+				boolean startNameDescr = false;
+				boolean startNameShortDescr = false;
+				
+				Pattern namePattern = Pattern.compile( "(?i)\\{\\s*"
+						+ Pattern.quote( dictionary )
+						+ "\\s*\\}" );
+				Pattern nameDesrcPattern = Pattern.compile( "(?i)\\{\\s*"
+						+ Pattern.quote( dictionary )
+						+ "_descr\\s*\\}" );
+				Pattern nameShortDesrcPattern = Pattern.compile( "(?i)\\{\\s*"
+						+ Pattern.quote( dictionary )
+						+ "_descr_short\\s*\\}" );
+				Pattern startPattern = Pattern.compile( "^\\s*\\{" );
+				
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.indexOf( dictionary ) > -1 )
+					if ( startPattern.matcher( line ).find( ) )
+					{
+						if ( line.indexOf( dictionary ) != -1 )
+						{
+							
+							if ( namePattern.matcher( line ).find( ) )
+							{
+								startName = true;
+							}
+							else
+							{
+								startName = false;
+							}
+							if ( nameDesrcPattern.matcher( line ).find( ) ) 
+							{
+								startNameDescr = true;
+							}
+							else
+							{
+								startNameDescr = false;
+							}
+							if ( nameShortDesrcPattern.matcher( line ).find( ) )
+							{
+								startNameShortDescr = true;
+							}
+							else
+							{
+								startNameShortDescr = false;
+							}
+						}
+						else
+						{
+							startName = false;
+							startNameDescr = false;
+							startNameShortDescr = false;
+						}
+					}
+					if ( startName == true
+							|| startNameDescr == true
+							|| startNameShortDescr == true )
 					{
 						printer.println( line.replaceAll( oldName, newName ) );
 					}
 					else
+					{
 						printer.println( line );
+					}
 				}
 				in.close( );
 				PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.exportUnitFile ),

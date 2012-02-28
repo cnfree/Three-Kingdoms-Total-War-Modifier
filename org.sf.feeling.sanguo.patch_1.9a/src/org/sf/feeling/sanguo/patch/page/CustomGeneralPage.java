@@ -632,7 +632,7 @@ public class CustomGeneralPage extends SimpleTabPage
 					{
 						Unit soldier = UnitParser.getUnit( soldierType );
 						String dictionary = soldier.getDictionary( );
-						String[] factions = UnitUtil.getFactionsFromSoldierDictionary( dictionary );
+						String[] factions = UnitUtil.getFactionsFromSoldierType( soldierType );
 						for ( int i = 0; i < factions.length; i++ )
 						{
 							File file = new File( Patch.GAME_ROOT
@@ -957,7 +957,7 @@ public class CustomGeneralPage extends SimpleTabPage
 				else
 				{
 					String dictionary = soldier.getDictionary( );
-					String[] factions = UnitUtil.getFactionsFromSoldierDictionary( dictionary );
+					String[] factions = UnitUtil.getFactionsFromSoldierType( soldier.getType( ) );
 					for ( int i = 0; i < factions.length; i++ )
 					{
 						File file = new File( Patch.GAME_ROOT
