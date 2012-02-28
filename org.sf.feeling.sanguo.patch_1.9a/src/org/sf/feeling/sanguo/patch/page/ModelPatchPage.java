@@ -267,7 +267,7 @@ public class ModelPatchPage extends SimpleTabPage
 								&& textureRootFile.isDirectory( ) )
 						{
 							FileUtil.writeToBinarayFile( new File( textureRootFile.getAbsolutePath( )
-									+ "\\Xianzhenyin_Lvbu.cas" ),
+									+ "\\Xianzhenyin_Lvbu.tga.dds" ),
 									ModelPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/models/Xianzhenyin_Lvbu.tga.dds" ) );
 						}
 						MapUtil.initMap( );
@@ -443,7 +443,7 @@ public class ModelPatchPage extends SimpleTabPage
 							&& textureRootFile.isDirectory( ) )
 					{
 						FileUtil.writeToBinarayFile( new File( textureRootFile.getAbsolutePath( )
-								+ "\\Xianzhenyin_Lvbu.cas" ),
+								+ "\\Xianzhenyin_Lvbu.tga.dds" ),
 								ModelPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/models/Xianzhenyin_Lvbu.tga.dds" ) );
 					}
 					MapUtil.initMap( );
