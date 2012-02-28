@@ -1281,9 +1281,9 @@ public class UnitUtil
 	{
 		String dictionary = (String) MapUtil.unitTypeToDictionaryMap.get( unitType );
 		String oldName = (String) UnitUtil.getGeneralUnits( ).get( unitType );
-		if(oldName == null)
+		if ( oldName == null )
 			oldName = (String) UnitUtil.getSoldierUnits( ).get( unitType );
-		if(oldName == null)
+		if ( oldName == null )
 			return;
 		String newName = ChangeCode.toShort( name );
 		if ( FileConstants.exportUnitFile.exists( ) )
@@ -1298,7 +1298,7 @@ public class UnitUtil
 				boolean startName = false;
 				boolean startNameDescr = false;
 				boolean startNameShortDescr = false;
-				
+
 				Pattern namePattern = Pattern.compile( "(?i)\\{\\s*"
 						+ Pattern.quote( dictionary )
 						+ "\\s*\\}" );
@@ -1309,14 +1309,14 @@ public class UnitUtil
 						+ Pattern.quote( dictionary )
 						+ "_descr_short\\s*\\}" );
 				Pattern startPattern = Pattern.compile( "^\\s*\\{" );
-				
+
 				while ( ( line = in.readLine( ) ) != null )
 				{
 					if ( startPattern.matcher( line ).find( ) )
 					{
 						if ( line.indexOf( dictionary ) != -1 )
 						{
-							
+
 							if ( namePattern.matcher( line ).find( ) )
 							{
 								startName = true;
@@ -1325,7 +1325,7 @@ public class UnitUtil
 							{
 								startName = false;
 							}
-							if ( nameDesrcPattern.matcher( line ).find( ) ) 
+							if ( nameDesrcPattern.matcher( line ).find( ) )
 							{
 								startNameDescr = true;
 							}
@@ -1748,7 +1748,10 @@ public class UnitUtil
 										", x " + posX + "," );
 								infoLine = infoLine.replaceAll( "(?i)(,)(\\s*)(y)(\\s+\\d+\\s*)(,)",
 										", y " + posY + "," );
-								infoLine.replaceAll( generalCode,
+								infoLine = infoLine.replaceAll( "sub_faction.+,\\s*"
+										+ generalCode,
+										generalCode );
+								infoLine = infoLine.replaceAll( generalCode,
 										"General_Replace" );
 							}
 							else

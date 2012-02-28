@@ -58,7 +58,7 @@ public class MapUtil
 	// name
 	static SortMap generalUnitTypeMap; // key-value:general code - unit type
 	static SortMap unitTypeToDictionaryMap; // key-value:unit type - unit
-//	// dictionary
+	// // dictionary
 	static SortMap unitDictionaryToTypeMap; // key-value:unit dictionary - unit
 	// type
 	static List soldierUnitList;
@@ -320,107 +320,112 @@ public class MapUtil
 					}
 					if ( startFaction )
 					{
-						Pattern pattern = Pattern.compile( "^\\s*(culture)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
 						{
-							String culture = line.replaceAll( "(?i)(culture)",
-									"" ).trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setCulture( culture );
-							continue;
+							Pattern pattern = Pattern.compile( "^\\s*(culture)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String culture = line.replaceAll( "(?i)(culture)",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setCulture( culture );
+								continue;
+							}
+						}
+						{
+							Pattern pattern = Pattern.compile( "^\\s*(symbol)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String symbol = line.replaceFirst( "(?i)symbol",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setSymbol( symbol );
+								continue;
+							}
+						}
+						{
+							Pattern pattern = Pattern.compile( "^\\s*(primary_colour)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String primary_colour = line.replaceAll( "(?i)primary_colour",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setPrimary_colour( primary_colour );
+								continue;
+							}
+						}
+						{
+							Pattern pattern = Pattern.compile( "^\\s*(secondary_colour)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String secondary_colour = line.replaceAll( "(?i)secondary_colour",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setSecondary_colour( secondary_colour );
+								continue;
+							}
+						}
+						{
+							Pattern pattern = Pattern.compile( "^\\s*(loading_logo)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String loading_logo = line.replaceAll( "(?i)loading_logo",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setLoading_logo( loading_logo );
+								continue;
+							}
+						}
+						{
+							Pattern pattern = Pattern.compile( "^\\s*(standard_index)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String standard_index = line.replaceAll( "(?i)standard_index",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setStandard_index( standard_index );
+								continue;
+							}
+						}
+						{
+							Pattern pattern = Pattern.compile( "^\\s*(custom_battle_availability)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String custom_battle_availability = line.replaceAll( "(?i)custom_battle_availability",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setCustom_battle_availability( custom_battle_availability );
+								continue;
+							}
+						}
+						{
+							Pattern pattern = Pattern.compile( "^\\s*(prefers_naval_invasions)(\\s+)",
+									Pattern.CASE_INSENSITIVE );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								String prefers_naval_invasions = line.replaceAll( "(?i)prefers_naval_invasions",
+										"" )
+										.trim( );
+								( (FactionDescription) factionDescriptionMap.get( faction ) ).setPrefers_naval_invasions( prefers_naval_invasions );
+								continue;
+							}
 						}
 					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(symbol)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
-						{
-							String symbol = line.replaceFirst( "(?i)symbol", "" )
-									.trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setSymbol( symbol );
-							continue;
-						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(primary_colour)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
-						{
-							String primary_colour = line.replaceAll( "(?i)primary_colour",
-									"" )
-									.trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setPrimary_colour( primary_colour );
-							continue;
-						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(secondary_colour)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
-						{
-							String secondary_colour = line.replaceAll( "(?i)secondary_colour",
-									"" )
-									.trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setSecondary_colour( secondary_colour );
-							continue;
-						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(loading_logo)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
-						{
-							String loading_logo = line.replaceAll( "(?i)loading_logo",
-									"" )
-									.trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setLoading_logo( loading_logo );
-							continue;
-						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(standard_index)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
-						{
-							String standard_index = line.replaceAll( "(?i)standard_index",
-									"" )
-									.trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setStandard_index( standard_index );
-							continue;
-						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(custom_battle_availability)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
-						{
-							String custom_battle_availability = line.replaceAll( "(?i)custom_battle_availability",
-									"" )
-									.trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setCustom_battle_availability( custom_battle_availability );
-							continue;
-						}
-					}
-					{
-						Pattern pattern = Pattern.compile( "^\\s*(prefers_naval_invasions)(\\s+)",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
-						{
-							String prefers_naval_invasions = line.replaceAll( "(?i)prefers_naval_invasions",
-									"" )
-									.trim( );
-							( (FactionDescription) factionDescriptionMap.get( faction ) ).setPrefers_naval_invasions( prefers_naval_invasions );
-							continue;
-						}
-					}
+
 				}
 
 				in.close( );
@@ -1019,7 +1024,10 @@ public class MapUtil
 					{
 						List list = (List) unitFactionMap.get( type );
 						String factionName = (String) factionMap.get( list.get( 0 ) );
-						if ( factionName == null || list.get( 0 ).toString( ).equalsIgnoreCase( "all" ) )
+						if ( factionName == null
+								|| list.get( 0 )
+										.toString( )
+										.equalsIgnoreCase( "all" ) )
 							soldierUnitMap.put( type, name );
 						else
 							soldierUnitMap.put( type, name
@@ -1036,9 +1044,9 @@ public class MapUtil
 					String type = (String) generalUnitMap.getKeyList( ).get( j );
 					if ( type.toLowerCase( ).endsWith( "_b" ) )
 						generalUnitMap.put( type, name + "（点将台）" );
-					else if(type.toLowerCase( ).endsWith( "az" ))
+					else if ( type.toLowerCase( ).endsWith( "az" ) )
 						generalUnitMap.put( type, name + "（对战）" );
-					else if(type.toLowerCase( ).endsWith( "ec" ))
+					else if ( type.toLowerCase( ).endsWith( "ec" ) )
 						generalUnitMap.put( type, name + "（电脑）" );
 				}
 			}
