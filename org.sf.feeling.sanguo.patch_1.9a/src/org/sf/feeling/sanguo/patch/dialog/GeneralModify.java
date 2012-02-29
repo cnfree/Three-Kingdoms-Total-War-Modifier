@@ -369,7 +369,8 @@ public class GeneralModify
 		patchClient.setLayoutData( gd );
 		if ( !isMemory )
 			patchClient.setEnabled( false );
-
+		else
+			patchClient.setEnabled( true );
 		{
 			WidgetUtil.getToolkit( ).createLabel( patchClient, "体力：" );
 			CCombo combo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
@@ -1262,8 +1263,10 @@ public class GeneralModify
 					}
 				}
 				else
-					patchClient.setEnabled( false );
-
+				{
+					if ( !isMemory )
+						patchClient.setEnabled( false );
+				}
 				Event event = new Event( );
 				event.type = SWT.Verify;
 				event.doit = false;
@@ -1374,7 +1377,7 @@ public class GeneralModify
 					}
 					else if ( "exp".equals( skill ) )
 					{
-						skills.put( skill, index - 1+ "" );
+						skills.put( skill, index - 1 + "" );
 					}
 					else
 					{
@@ -1483,10 +1486,17 @@ public class GeneralModify
 				generalCombo.select( generalMap.getIndexOf( general ) );
 			}
 			initSkills( );
-			if(generalCombo.getSelectionIndex( )!=-1){
+			if ( generalCombo.getSelectionIndex( ) != -1 )
+			{
 				patchClient.setEnabled( true );
 			}
-			else patchClient.setEnabled( false );
+			else
+			{
+				if ( !isMemory )
+				{
+					patchClient.setEnabled( false );
+				}
+			}
 		}
 	}
 

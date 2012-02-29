@@ -36,6 +36,8 @@ public class GeneralParser
 				StringWriter writer = new StringWriter( );
 				PrintWriter printer = new PrintWriter( writer );
 				boolean startGeneral = false;
+				String exp = (String)generalSkills.get( "exp" );
+				generalSkills.remove( "exp" );
 				while ( ( line = in.readLine( ) ) != null )
 				{
 					if ( !startGeneral )
@@ -63,8 +65,6 @@ public class GeneralParser
 								while ( iter.hasNext( ) )
 								{
 									String key = (String) iter.next( );
-									if ( "exp".equals( key ) )
-										continue;
 									String value = (String) generalSkills.get( key );
 									printer.print( key + " " + value );
 									if ( iter.hasNext( ) )
@@ -83,7 +83,7 @@ public class GeneralParser
 							if ( matcher.find( ) )
 							{
 								printer.println( line.replaceFirst( "(?i)\\s+(exp)\\s+\\d+",
-										"		exp "+generalSkills.get( "exp" ) ) );
+										"		exp "+ exp ) );
 								startGeneral = false;
 								continue;
 							}

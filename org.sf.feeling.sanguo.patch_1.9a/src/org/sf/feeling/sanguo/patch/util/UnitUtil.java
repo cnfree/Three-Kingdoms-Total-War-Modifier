@@ -2008,6 +2008,8 @@ public class UnitUtil
 			StringWriter writer = new StringWriter( );
 			PrintWriter printer = new PrintWriter( writer );
 			boolean finish = false;
+			String exp = (String) skills.get( "exp" );
+			skills.remove( "exp" );
 			while ( ( line = in.readLine( ) ) != null )
 			{
 				if ( !finish )
@@ -2077,7 +2079,9 @@ public class UnitUtil
 						printer.println( "army" );
 						printer.println( "unit		"
 								+ soldierType
-								+ "		exp 2 armour 2 weapon_lvl 0" );
+								+ "		exp "
+								+ exp
+								+ " armour 2 weapon_lvl 1" );
 						printer.println( );
 					}
 					else
