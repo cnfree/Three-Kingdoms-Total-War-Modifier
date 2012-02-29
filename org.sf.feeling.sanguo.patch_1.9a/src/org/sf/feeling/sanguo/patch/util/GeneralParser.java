@@ -52,27 +52,41 @@ public class GeneralParser
 					}
 					else
 					{
-						Pattern pattern = Pattern.compile( "^\\s*(traits)(\\s+)" );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
 						{
-							printer.print( matcher.group( ) );
-							Iterator iter = generalSkills.getKeyList( )
-									.iterator( );
-							while ( iter.hasNext( ) )
+							Pattern pattern = Pattern.compile( "^\\s*(traits)(\\s+)" );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
 							{
-								String key = (String) iter.next( );
-								String value = (String) generalSkills.get( key );
-								printer.print( key + " " + value );
-								if ( iter.hasNext( ) )
+								printer.print( matcher.group( ) );
+								Iterator iter = generalSkills.getKeyList( )
+										.iterator( );
+								while ( iter.hasNext( ) )
 								{
-									printer.print( " , " );
+									String key = (String) iter.next( );
+									if ( "exp".equals( key ) )
+										continue;
+									String value = (String) generalSkills.get( key );
+									printer.print( key + " " + value );
+									if ( iter.hasNext( ) )
+									{
+										printer.print( " , " );
+									}
+									else
+										printer.println( );
 								}
-								else
-									printer.println( );
+								continue;
 							}
-							startGeneral = false;
-							continue;
+						}
+						{
+							Pattern pattern = Pattern.compile( "(?i)\\s+(exp)\\s+\\d+" );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								printer.println( line.replaceFirst( "(?i)\\s+(exp)\\s+\\d+",
+										"		exp "+generalSkills.get( "exp" ) ) );
+								startGeneral = false;
+								continue;
+							}
 						}
 					}
 					printer.println( line );
@@ -248,23 +262,35 @@ public class GeneralParser
 					}
 					else
 					{
-						Pattern pattern = Pattern.compile( "^\\s*(traits)(\\s+)" );
-						Matcher matcher = pattern.matcher( line );
-						if ( matcher.find( ) )
 						{
-							String[] skills = line.replaceAll( "traits", "" )
-									.split( ";" )[0].trim( ).split( "," );
-							for ( int i = 0; i < skills.length; i++ )
+							Pattern pattern = Pattern.compile( "^\\s*(traits)(\\s+)" );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
 							{
-								String[] skill = skills[i].trim( )
-										.replaceAll( "\\s+", "," )
-										.split( "," );
-								if ( skill.length == 2 )
+								String[] skills = line.replaceAll( "traits", "" )
+										.split( ";" )[0].trim( ).split( "," );
+								for ( int i = 0; i < skills.length; i++ )
 								{
-									skillMap.put( skill[0], skill[1] );
+									String[] skill = skills[i].trim( )
+											.replaceAll( "\\s+", "," )
+											.split( "," );
+									if ( skill.length == 2 )
+									{
+										skillMap.put( skill[0], skill[1] );
+									}
 								}
 							}
-							break;
+						}
+						{
+							Pattern pattern = Pattern.compile( "(?i)\\s+(exp)\\s+\\d+" );
+							Matcher matcher = pattern.matcher( line );
+							if ( matcher.find( ) )
+							{
+								skillMap.put( "exp", matcher.group( )
+										.replaceAll( "(?i)\\s+(exp)\\s+", "" )
+										.trim( ) );
+								break;
+							}
 						}
 					}
 				}

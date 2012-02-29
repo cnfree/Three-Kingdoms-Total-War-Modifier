@@ -559,7 +559,7 @@ public class CustomGeneralPage extends SimpleTabPage
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置新武将能力" );
+				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置新武将能力", true );
 				if ( skills == null )
 				{
 					skills = new SortMap( );

@@ -20,9 +20,10 @@ public class GeneralModifyDialog extends BaseDialog implements Listener {
 
 	private Control control;
 	private ScrolledComposite composite;
-
-	public GeneralModifyDialog(String title) {
+	private boolean isMemory;
+	public GeneralModifyDialog(String title, boolean isMemory) {
 		super(title);
+		this.isMemory = isMemory;
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -31,7 +32,7 @@ public class GeneralModifyDialog extends BaseDialog implements Listener {
 		composite.setExpandHorizontal(true);
 		composite.setExpandVertical(true);
 
-		modify = new GeneralModify(true);
+		modify = new GeneralModify(isMemory);
 		modify.addListener(this);
 
 		control = modify.createModifyControl(composite);

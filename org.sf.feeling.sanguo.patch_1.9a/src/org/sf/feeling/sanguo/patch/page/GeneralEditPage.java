@@ -553,7 +553,7 @@ public class GeneralEditPage extends SimpleTabPage
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置武将能力" );
+				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置武将能力", false );
 				if ( skills != null )
 				{
 					dialog.setGeneralSkills( general, skills );
