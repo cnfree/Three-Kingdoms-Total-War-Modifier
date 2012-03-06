@@ -1607,7 +1607,7 @@ public class StartPatchPage extends SimpleTabPage
 		if ( generalIdentity != null
 				&& generalIdentityChangeCombo.indexOf( generalIdentity ) != -1 )
 		{
-			generalIdentityChangeCombo.setText( generalChange );
+			generalIdentityChangeCombo.setText( generalIdentity );
 			generalIdentityChangeCombo.notifyListeners( SWT.Selection,
 					new Event( ) );
 		}
