@@ -404,8 +404,6 @@ public class UnitModify
 							if ( ( unit.hasSecondWeapon( ) && !soldier.hasSecondWeapon( ) )
 									|| ( unit.hasPrimaryWeapon( ) && !soldier.hasPrimaryWeapon( ) ) )
 							{
-								unitType = soldierType;
-								currentUnit = null;
 								MessageDialog.openInformation( Display.getDefault( )
 										.getActiveShell( ),
 										"错误信息提示",
@@ -417,23 +415,6 @@ public class UnitModify
 										new Event( ) );
 								return;
 							}
-							else
-							{
-								currentUnit = unit;
-							}
-						}
-						else
-						{
-							unitType = soldierType;
-							currentUnit = null;
-						}
-						if ( currentUnit != null )
-						{
-							initSoliderPriAndSec( currentUnit );
-						}
-						else
-						{
-							initSoliderPriAndSec( soldier );
 						}
 					}
 				}
