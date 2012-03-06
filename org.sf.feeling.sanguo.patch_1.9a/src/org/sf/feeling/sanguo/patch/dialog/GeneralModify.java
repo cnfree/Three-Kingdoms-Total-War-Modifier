@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
-import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
 import org.sf.feeling.sanguo.patch.util.GeneralParser;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
@@ -68,8 +67,6 @@ public class GeneralModify
 	};
 
 	private final Random random = new Random( );
-	private Button applyButton;
-	private Button restoreButton;
 	private Composite patchClient;
 	private Group[] groups = new Group[3];
 

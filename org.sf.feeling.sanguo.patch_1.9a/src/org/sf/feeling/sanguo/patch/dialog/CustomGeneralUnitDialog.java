@@ -36,11 +36,11 @@ import org.sf.feeling.sanguo.patch.model.Unit;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
 import org.sf.feeling.sanguo.patch.util.CustomGeneralUnit;
-import org.sf.feeling.sanguo.patch.util.UnitParser;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.FormWidgetFactory;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
+import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 import org.sf.feeling.swt.win32.extension.widgets.ShellWrapper;
@@ -168,28 +168,32 @@ public class CustomGeneralUnitDialog extends BaseDialog {
 		soldierImageCombo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (soldierImageCombo.getSelectionIndex() != -1) {
-					String soldierType = (String) generalUnitMap.getKeyList()
-							.get(soldierImageCombo.getSelectionIndex());
-					if (soldierType != null) {
-						Unit soldier = UnitParser.getUnit(soldierType);
-						String dictionary = soldier.getType( );
-						String[] factions = UnitUtil
-								.getFactionsFromSoldierType(soldierType);
-						for (int i = 0; i < factions.length; i++) {
-							File file = new File(Patch.GAME_ROOT
+					String soldierType = (String) generalUnitMap.getKeyList( )
+							.get( soldierImageCombo.getSelectionIndex( ) );
+					if ( soldierType != null )
+					{
+						String dictionary = UnitUtil.getUnitDictionary( soldierType );
+						String[] factions = UnitUtil.getFactionsFromSoldierType( soldierType );
+						for ( int i = 0; i < factions.length; i++ )
+						{
+							File file = new File( Patch.GAME_ROOT
 									+ "\\alexander\\data\\ui\\unit_info\\"
-									+ factions[i] + "\\" + dictionary
-									+ "_info.tga");
-							if (file.exists() && file.length() > 0) {
-								try {
-									ImageData image = TgaLoader
-											.loadImage(new BufferedInputStream(
-													new FileInputStream(file)));
-									imageCanvas.setImageData(image);
+									+ factions[i]
+									+ "\\"
+									+ dictionary
+									+ "_info.tga" );
+							if ( file.exists( ) && file.length( ) > 0 )
+							{
+								try
+								{
+									ImageData image = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( file ) ) );
+									imageCanvas.setImageData( image );
 									soldierImage = image;
 									break;
-								} catch (IOException e1) {
-									e1.printStackTrace();
+								}
+								catch ( IOException e1 )
+								{
+									e1.printStackTrace( );
 								}
 							}
 						}
@@ -219,21 +223,26 @@ public class CustomGeneralUnitDialog extends BaseDialog {
 							.trim());
 					if (imageFile.exists() && imageFile.isFile()) {
 						try {
-							if (imageFile.getName().toLowerCase().endsWith(
-									".tga")) {
-								ImageData imageData = TgaLoader.loadImage(
-										new FileInputStream(imageFile), true,
-										true).scaledTo(160, 210);
-								imageCanvas.setImageData(imageData);
-								soldierImage = imageData;
-							} else {
-								ImageLoader loader = new ImageLoader();
-								ImageData imageData = loader.load(imageFile
-										.getAbsolutePath())[0].scaledTo(160,
-										210);
-								imageCanvas.setImageData(imageData);
-								soldierImage = imageData;
+							ImageData imageData = null;
+							if ( imageFile.getName( )
+									.toLowerCase( )
+									.endsWith( ".tga" ) )
+							{
+								imageData = TgaLoader.loadImage( new FileInputStream( imageFile ),
+										true,
+										true );
+
 							}
+							else
+							{
+								ImageLoader loader = new ImageLoader( );
+								imageData = loader.load( imageFile.getAbsolutePath( ) )[0];
+							}
+							soldierImage = GraphicsUtil.resizeImage( imageData,
+									160,
+									210,
+									true );
+							imageCanvas.setImageData( soldierImage );
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
