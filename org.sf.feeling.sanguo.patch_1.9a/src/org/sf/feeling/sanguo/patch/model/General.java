@@ -12,13 +12,12 @@ public class General
 	private boolean isLeader = false;
 	private boolean isHeir = false;
 	private String faction;
-	
+
 	public boolean isHeir( )
 	{
 		return isHeir;
 	}
 
-	
 	public void setHeir( boolean isHeir )
 	{
 		this.isHeir = isHeir;
@@ -95,7 +94,7 @@ public class General
 	{
 		this.battle_model = battle_model;
 	}
-	
+
 	public String getFaction( )
 	{
 		return faction;

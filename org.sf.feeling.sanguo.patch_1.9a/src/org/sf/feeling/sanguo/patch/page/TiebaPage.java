@@ -8,6 +8,7 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.page;
 
 import org.eclipse.swt.SWT;
@@ -19,18 +20,18 @@ public class TiebaPage extends TabPage
 
 	private Browser browser;
 
-	public void buildUI(Composite parent)
+	public void buildUI( Composite parent )
 	{
-		browser = new Browser(parent, SWT.NONE);
-		browser.setUrl("http://tieba.baidu.com/f?kw=%C8%FD%B9%FA%C8%AB%C3%E6%D5%BD%D5%F9");
+		browser = new Browser( parent, SWT.NONE );
+		browser.setUrl( "http://tieba.baidu.com/f?kw=%C8%FD%B9%FA%C8%AB%C3%E6%D5%BD%D5%F9" );
 	}
 
-	public Composite getControl()
+	public Composite getControl( )
 	{
 		return browser;
 	}
 
-	public String getDisplayName()
+	public String getDisplayName( )
 	{
 		return "三国全面战争百度贴吧";
 	}

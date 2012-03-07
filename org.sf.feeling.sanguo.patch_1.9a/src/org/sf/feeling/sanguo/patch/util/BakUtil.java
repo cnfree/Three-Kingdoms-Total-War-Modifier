@@ -141,7 +141,7 @@ public class BakUtil
 			return false;
 		}
 	};
-	
+
 	private static FileFilter cityBannerFilter = new FileFilter( ) {
 
 		public boolean accept( File file )
@@ -149,9 +149,7 @@ public class BakUtil
 			if ( file.isDirectory( )
 					|| file.getName( ).toLowerCase( ).endsWith( ".dds" ) )
 			{
-				if ( file.getName( )
-						.toLowerCase( )
-						.indexOf( "#banner_symbol_" ) > -1 )
+				if ( file.getName( ).toLowerCase( ).indexOf( "#banner_symbol_" ) > -1 )
 				{
 					return true;
 				}

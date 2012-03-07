@@ -81,7 +81,7 @@ public class MapUtil
 	static SortMap factionDescriptionMap;
 	static HashSet unAvailableGeneralPoints = new HashSet( );
 	static SortMap factionProperty;
-
+	static SortMap generalModelProperty;
 	static
 	{
 		try
@@ -162,6 +162,8 @@ public class MapUtil
 		{
 			e.printStackTrace( );
 		}
+
+		generalModelProperty = FileUtil.loadProperties( "generalmodel" );
 	}
 
 	public static void initMap( )
@@ -569,7 +571,7 @@ public class MapUtil
 
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.split( ";" ).length == 0 )
+					if ( line.trim( ).startsWith( ";" ) )
 					{
 						continue;
 					}
@@ -1151,7 +1153,7 @@ public class MapUtil
 				String model = null;
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.split( ";" ).length == 0 )
+					if ( line.trim( ).startsWith( ";" ) )
 					{
 						continue;
 					}

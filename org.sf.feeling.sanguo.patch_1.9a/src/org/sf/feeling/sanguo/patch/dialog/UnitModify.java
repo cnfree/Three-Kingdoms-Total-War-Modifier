@@ -1115,9 +1115,9 @@ public class UnitModify
 		soldierBuMap = UnitUtil.getInfantryMap( );
 		soldierSiegeMap = UnitUtil.getSiegeMap( );
 		soldierHandlerMap = UnitUtil.getHandlerMap( );
-		
-		initModels();
-		
+
+		initModels( );
+
 		for ( int i = 0; i < generalUnitMap.getKeyList( ).size( ); i++ )
 		{
 			soldierList.add( ChangeCode.toLong( (String) generalUnitMap.get( i ) ) );

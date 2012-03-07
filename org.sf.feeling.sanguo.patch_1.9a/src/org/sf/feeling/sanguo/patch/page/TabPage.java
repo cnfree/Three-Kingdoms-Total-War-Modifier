@@ -8,26 +8,32 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.page;
 
 import org.eclipse.swt.widgets.Composite;
 import org.sf.feeling.sanguo.patch.widget.FormWidgetFactory;
 
-public abstract class TabPage {
-	public abstract void buildUI(Composite parent);
+public abstract class TabPage
+{
 
-	public abstract Composite getControl();
+	public abstract void buildUI( Composite parent );
 
-	public abstract String getDisplayName();
+	public abstract Composite getControl( );
 
-	public void refresh() {
-		FormWidgetFactory.getInstance().paintFormStyle(getControl());
-		FormWidgetFactory.getInstance().adapt(getControl());
+	public abstract String getDisplayName( );
+
+	public void refresh( )
+	{
+		FormWidgetFactory.getInstance( ).paintFormStyle( getControl( ) );
+		FormWidgetFactory.getInstance( ).adapt( getControl( ) );
 	}
 
-	public void deActivate() {
+	public void deActivate( )
+	{
 	}
 
-	public void activate() {
+	public void activate( )
+	{
 	}
 }

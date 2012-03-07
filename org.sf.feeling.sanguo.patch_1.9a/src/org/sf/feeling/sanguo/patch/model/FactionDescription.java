@@ -97,7 +97,8 @@ public class FactionDescription
 
 	public RGB parseRGB( String primary_colour )
 	{
-		String[] color = primary_colour.trim( ).split( "(\\s*,*\\s+)|(\\s*,+\\s*)" );
+		String[] color = primary_colour.trim( )
+				.split( "(\\s*,*\\s+)|(\\s*,+\\s*)" );
 		return new RGB( Integer.parseInt( color[1].trim( ) ),
 				Integer.parseInt( color[3].trim( ) ),
 				Integer.parseInt( color[5].trim( ) ) );

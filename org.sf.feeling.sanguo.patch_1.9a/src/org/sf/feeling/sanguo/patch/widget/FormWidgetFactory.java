@@ -8,6 +8,7 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.widget;
 
 import org.eclipse.swt.SWT;
@@ -40,21 +41,25 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 /**
  * A FormToolkit customized for use by tabbed property sheet page.
  */
-public class FormWidgetFactory extends FormToolkit {
+public class FormWidgetFactory extends FormToolkit
+{
 
 	/**
 	 * private constructor.
 	 */
-	private FormWidgetFactory() {
-		super(Display.getCurrent());
+	private FormWidgetFactory( )
+	{
+		super( Display.getCurrent( ) );
 	}
 
 	private static FormWidgetFactory factory;
 
-	public static FormWidgetFactory getInstance() {
-		if (factory == null) {
-			factory = new FormWidgetFactory();
-			factory.setBorderStyle(SWT.NULL);
+	public static FormWidgetFactory getInstance( )
+	{
+		if ( factory == null )
+		{
+			factory = new FormWidgetFactory( );
+			factory.setBorderStyle( SWT.NULL );
 		}
 		return factory;
 	}
@@ -68,8 +73,9 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the tab folder style.
 	 * @return the tab folder
 	 */
-	public CTabFolder createTabFolder(Composite parent, int style) {
-		CTabFolder tabFolder = new CTabFolder(parent, style);
+	public CTabFolder createTabFolder( Composite parent, int style )
+	{
+		CTabFolder tabFolder = new CTabFolder( parent, style );
 		return tabFolder;
 	}
 
@@ -82,8 +88,9 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the tab folder style.
 	 * @return the tab item.
 	 */
-	public CTabItem createTabItem(CTabFolder tabFolder, int style) {
-		CTabItem tabItem = new CTabItem(tabFolder, style);
+	public CTabItem createTabItem( CTabFolder tabFolder, int style )
+	{
+		CTabItem tabItem = new CTabItem( tabFolder, style );
 		return tabItem;
 	}
 
@@ -96,46 +103,52 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the list style.
 	 * @return the list.
 	 */
-	public List createList(Composite parent, int style) {
-		List list = new org.eclipse.swt.widgets.List(parent, style);
+	public List createList( Composite parent, int style )
+	{
+		List list = new org.eclipse.swt.widgets.List( parent, style );
 		return list;
 	}
 
-	public Composite createComposite(Composite parent, int style) {
-		Composite c = super.createComposite(parent, style);
-		paintBordersFor(c);
+	public Composite createComposite( Composite parent, int style )
+	{
+		Composite c = super.createComposite( parent, style );
+		paintBordersFor( c );
 		return c;
 	}
 
-	public Composite createComposite(Composite parent) {
-		Composite c = createComposite(parent, SWT.NONE);
+	public Composite createComposite( Composite parent )
+	{
+		Composite c = createComposite( parent, SWT.NONE );
 		return c;
 	}
 
-	public Button createButton(Composite parent, int style, boolean isFormStyle) {
+	public Button createButton( Composite parent, int style, boolean isFormStyle )
+	{
 		Button b;
-		if (isFormStyle)
-			b = super.createButton(parent, "", style);
+		if ( isFormStyle )
+			b = super.createButton( parent, "", style );
 		else
-			b = new Button(parent, style);
+			b = new Button( parent, style );
 		return b;
 	}
 
-	public Label createLabel(Composite parent, int style, boolean isFormStyle) {
+	public Label createLabel( Composite parent, int style, boolean isFormStyle )
+	{
 		Label l;
-		if (isFormStyle)
-			l = super.createLabel(parent, "", style);
+		if ( isFormStyle )
+			l = super.createLabel( parent, "", style );
 		else
-			l = new Label(parent, style);
+			l = new Label( parent, style );
 		return l;
 	}
 
-	public Label createLabel(Composite parent, boolean isFormStyle) {
+	public Label createLabel( Composite parent, boolean isFormStyle )
+	{
 		Label l;
-		if (isFormStyle)
-			l = super.createLabel(parent, "", SWT.NONE);
+		if ( isFormStyle )
+			l = super.createLabel( parent, "", SWT.NONE );
 		else
-			l = new Label(parent, SWT.NONE);
+			l = new Label( parent, SWT.NONE );
 		return l;
 	}
 
@@ -148,10 +161,11 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the composite style.
 	 * @return the composite.
 	 */
-	public Composite createPlainComposite(Composite parent, int style) {
-		Composite c = super.createComposite(parent, style);
-		c.setBackground(parent.getBackground());
-		paintBordersFor(c);
+	public Composite createPlainComposite( Composite parent, int style )
+	{
+		Composite c = super.createComposite( parent, style );
+		c.setBackground( parent.getBackground( ) );
+		paintBordersFor( c );
 		return c;
 	}
 
@@ -164,21 +178,25 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the composite style.
 	 * @return the composite.
 	 */
-	public ScrolledComposite createScrolledComposite(Composite parent, int style) {
-		ScrolledComposite scrolledComposite = new ScrolledComposite(parent,
-				style);
+	public ScrolledComposite createScrolledComposite( Composite parent,
+			int style )
+	{
+		ScrolledComposite scrolledComposite = new ScrolledComposite( parent,
+				style );
 		return scrolledComposite;
 	}
 
-	public Spinner createSpinner(Composite parent) {
-		Spinner spinner = new Spinner(parent, SWT.FLAT);
-		adapt(spinner, true, false);
+	public Spinner createSpinner( Composite parent )
+	{
+		Spinner spinner = new Spinner( parent, SWT.FLAT );
+		adapt( spinner, true, false );
 		return spinner;
 	}
 
-	public Scale createScale(Composite parent, int style) {
-		Scale scale = new Scale(parent, style);
-		adapt(scale, false, false);
+	public Scale createScale( Composite parent, int style )
+	{
+		Scale scale = new Scale( parent, style );
+		adapt( scale, false, false );
 		return scale;
 	}
 
@@ -191,10 +209,11 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the combo box style.
 	 * @return the combo box.
 	 */
-	public CCombo createCCombo(Composite parent, int comboStyle) {
-		CCombo combo = new CCombo(parent, comboStyle | SWT.FLAT);
-		combo.setVisibleItemCount(20);
-		adapt(combo, true, false);
+	public CCombo createCCombo( Composite parent, int comboStyle )
+	{
+		CCombo combo = new CCombo( parent, comboStyle | SWT.FLAT );
+		combo.setVisibleItemCount( 20 );
+		adapt( combo, true, false );
 		return combo;
 	}
 
@@ -205,15 +224,17 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the combo box parent.
 	 * @return the combo box.
 	 */
-	public CCombo createCCombo(Composite parent) {
-		return createCCombo(parent, SWT.FLAT | SWT.READ_ONLY);
+	public CCombo createCCombo( Composite parent )
+	{
+		return createCCombo( parent, SWT.FLAT | SWT.READ_ONLY );
 	}
 
-	public CCombo createCCombo(Composite parent, boolean isReadOnly) {
-		if (isReadOnly)
-			return createCCombo(parent, SWT.FLAT | SWT.READ_ONLY);
+	public CCombo createCCombo( Composite parent, boolean isReadOnly )
+	{
+		if ( isReadOnly )
+			return createCCombo( parent, SWT.FLAT | SWT.READ_ONLY );
 		else
-			return createCCombo(parent, SWT.FLAT);
+			return createCCombo( parent, SWT.FLAT );
 	}
 
 	/**
@@ -225,11 +246,12 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the group title.
 	 * @return the composite.
 	 */
-	public Group createGroup(Composite parent, String text) {
-		Group group = new Group(parent, SWT.SHADOW_NONE);
-		group.setText(text);
-		group.setBackground(getColors().getBackground());
-		group.setForeground(getColors().getForeground());
+	public Group createGroup( Composite parent, String text )
+	{
+		Group group = new Group( parent, SWT.SHADOW_NONE );
+		group.setText( text );
+		group.setBackground( getColors( ).getBackground( ) );
+		group.setForeground( getColors( ).getForeground( ) );
 		return group;
 	}
 
@@ -240,13 +262,14 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the composite parent.
 	 * @return the composite.
 	 */
-	public Composite createFlatFormComposite(Composite parent) {
-		Composite composite = createComposite(parent);
-		FormLayout layout = new FormLayout();
+	public Composite createFlatFormComposite( Composite parent )
+	{
+		Composite composite = createComposite( parent );
+		FormLayout layout = new FormLayout( );
 		layout.marginWidth = ITabbedPropertyConstants.HSPACE + 2;
 		layout.marginHeight = ITabbedPropertyConstants.VSPACE;
 		layout.spacing = ITabbedPropertyConstants.VMARGIN + 1;
-		composite.setLayout(layout);
+		composite.setLayout( layout );
 		return composite;
 	}
 
@@ -259,8 +282,9 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the label text.
 	 * @return the label.
 	 */
-	public CLabel createCLabel(Composite parent, String text) {
-		return createCLabel(parent, text, SWT.NONE);
+	public CLabel createCLabel( Composite parent, String text )
+	{
+		return createCLabel( parent, text, SWT.NONE );
 	}
 
 	/**
@@ -274,102 +298,132 @@ public class FormWidgetFactory extends FormToolkit {
 	 *            the label style.
 	 * @return the label.
 	 */
-	public CLabel createCLabel(Composite parent, String text, int style) {
-		final CLabel label = new CLabel(parent, style);
-		label.setBackground(parent.getBackground());
-		label.setText(text);
+	public CLabel createCLabel( Composite parent, String text, int style )
+	{
+		final CLabel label = new CLabel( parent, style );
+		label.setBackground( parent.getBackground( ) );
+		label.setText( text );
 		return label;
 	}
 
-	public CLabel createCLabel(Composite parent, int style) {
-		final CLabel label = new CLabel(parent, style);
-		label.setBackground(parent.getBackground());
+	public CLabel createCLabel( Composite parent, int style )
+	{
+		final CLabel label = new CLabel( parent, style );
+		label.setBackground( parent.getBackground( ) );
 		return label;
 	}
 
-	public ImageCanvas createImageCanvas(Composite parent, int comboStyle) {
-		ImageCanvas canvas = new ImageCanvas(parent, comboStyle);
-		adapt(canvas, true, false);
+	public ImageCanvas createImageCanvas( Composite parent, int comboStyle )
+	{
+		ImageCanvas canvas = new ImageCanvas( parent, comboStyle );
+		adapt( canvas, true, false );
 		return canvas;
 	}
 
-	public void dispose() {
-		if (getColors() != null) {
-			super.dispose();
+	public void dispose( )
+	{
+		if ( getColors( ) != null )
+		{
+			super.dispose( );
 		}
 	}
 
-	public void paintFormStyle(Composite composite) {
-		if (composite instanceof TabbedPropertyTitle)
+	public void paintFormStyle( Composite composite )
+	{
+		if ( composite instanceof TabbedPropertyTitle )
 			return;
-		Control[] children = composite.getChildren();
-		for (int i = 0; i < children.length; i++) {
-			if (children[i] instanceof Composite) {
-				paintFormStyle((Composite) children[i]);
+		Control[] children = composite.getChildren( );
+		for ( int i = 0; i < children.length; i++ )
+		{
+			if ( children[i] instanceof Composite )
+			{
+				paintFormStyle( (Composite) children[i] );
 			}
 		}
-		FormWidgetFactory.getInstance().paintBordersFor(composite);
-		adapt(composite);
+		FormWidgetFactory.getInstance( ).paintBordersFor( composite );
+		adapt( composite );
 	}
 
-	private class BorderPainter implements PaintListener {
+	private class BorderPainter implements PaintListener
+	{
 
-		public void paintControl(PaintEvent event) {
+		public void paintControl( PaintEvent event )
+		{
 			Composite composite = (Composite) event.widget;
-			Control[] children = composite.getChildren();
-			for (int i = 0; i < children.length; i++) {
+			Control[] children = composite.getChildren( );
+			for ( int i = 0; i < children.length; i++ )
+			{
 				Control c = children[i];
 				boolean inactiveBorder = false;
 				boolean textBorder = false;
-				if (!c.isVisible())
+				if ( !c.isVisible( ) )
 					continue;
 				/*
 				 * if (c.getEnabled() == false && !(c instanceof CCombo))
 				 * continue;
 				 */
-				if (c instanceof Hyperlink)
+				if ( c instanceof Hyperlink )
 					continue;
-				Object flag = c.getData(KEY_DRAW_BORDER);
-				if (flag != null) {
-					if (flag.equals(Boolean.FALSE))
+				Object flag = c.getData( KEY_DRAW_BORDER );
+				if ( flag != null )
+				{
+					if ( flag.equals( Boolean.FALSE ) )
 						continue;
-					if (flag.equals(TREE_BORDER))
+					if ( flag.equals( TREE_BORDER ) )
 						inactiveBorder = true;
-					else if (flag.equals(TEXT_BORDER))
+					else if ( flag.equals( TEXT_BORDER ) )
 						textBorder = true;
 				}
-				if (getBorderStyle() == SWT.BORDER) {
-					if (!inactiveBorder && !textBorder) {
+				if ( getBorderStyle( ) == SWT.BORDER )
+				{
+					if ( !inactiveBorder && !textBorder )
+					{
 						continue;
 					}
-					if (c instanceof Text || c instanceof Table
-							|| c instanceof Tree)
+					if ( c instanceof Text
+							|| c instanceof Table
+							|| c instanceof Tree )
 						continue;
 				}
-				if (!inactiveBorder
-						&& (c instanceof Text || c instanceof CCombo
-								|| textBorder || c instanceof Spinner
-								|| c instanceof ImageCanvas || c instanceof DateTime)) {
-					Rectangle b = c.getBounds();
+				if ( !inactiveBorder
+						&& ( c instanceof Text
+								|| c instanceof CCombo
+								|| textBorder
+								|| c instanceof Spinner
+								|| c instanceof ImageCanvas || c instanceof DateTime ) )
+				{
+					Rectangle b = c.getBounds( );
 					GC gc = event.gc;
-					gc.setForeground(c.getBackground());
-					gc.drawRectangle(b.x - 1, b.y - 1, b.width + 1,
-							b.height + 1);
-					gc.setForeground(getColors().getBorderColor());
-					if (c instanceof CCombo || c instanceof Spinner)
-						gc.drawRectangle(b.x - 2, b.y - 1, b.width + 2,
-								b.height + 1);
+					gc.setForeground( c.getBackground( ) );
+					gc.drawRectangle( b.x - 1,
+							b.y - 1,
+							b.width + 1,
+							b.height + 1 );
+					gc.setForeground( getColors( ).getBorderColor( ) );
+					if ( c instanceof CCombo || c instanceof Spinner )
+						gc.drawRectangle( b.x - 2,
+								b.y - 1,
+								b.width + 2,
+								b.height + 1 );
 					else
-						gc.drawRectangle(b.x - 2, b.y - 2, b.width + 2,
-								b.height + 3);
-				} else if (inactiveBorder || c instanceof Table
-						|| c instanceof Tree || c instanceof List
-						|| c instanceof DateTime) {
-					Rectangle b = c.getBounds();
+						gc.drawRectangle( b.x - 2,
+								b.y - 2,
+								b.width + 2,
+								b.height + 3 );
+				}
+				else if ( inactiveBorder
+						|| c instanceof Table
+						|| c instanceof Tree
+						|| c instanceof List
+						|| c instanceof DateTime )
+				{
+					Rectangle b = c.getBounds( );
 					GC gc = event.gc;
-					gc.setForeground(getColors().getBorderColor());
-					gc.drawRectangle(b.x - 1, b.y - 1, b.width + 1,
-							b.height + 1);
+					gc.setForeground( getColors( ).getBorderColor( ) );
+					gc.drawRectangle( b.x - 1,
+							b.y - 1,
+							b.width + 1,
+							b.height + 1 );
 				}
 			}
 		}
@@ -377,11 +431,12 @@ public class FormWidgetFactory extends FormToolkit {
 
 	private BorderPainter borderPainter;
 
-	public void paintBordersFor(Composite parent) {
+	public void paintBordersFor( Composite parent )
+	{
 		// if (borderStyle == SWT.BORDER)
 		// return;
-		if (borderPainter == null)
-			borderPainter = new BorderPainter();
-		parent.addPaintListener(borderPainter);
+		if ( borderPainter == null )
+			borderPainter = new BorderPainter( );
+		parent.addPaintListener( borderPainter );
 	}
 }

@@ -23,11 +23,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -45,6 +47,7 @@ import org.sf.feeling.sanguo.patch.util.BattleUtil;
 import org.sf.feeling.sanguo.patch.util.FileConstants;
 import org.sf.feeling.sanguo.patch.util.FileUtil;
 import org.sf.feeling.sanguo.patch.util.MapUtil;
+import org.sf.feeling.sanguo.patch.util.PinyinComparator;
 import org.sf.feeling.sanguo.patch.util.UnitParser;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
@@ -67,7 +70,7 @@ public class ModelPatchPage extends SimpleTabPage
 		createPatchArea( );
 
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
-				"<form><p>注意：如已导入过其他兵模，可能会因为兵模数量超过上限而无法正常进入游戏，请释放兵模后再进行导入模型操作。</p></form>",
+				"<form><p>注意：<br/>1、导入过多兵模，可能会因为兵模数量超过上限而无法正常进入游戏，请移除不需要的兵模。<br/>2、移除作为骑兵士兵的将军模型后，原先使用该将军模型的骑兵士兵统一改为大汉羽林骑士兵。</p></form>",
 				true,
 				false );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
@@ -87,17 +90,18 @@ public class ModelPatchPage extends SimpleTabPage
 		Composite patchClient = WidgetUtil.getToolkit( )
 				.createComposite( patchSection );
 		GridLayout layout = new GridLayout( );
-		layout.numColumns = 3;
+		layout.numColumns = 4;
 		patchClient.setLayout( layout );
 
 		{
-			GridData gd = new GridData( );
-			gd.widthHint = 200;
 
 			final Button freeBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient,
 							"替换所有普通兵种将军模型为中年高级将军，释放模型位置用来导入其他模型",
 							SWT.CHECK );
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 2;
+			freeBtn.setLayoutData( gd );
 
 			final Button freeApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
@@ -130,11 +134,12 @@ public class ModelPatchPage extends SimpleTabPage
 
 		}
 		{
-			GridData gd = new GridData( );
-			gd.widthHint = 200;
 
 			final Button xianzhenBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "导入弩兵陷阵营", SWT.CHECK );
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 2;
+			xianzhenBtn.setLayoutData( gd );
 
 			final Button xianzhenApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
@@ -288,11 +293,11 @@ public class ModelPatchPage extends SimpleTabPage
 
 		}
 		{
-			GridData gd = new GridData( );
-			gd.widthHint = 200;
-
 			final Button gaoshunBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "导入弩骑高顺卫队", SWT.CHECK );
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 2;
+			gaoshunBtn.setLayoutData( gd );
 
 			final Button gaoshunApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
@@ -461,6 +466,230 @@ public class ModelPatchPage extends SimpleTabPage
 			} );
 
 		}
+
+		{
+			final Button importGeneralBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "导入将军模型作为骑兵士兵模型", SWT.CHECK );
+
+			final CCombo generalCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+
+			GridData gd = new GridData( );
+			gd.widthHint = 150;
+			generalCombo.setLayoutData( gd );
+			generalCombo.setEnabled( false );
+			String[] generals = (String[]) UnitUtil.getGeneralModelProperties( )
+					.keySet( )
+					.toArray( new String[0] );
+			Arrays.sort( generals, new Comparator( ) {
+
+				public int compare( Object o1, Object o2 )
+				{
+					return PinyinComparator.compare( o1.toString( ),
+							o2.toString( ) );
+				}
+			} );
+			generalCombo.setItems( generals );
+
+			final Button importGeneralApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			importGeneralApply.setEnabled( false );
+			final Button importGeneralRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+
+			importGeneralBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					generalCombo.setEnabled( importGeneralBtn.getSelection( ) );
+					importGeneralApply.setEnabled( importGeneralBtn.getSelection( ) );
+				}
+
+			} );
+
+			importGeneralRestore.addSelectionListener( new RestoreListener( ) );
+			importGeneralApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( generalCombo.getSelectionIndex( ) == -1 )
+						return;
+					importGeneralApply.setEnabled( false );
+					BakUtil.bakData( "导入将军"
+							+ generalCombo.getText( )
+							+ "模型作为骑兵士兵模型" );
+
+					String general = (String) UnitUtil.getGeneralModelProperties( )
+							.get( generalCombo.getText( ) );
+					String customModel = "custom_" + general;
+					if ( FileConstants.battleFile.exists( )
+							&& !FileUtil.containMatchString( FileConstants.battleFile,
+									customModel ) )
+					{
+						List modelInfo = UnitUtil.getModelInfo( general );
+						if ( modelInfo.size( ) > 0 )
+						{
+							try
+							{
+								StringWriter writer1 = new StringWriter( );
+								PrintWriter printer1 = new PrintWriter( writer1 );
+
+								BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.battleFile ),
+										"GBK" ) );
+								String line = null;
+								while ( ( line = in.readLine( ) ) != null )
+								{
+									printer1.println( line );
+								}
+								in.close( );
+								writer1.close( );
+
+								PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.battleFile ),
+										"GBK" ) ),
+										false );
+								out.println( "type		" + customModel );
+								for ( int i = 0; i < modelInfo.size( ); i++ )
+								{
+									out.println( modelInfo.get( i ).toString( ) );
+								}
+								out.println( );
+								out.print( writer1.getBuffer( ) );
+								out.close( );
+							}
+							catch ( IOException e1 )
+							{
+								e1.printStackTrace( );
+							}
+						}
+					}
+					importGeneralApply.setEnabled( true );
+				}
+			} );
+		}
+
+		{
+			final Button removeGeneralBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "移除作为骑兵士兵模型的将军模型", SWT.CHECK );
+
+			final CCombo generalCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+
+			GridData gd = new GridData( );
+			gd.widthHint = 150;
+			generalCombo.setLayoutData( gd );
+			generalCombo.setEnabled( false );
+			String[] generals = (String[]) UnitUtil.getGeneralModelProperties( )
+					.keySet( )
+					.toArray( new String[0] );
+			Arrays.sort( generals, new Comparator( ) {
+
+				public int compare( Object o1, Object o2 )
+				{
+					return PinyinComparator.compare( o1.toString( ),
+							o2.toString( ) );
+				}
+			} );
+			generalCombo.setItems( generals );
+
+			final Button removeGeneralApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			removeGeneralApply.setEnabled( false );
+			final Button removeGeneralRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+
+			removeGeneralBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					generalCombo.setEnabled( removeGeneralBtn.getSelection( ) );
+					removeGeneralApply.setEnabled( removeGeneralBtn.getSelection( ) );
+				}
+
+			} );
+
+			removeGeneralRestore.addSelectionListener( new RestoreListener( ) );
+			removeGeneralApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( generalCombo.getSelectionIndex( ) == -1 )
+						return;
+					removeGeneralApply.setEnabled( false );
+					BakUtil.bakData( "移除作为骑兵士兵的将军"
+							+ generalCombo.getText( )
+							+ "模型" );
+
+					String general = (String) UnitUtil.getGeneralModelProperties( )
+							.get( generalCombo.getText( ) );
+					String customModel = "custom_" + general;
+					if ( FileConstants.battleFile.exists( ) )
+					{
+
+						try
+						{
+							StringWriter writer1 = new StringWriter( );
+							PrintWriter printer1 = new PrintWriter( writer1 );
+
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.battleFile ),
+									"GBK" ) );
+							String line = null;
+							boolean startGeneral = false;
+							boolean remove = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+								if ( !remove )
+								{
+									if ( startGeneral == false )
+									{
+										Pattern pattern2 = Pattern.compile( "^\\s*(type)(\\s+)"
+												+ customModel
+												+ "\\s*$",
+												Pattern.CASE_INSENSITIVE );
+										Matcher matcher2 = pattern2.matcher( line );
+										if ( matcher2.find( ) )
+										{
+											startGeneral = true;
+											continue;
+										}
+									}
+									else
+									{
+
+										Pattern pattern2 = Pattern.compile( "^\\s*(type)(\\s+)",
+												Pattern.CASE_INSENSITIVE );
+										Matcher matcher2 = pattern2.matcher( line );
+										if ( matcher2.find( ) )
+										{
+											remove = true;
+										}
+										else
+										{
+											continue;
+										}
+									}
+								}
+								printer1.println( line );
+							}
+							in.close( );
+							writer1.close( );
+
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.battleFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer1.getBuffer( ) );
+							out.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+					removeCustomModel(customModel);
+					removeGeneralApply.setEnabled( true );
+				}
+			} );
+		}
+
 		patchSection.setClient( patchClient );
 	}
 
@@ -493,7 +722,7 @@ public class ModelPatchPage extends SimpleTabPage
 				SortMap modelMap = generalModelMap;
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.split( ";" ).length == 0 )
+					if ( line.trim( ).startsWith( ";" ) )
 					{
 						continue;
 					}
@@ -591,7 +820,7 @@ public class ModelPatchPage extends SimpleTabPage
 							"GBK" ) );
 					while ( ( line = in.readLine( ) ) != null )
 					{
-						if ( line.split( ";" ).length == 0 )
+						if ( line.trim( ).startsWith( ";" ) )
 						{
 							printer.println( line );
 							continue;
@@ -625,6 +854,53 @@ public class ModelPatchPage extends SimpleTabPage
 					e.printStackTrace( );
 				}
 				BattleUtil.removeModelTypes( unitModelMap.getKeyList( ) );
+			}
+		}
+	}
+
+	private void removeCustomModel( String customModel )
+	{
+		if ( FileConstants.unitFile.exists( ) )
+		{
+
+			try
+			{
+				StringWriter writer = new StringWriter( );
+				PrintWriter printer = new PrintWriter( writer );
+				String line = null;
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.unitFile ),
+						"GBK" ) );
+				while ( ( line = in.readLine( ) ) != null )
+				{
+					if ( line.trim( ).startsWith( ";" ) )
+					{
+						printer.println( line );
+						continue;
+					}
+					String regex = "^\\s*(soldier)(\\s+)"
+							+ customModel
+							+ "(\\s*,)";
+					Pattern pattern = Pattern.compile( regex );
+					Matcher matcher = pattern.matcher( line );
+					if ( matcher.find( ) )
+					{
+						printer.println( line.replaceFirst( regex,
+								"soldier          DaHanYuLin_QiBing," ) );
+						continue;
+					}
+					printer.println( line );
+				}
+				in.close( );
+				PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.unitFile ),
+						"GBK" ) ),
+						false );
+				out.print( writer.getBuffer( ) );
+				out.close( );
+				printer.close( );
+			}
+			catch ( IOException e )
+			{
+				e.printStackTrace( );
 			}
 		}
 	}

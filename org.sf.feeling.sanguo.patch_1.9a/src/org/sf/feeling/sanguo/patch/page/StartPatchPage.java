@@ -1228,7 +1228,7 @@ public class StartPatchPage extends SimpleTabPage
 			spawnCombo.setEnabled( false );
 
 			spawnCombo.setItems( new String[]{
-					"0", "10", "25", "50", "100","200"
+					"0", "10", "25", "50", "100", "200"
 			} );
 
 			final Button spawnApply = WidgetUtil.getToolkit( )

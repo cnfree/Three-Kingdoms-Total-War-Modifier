@@ -55,7 +55,8 @@ import java.util.zip.ZipException;
  * </p>
  * 
  */
-public class ZipOutputStream extends FilterOutputStream {
+public class ZipOutputStream extends FilterOutputStream
+{
 
 	/**
 	 * Compression method for deflated entries.
@@ -118,11 +119,12 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	private Vector entries = new Vector();
+	private Vector entries = new Vector( );
 
-	private List entryNames = new ArrayList();
+	private List entryNames = new ArrayList( );
 
-	public List getEntries() {
+	public List getEntries( )
+	{
 		return entryNames;
 	}
 
@@ -131,7 +133,7 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	private CRC32 crc = new CRC32();
+	private CRC32 crc = new CRC32( );
 
 	/**
 	 * Count the bytes written to out.
@@ -174,21 +176,25 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	private static final byte[] ZERO = { 0, 0 };
+	private static final byte[] ZERO = {
+			0, 0
+	};
 
 	/**
 	 * Helper, a 0 as ZipLong.
 	 * 
 	 * @since 1.1
 	 */
-	private static final byte[] LZERO = { 0, 0, 0, 0 };
+	private static final byte[] LZERO = {
+			0, 0, 0, 0
+	};
 
 	/**
 	 * Holds the offsets of the LFH starts for each entry.
 	 * 
 	 * @since 1.1
 	 */
-	private Hashtable offsets = new Hashtable();
+	private Hashtable offsets = new Hashtable( );
 
 	/**
 	 * The encoding to use for filenames and the file comment.
@@ -218,7 +224,7 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.14
 	 */
-	protected Deflater def = new Deflater(level, true);
+	protected Deflater def = new Deflater( level, true );
 
 	/**
 	 * This buffer servers as a Deflater.
@@ -250,8 +256,9 @@ public class ZipOutputStream extends FilterOutputStream {
 	 *            the outputstream to zip
 	 * @since 1.1
 	 */
-	public ZipOutputStream(OutputStream out) {
-		super(out);
+	public ZipOutputStream( OutputStream out )
+	{
+		super( out );
 	}
 
 	/**
@@ -264,22 +271,30 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @throws IOException
 	 *             on error
 	 */
-	public ZipOutputStream(File file) throws IOException {
-		super(null);
+	public ZipOutputStream( File file ) throws IOException
+	{
+		super( null );
 
-		try {
-			raf = new RandomAccessFile(file, "rw");
-			raf.setLength(0);
-		} catch (IOException e) {
-			if (raf != null) {
-				try {
-					raf.close();
-				} catch (IOException inner) {
+		try
+		{
+			raf = new RandomAccessFile( file, "rw" );
+			raf.setLength( 0 );
+		}
+		catch ( IOException e )
+		{
+			if ( raf != null )
+			{
+				try
+				{
+					raf.close( );
+				}
+				catch ( IOException inner )
+				{
 					// ignore
 				}
 				raf = null;
 			}
-			out = new FileOutputStream(file);
+			out = new FileOutputStream( file );
 		}
 	}
 
@@ -294,7 +309,8 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @return true if seekable
 	 * @since 1.17
 	 */
-	public boolean isSeekable() {
+	public boolean isSeekable( )
+	{
 		return raf != null;
 	}
 
@@ -312,7 +328,8 @@ public class ZipOutputStream extends FilterOutputStream {
 	 *            the encoding value
 	 * @since 1.3
 	 */
-	public void setEncoding(String encoding) {
+	public void setEncoding( String encoding )
+	{
 		this.encoding = encoding;
 	}
 
@@ -323,7 +340,8 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.3
 	 */
-	public String getEncoding() {
+	public String getEncoding( )
+	{
 		return encoding;
 	}
 
@@ -335,16 +353,18 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @throws IOException
 	 *             on error
 	 */
-	public void finish() throws IOException {
-		closeEntry();
+	public void finish( ) throws IOException
+	{
+		closeEntry( );
 		cdOffset = written;
-		for (int i = 0, entriesSize = entries.size(); i < entriesSize; i++) {
-			writeCentralFileHeader((ZipEntry) entries.elementAt(i));
+		for ( int i = 0, entriesSize = entries.size( ); i < entriesSize; i++ )
+		{
+			writeCentralFileHeader( (ZipEntry) entries.elementAt( i ) );
 		}
 		cdLength = written - cdOffset;
-		writeCentralDirectoryEnd();
-		offsets.clear();
-		entries.removeAllElements();
+		writeCentralDirectoryEnd( );
+		offsets.clear( );
+		entries.removeAllElements( );
 	}
 
 	/**
@@ -354,61 +374,77 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @throws IOException
 	 *             on error
 	 */
-	public void closeEntry() throws IOException {
-		if (entry == null) {
+	public void closeEntry( ) throws IOException
+	{
+		if ( entry == null )
+		{
 			return;
 		}
 
-		long realCrc = crc.getValue();
-		crc.reset();
+		long realCrc = crc.getValue( );
+		crc.reset( );
 
-		if (entry.getMethod() == DEFLATED) {
-			def.finish();
-			while (!def.finished()) {
-				deflate();
+		if ( entry.getMethod( ) == DEFLATED )
+		{
+			def.finish( );
+			while ( !def.finished( ) )
+			{
+				deflate( );
 			}
 
-			entry.setSize(adjustToLong(def.getTotalIn()));
-			entry.setCompressedSize(adjustToLong(def.getTotalOut()));
-			entry.setCrc(realCrc);
+			entry.setSize( adjustToLong( def.getTotalIn( ) ) );
+			entry.setCompressedSize( adjustToLong( def.getTotalOut( ) ) );
+			entry.setCrc( realCrc );
 
-			def.reset();
+			def.reset( );
 
-			written += entry.getCompressedSize();
-		} else if (raf == null) {
-			if (entry.getCrc() != realCrc) {
-				throw new ZipException("bad CRC checksum for entry "
-						+ entry.getName() + ": "
-						+ Long.toHexString(entry.getCrc()) + " instead of "
-						+ Long.toHexString(realCrc));
+			written += entry.getCompressedSize( );
+		}
+		else if ( raf == null )
+		{
+			if ( entry.getCrc( ) != realCrc )
+			{
+				throw new ZipException( "bad CRC checksum for entry "
+						+ entry.getName( )
+						+ ": "
+						+ Long.toHexString( entry.getCrc( ) )
+						+ " instead of "
+						+ Long.toHexString( realCrc ) );
 			}
 
-			if (entry.getSize() != written - dataStart) {
-				throw new ZipException("bad size for entry " + entry.getName()
-						+ ": " + entry.getSize() + " instead of "
-						+ (written - dataStart));
+			if ( entry.getSize( ) != written - dataStart )
+			{
+				throw new ZipException( "bad size for entry "
+						+ entry.getName( )
+						+ ": "
+						+ entry.getSize( )
+						+ " instead of "
+						+ ( written - dataStart ) );
 			}
-		} else { /* method is STORED and we used RandomAccessFile */
+		}
+		else
+		{ /* method is STORED and we used RandomAccessFile */
 			long size = written - dataStart;
 
-			entry.setSize(size);
-			entry.setCompressedSize(size);
-			entry.setCrc(realCrc);
+			entry.setSize( size );
+			entry.setCompressedSize( size );
+			entry.setCrc( realCrc );
 		}
 
 		// If random access output, write the local file header containing
 		// the correct CRC and compressed/uncompressed sizes
-		if (raf != null) {
-			long save = raf.getFilePointer();
+		if ( raf != null )
+		{
+			long save = raf.getFilePointer( );
 
-			raf.seek(localDataStart);
-			writeOut(ZipLong.getBytes(entry.getCrc()));
-			writeOut(ZipLong.getBytes(entry.getCompressedSize()));
-			writeOut(ZipLong.getBytes(entry.getSize()));
-			raf.seek(save);
+			raf.seek( localDataStart );
+			writeOut( ZipLong.getBytes( entry.getCrc( ) ) );
+			writeOut( ZipLong.getBytes( entry.getCompressedSize( ) ) );
+			writeOut( ZipLong.getBytes( entry.getSize( ) ) );
+			raf.seek( save );
 		}
 
-		writeDataDescriptor(entry);
+		writeDataDescriptor( entry );
 		entry = null;
 	}
 
@@ -421,40 +457,48 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @throws IOException
 	 *             on error
 	 */
-	public void putNextEntry(ZipEntry ze) throws IOException {
-		closeEntry();
+	public void putNextEntry( ZipEntry ze ) throws IOException
+	{
+		closeEntry( );
 
 		entry = ze;
-		
-		entries.addElement(entry);
-		entryNames.add(entry.getName());
-		
-		if (entry.getMethod() == -1) { // not specified
-			entry.setMethod(method);
+
+		entries.addElement( entry );
+		entryNames.add( entry.getName( ) );
+
+		if ( entry.getMethod( ) == -1 )
+		{ // not specified
+			entry.setMethod( method );
 		}
 
-		if (entry.getTime() == -1) { // not specified
-			entry.setTime(System.currentTimeMillis());
+		if ( entry.getTime( ) == -1 )
+		{ // not specified
+			entry.setTime( System.currentTimeMillis( ) );
 		}
 
 		// Size/CRC not required if RandomAccessFile is used
-		if (entry.getMethod() == STORED && raf == null) {
-			if (entry.getSize() == -1) {
-				throw new ZipException("uncompressed size is required for"
-						+ " STORED method when not writing to a" + " file");
+		if ( entry.getMethod( ) == STORED && raf == null )
+		{
+			if ( entry.getSize( ) == -1 )
+			{
+				throw new ZipException( "uncompressed size is required for"
+						+ " STORED method when not writing to a"
+						+ " file" );
 			}
-			if (entry.getCrc() == -1) {
-				throw new ZipException("crc checksum is required for STORED"
-						+ " method when not writing to a file");
+			if ( entry.getCrc( ) == -1 )
+			{
+				throw new ZipException( "crc checksum is required for STORED"
+						+ " method when not writing to a file" );
 			}
-			entry.setCompressedSize(entry.getSize());
+			entry.setCompressedSize( entry.getSize( ) );
 		}
 
-		if (entry.getMethod() == DEFLATED && hasCompressionLevelChanged) {
-			def.setLevel(level);
+		if ( entry.getMethod( ) == DEFLATED && hasCompressionLevelChanged )
+		{
+			def.setLevel( level );
 			hasCompressionLevelChanged = false;
 		}
-		writeLocalFileHeader(entry);
+		writeLocalFileHeader( entry );
 	}
 
 	/**
@@ -464,7 +508,8 @@ public class ZipOutputStream extends FilterOutputStream {
 	 *            the comment
 	 * @since 1.1
 	 */
-	public void setComment(String comment) {
+	public void setComment( String comment )
+	{
 		this.comment = comment;
 	}
 
@@ -481,13 +526,15 @@ public class ZipOutputStream extends FilterOutputStream {
 	 *             if an invalid compression level is specified.
 	 * @since 1.1
 	 */
-	public void setLevel(int level) {
-		if (level < Deflater.DEFAULT_COMPRESSION
-				|| level > Deflater.BEST_COMPRESSION) {
-			throw new IllegalArgumentException("Invalid compression level: "
-					+ level);
+	public void setLevel( int level )
+	{
+		if ( level < Deflater.DEFAULT_COMPRESSION
+				|| level > Deflater.BEST_COMPRESSION )
+		{
+			throw new IllegalArgumentException( "Invalid compression level: "
+					+ level );
 		}
-		hasCompressionLevelChanged = (this.level != level);
+		hasCompressionLevelChanged = ( this.level != level );
 		this.level = level;
 	}
 
@@ -502,7 +549,8 @@ public class ZipOutputStream extends FilterOutputStream {
 	 *            an <code>int</code> from java.util.zip.ZipEntry
 	 * @since 1.1
 	 */
-	public void setMethod(int method) {
+	public void setMethod( int method )
+	{
 		this.method = method;
 	}
 
@@ -518,21 +566,28 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @throws IOException
 	 *             on error
 	 */
-	public void write(byte[] b, int offset, int length) throws IOException {
-		if (entry.getMethod() == DEFLATED) {
-			if (length > 0) {
-				if (!def.finished()) {
-					def.setInput(b, offset, length);
-					while (!def.needsInput()) {
-						deflate();
+	public void write( byte[] b, int offset, int length ) throws IOException
+	{
+		if ( entry.getMethod( ) == DEFLATED )
+		{
+			if ( length > 0 )
+			{
+				if ( !def.finished( ) )
+				{
+					def.setInput( b, offset, length );
+					while ( !def.needsInput( ) )
+					{
+						deflate( );
 					}
 				}
 			}
-		} else {
-			writeOut(b, offset, length);
+		}
+		else
+		{
+			writeOut( b, offset, length );
 			written += length;
 		}
-		crc.update(b, offset, length);
+		crc.update( b, offset, length );
 	}
 
 	/**
@@ -548,10 +603,11 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @throws IOException
 	 *             on error
 	 */
-	public void write(int b) throws IOException {
+	public void write( int b ) throws IOException
+	{
 		byte[] buff = new byte[1];
-		buff[0] = (byte) (b & 0xff);
-		write(buff, 0, 1);
+		buff[0] = (byte) ( b & 0xff );
+		write( buff, 0, 1 );
 	}
 
 	/**
@@ -562,14 +618,17 @@ public class ZipOutputStream extends FilterOutputStream {
 	 *                if an I/O error occurs.
 	 * @since 1.14
 	 */
-	public void close() throws IOException {
-		finish();
+	public void close( ) throws IOException
+	{
+		finish( );
 
-		if (raf != null) {
-			raf.close();
+		if ( raf != null )
+		{
+			raf.close( );
 		}
-		if (out != null) {
-			out.close();
+		if ( out != null )
+		{
+			out.close( );
 		}
 	}
 
@@ -581,9 +640,11 @@ public class ZipOutputStream extends FilterOutputStream {
 	 *                if an I/O error occurs.
 	 * @since 1.14
 	 */
-	public void flush() throws IOException {
-		if (out != null) {
-			out.flush();
+	public void flush( ) throws IOException
+	{
+		if ( out != null )
+		{
+			out.flush( );
 		}
 	}
 
@@ -595,25 +656,25 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	protected static final byte[] LFH_SIG = ZipLong.getBytes(0X04034B50L);
+	protected static final byte[] LFH_SIG = ZipLong.getBytes( 0X04034B50L );
 	/**
 	 * data descriptor signature
 	 * 
 	 * @since 1.1
 	 */
-	protected static final byte[] DD_SIG = ZipLong.getBytes(0X08074B50L);
+	protected static final byte[] DD_SIG = ZipLong.getBytes( 0X08074B50L );
 	/**
 	 * central file header signature
 	 * 
 	 * @since 1.1
 	 */
-	protected static final byte[] CFH_SIG = ZipLong.getBytes(0X02014B50L);
+	protected static final byte[] CFH_SIG = ZipLong.getBytes( 0X02014B50L );
 	/**
 	 * end of central dir signature
 	 * 
 	 * @since 1.1
 	 */
-	protected static final byte[] EOCD_SIG = ZipLong.getBytes(0X06054B50L);
+	protected static final byte[] EOCD_SIG = ZipLong.getBytes( 0X06054B50L );
 
 	/**
 	 * Writes next block of compressed data to the output stream.
@@ -623,10 +684,12 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.14
 	 */
-	protected final void deflate() throws IOException {
-		int len = def.deflate(buf, 0, buf.length);
-		if (len > 0) {
-			writeOut(buf, 0, len);
+	protected final void deflate( ) throws IOException
+	{
+		int len = def.deflate( buf, 0, buf.length );
+		if ( len > 0 )
+		{
+			writeOut( buf, 0, len );
 		}
 	}
 
@@ -640,69 +703,76 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	protected void writeLocalFileHeader(ZipEntry ze) throws IOException {
-		offsets.put(ze, ZipLong.getBytes(written));
+	protected void writeLocalFileHeader( ZipEntry ze ) throws IOException
+	{
+		offsets.put( ze, ZipLong.getBytes( written ) );
 
-		writeOut(LFH_SIG);
+		writeOut( LFH_SIG );
 		written += 4;
 
 		// store method in local variable to prevent multiple method calls
-		final int zipMethod = ze.getMethod();
+		final int zipMethod = ze.getMethod( );
 
 		// version needed to extract
 		// general purpose bit flag
-		if (zipMethod == DEFLATED && raf == null) {
+		if ( zipMethod == DEFLATED && raf == null )
+		{
 			// requires version 2 as we are going to store length info
 			// in the data descriptor
-			writeOut(ZipShort.getBytes(20));
+			writeOut( ZipShort.getBytes( 20 ) );
 
 			// bit3 set to signal, we use a data descriptor
-			writeOut(ZipShort.getBytes(8));
-		} else {
-			writeOut(ZipShort.getBytes(10));
-			writeOut(ZERO);
+			writeOut( ZipShort.getBytes( 8 ) );
+		}
+		else
+		{
+			writeOut( ZipShort.getBytes( 10 ) );
+			writeOut( ZERO );
 		}
 		written += 4;
 
 		// compression method
-		writeOut(ZipShort.getBytes(zipMethod));
+		writeOut( ZipShort.getBytes( zipMethod ) );
 		written += 2;
 
 		// last mod. time and date
-		writeOut(toDosTime(ze.getTime()));
+		writeOut( toDosTime( ze.getTime( ) ) );
 		written += 4;
 
 		// CRC
 		// compressed length
 		// uncompressed length
 		localDataStart = written;
-		if (zipMethod == DEFLATED || raf != null) {
-			writeOut(LZERO);
-			writeOut(LZERO);
-			writeOut(LZERO);
-		} else {
-			writeOut(ZipLong.getBytes(ze.getCrc()));
-			writeOut(ZipLong.getBytes(ze.getSize()));
-			writeOut(ZipLong.getBytes(ze.getSize()));
+		if ( zipMethod == DEFLATED || raf != null )
+		{
+			writeOut( LZERO );
+			writeOut( LZERO );
+			writeOut( LZERO );
+		}
+		else
+		{
+			writeOut( ZipLong.getBytes( ze.getCrc( ) ) );
+			writeOut( ZipLong.getBytes( ze.getSize( ) ) );
+			writeOut( ZipLong.getBytes( ze.getSize( ) ) );
 		}
 		written += 12;
 
 		// file name length
-		byte[] name = getBytes(ze.getName());
-		writeOut(ZipShort.getBytes(name.length));
+		byte[] name = getBytes( ze.getName( ) );
+		writeOut( ZipShort.getBytes( name.length ) );
 		written += 2;
 
 		// extra field length
-		byte[] extra = ze.getLocalFileDataExtra();
-		writeOut(ZipShort.getBytes(extra.length));
+		byte[] extra = ze.getLocalFileDataExtra( );
+		writeOut( ZipShort.getBytes( extra.length ) );
 		written += 2;
 
 		// file name
-		writeOut(name);
+		writeOut( name );
 		written += name.length;
 
 		// extra field
-		writeOut(extra);
+		writeOut( extra );
 		written += extra.length;
 
 		dataStart = written;
@@ -718,14 +788,16 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	protected void writeDataDescriptor(ZipEntry ze) throws IOException {
-		if (ze.getMethod() != DEFLATED || raf != null) {
+	protected void writeDataDescriptor( ZipEntry ze ) throws IOException
+	{
+		if ( ze.getMethod( ) != DEFLATED || raf != null )
+		{
 			return;
 		}
-		writeOut(DD_SIG);
-		writeOut(ZipLong.getBytes(entry.getCrc()));
-		writeOut(ZipLong.getBytes(entry.getCompressedSize()));
-		writeOut(ZipLong.getBytes(entry.getSize()));
+		writeOut( DD_SIG );
+		writeOut( ZipLong.getBytes( entry.getCrc( ) ) );
+		writeOut( ZipLong.getBytes( entry.getCompressedSize( ) ) );
+		writeOut( ZipLong.getBytes( entry.getSize( ) ) );
 		written += 16;
 	}
 
@@ -739,90 +811,95 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	protected void writeCentralFileHeader(ZipEntry ze) throws IOException {
-		writeOut(CFH_SIG);
+	protected void writeCentralFileHeader( ZipEntry ze ) throws IOException
+	{
+		writeOut( CFH_SIG );
 		written += 4;
 
 		// version made by
-		writeOut(ZipShort.getBytes((ze.getPlatform() << 8) | 20));
+		writeOut( ZipShort.getBytes( ( ze.getPlatform( ) << 8 ) | 20 ) );
 		written += 2;
 
 		// version needed to extract
 		// general purpose bit flag
-		if (ze.getMethod() == DEFLATED && raf == null) {
+		if ( ze.getMethod( ) == DEFLATED && raf == null )
+		{
 			// requires version 2 as we are going to store length info
 			// in the data descriptor
-			writeOut(ZipShort.getBytes(20));
+			writeOut( ZipShort.getBytes( 20 ) );
 
 			// bit3 set to signal, we use a data descriptor
-			writeOut(ZipShort.getBytes(8));
-		} else {
-			writeOut(ZipShort.getBytes(10));
-			writeOut(ZERO);
+			writeOut( ZipShort.getBytes( 8 ) );
+		}
+		else
+		{
+			writeOut( ZipShort.getBytes( 10 ) );
+			writeOut( ZERO );
 		}
 		written += 4;
 
 		// compression method
-		writeOut(ZipShort.getBytes(ze.getMethod()));
+		writeOut( ZipShort.getBytes( ze.getMethod( ) ) );
 		written += 2;
 
 		// last mod. time and date
-		writeOut(toDosTime(ze.getTime()));
+		writeOut( toDosTime( ze.getTime( ) ) );
 		written += 4;
 
 		// CRC
 		// compressed length
 		// uncompressed length
-		writeOut(ZipLong.getBytes(ze.getCrc()));
-		writeOut(ZipLong.getBytes(ze.getCompressedSize()));
-		writeOut(ZipLong.getBytes(ze.getSize()));
+		writeOut( ZipLong.getBytes( ze.getCrc( ) ) );
+		writeOut( ZipLong.getBytes( ze.getCompressedSize( ) ) );
+		writeOut( ZipLong.getBytes( ze.getSize( ) ) );
 		written += 12;
 
 		// file name length
-		byte[] name = getBytes(ze.getName());
-		writeOut(ZipShort.getBytes(name.length));
+		byte[] name = getBytes( ze.getName( ) );
+		writeOut( ZipShort.getBytes( name.length ) );
 		written += 2;
 
 		// extra field length
-		byte[] extra = ze.getCentralDirectoryExtra();
-		writeOut(ZipShort.getBytes(extra.length));
+		byte[] extra = ze.getCentralDirectoryExtra( );
+		writeOut( ZipShort.getBytes( extra.length ) );
 		written += 2;
 
 		// file comment length
-		String comm = ze.getComment();
-		if (comm == null) {
+		String comm = ze.getComment( );
+		if ( comm == null )
+		{
 			comm = "";
 		}
-		byte[] commentB = getBytes(comm);
-		writeOut(ZipShort.getBytes(commentB.length));
+		byte[] commentB = getBytes( comm );
+		writeOut( ZipShort.getBytes( commentB.length ) );
 		written += 2;
 
 		// disk number start
-		writeOut(ZERO);
+		writeOut( ZERO );
 		written += 2;
 
 		// internal file attributes
-		writeOut(ZipShort.getBytes(ze.getInternalAttributes()));
+		writeOut( ZipShort.getBytes( ze.getInternalAttributes( ) ) );
 		written += 2;
 
 		// external file attributes
-		writeOut(ZipLong.getBytes(ze.getExternalAttributes()));
+		writeOut( ZipLong.getBytes( ze.getExternalAttributes( ) ) );
 		written += 4;
 
 		// relative offset of LFH
-		writeOut((byte[]) offsets.get(ze));
+		writeOut( (byte[]) offsets.get( ze ) );
 		written += 4;
 
 		// file name
-		writeOut(name);
+		writeOut( name );
 		written += name.length;
 
 		// extra field
-		writeOut(extra);
+		writeOut( extra );
 		written += extra.length;
 
 		// file comment
-		writeOut(commentB);
+		writeOut( commentB );
 		written += commentB.length;
 	}
 
@@ -834,26 +911,27 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	protected void writeCentralDirectoryEnd() throws IOException {
-		writeOut(EOCD_SIG); // 4
+	protected void writeCentralDirectoryEnd( ) throws IOException
+	{
+		writeOut( EOCD_SIG ); // 4
 
 		// disk numbers
-		writeOut(ZERO);// 2
-		writeOut(ZERO);// 2
+		writeOut( ZERO );// 2
+		writeOut( ZERO );// 2
 
 		// number of entries
-		byte[] num = ZipShort.getBytes(entries.size());
-		writeOut(num); // 2
-		writeOut(num); // 2
+		byte[] num = ZipShort.getBytes( entries.size( ) );
+		writeOut( num ); // 2
+		writeOut( num ); // 2
 
 		// length and location of CD
-		writeOut(ZipLong.getBytes(cdLength)); // 4
-		writeOut(ZipLong.getBytes(cdOffset)); // 4
+		writeOut( ZipLong.getBytes( cdLength ) ); // 4
+		writeOut( ZipLong.getBytes( cdOffset ) ); // 4
 
 		// ZIP file comment
-		byte[] data = getBytes(comment);
-		writeOut(ZipShort.getBytes(data.length)); // 2
-		writeOut(data);
+		byte[] data = getBytes( comment );
+		writeOut( ZipShort.getBytes( data.length ) ); // 2
+		writeOut( data );
 	}
 
 	/**
@@ -861,7 +939,7 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.1
 	 */
-	private static final byte[] DOS_TIME_MIN = ZipLong.getBytes(0x00002100L);
+	private static final byte[] DOS_TIME_MIN = ZipLong.getBytes( 0x00002100L );
 
 	/**
 	 * Convert a Date object to a DOS date/time field.
@@ -871,8 +949,9 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @return the date as a <code>ZipLong</code>
 	 * @since 1.1
 	 */
-	protected static ZipLong toDosTime(Date time) {
-		return new ZipLong(toDosTime(time.getTime()));
+	protected static ZipLong toDosTime( Date time )
+	{
+		return new ZipLong( toDosTime( time.getTime( ) ) );
 	}
 
 	/**
@@ -887,17 +966,22 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @return the date as a byte array
 	 * @since 1.26
 	 */
-	protected static byte[] toDosTime(long t) {
-		Date time = new Date(t);
-		int year = time.getYear() + 1900;
-		if (year < 1980) {
+	protected static byte[] toDosTime( long t )
+	{
+		Date time = new Date( t );
+		int year = time.getYear( ) + 1900;
+		if ( year < 1980 )
+		{
 			return DOS_TIME_MIN;
 		}
-		int month = time.getMonth() + 1;
-		long value = ((year - 1980) << 25) | (month << 21)
-				| (time.getDate() << 16) | (time.getHours() << 11)
-				| (time.getMinutes() << 5) | (time.getSeconds() >> 1);
-		return ZipLong.getBytes(value);
+		int month = time.getMonth( ) + 1;
+		long value = ( ( year - 1980 ) << 25 )
+				| ( month << 21 )
+				| ( time.getDate( ) << 16 )
+				| ( time.getHours( ) << 11 )
+				| ( time.getMinutes( ) << 5 )
+				| ( time.getSeconds( ) >> 1 );
+		return ZipLong.getBytes( value );
 	}
 
 	/**
@@ -912,14 +996,21 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.3
 	 */
-	protected byte[] getBytes(String name) throws ZipException {
-		if (encoding == null) {
-			return name.getBytes();
-		} else {
-			try {
-				return name.getBytes(encoding);
-			} catch (UnsupportedEncodingException uee) {
-				throw new ZipException(uee.getMessage());
+	protected byte[] getBytes( String name ) throws ZipException
+	{
+		if ( encoding == null )
+		{
+			return name.getBytes( );
+		}
+		else
+		{
+			try
+			{
+				return name.getBytes( encoding );
+			}
+			catch ( UnsupportedEncodingException uee )
+			{
+				throw new ZipException( uee.getMessage( ) );
 			}
 		}
 	}
@@ -934,8 +1025,9 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.14
 	 */
-	protected final void writeOut(byte[] data) throws IOException {
-		writeOut(data, 0, data.length);
+	protected final void writeOut( byte[] data ) throws IOException
+	{
+		writeOut( data, 0, data.length );
 	}
 
 	/**
@@ -952,12 +1044,16 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * 
 	 * @since 1.14
 	 */
-	protected final void writeOut(byte[] data, int offset, int length)
-			throws IOException {
-		if (raf != null) {
-			raf.write(data, offset, length);
-		} else {
-			out.write(data, offset, length);
+	protected final void writeOut( byte[] data, int offset, int length )
+			throws IOException
+	{
+		if ( raf != null )
+		{
+			raf.write( data, offset, length );
+		}
+		else
+		{
+			out.write( data, offset, length );
 		}
 	}
 
@@ -970,10 +1066,14 @@ public class ZipOutputStream extends FilterOutputStream {
 	 * @return the unsigned int as a long.
 	 * @since 1.34
 	 */
-	protected static long adjustToLong(int i) {
-		if (i < 0) {
-			return 2 * ((long) Integer.MAX_VALUE) + 2 + i;
-		} else {
+	protected static long adjustToLong( int i )
+	{
+		if ( i < 0 )
+		{
+			return 2 * ( (long) Integer.MAX_VALUE ) + 2 + i;
+		}
+		else
+		{
 			return i;
 		}
 	}

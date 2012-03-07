@@ -35,7 +35,8 @@ import org.eclipse.ui.forms.FormColors;
  * 
  * @author Anthony Hunter
  */
-public class TabbedPropertyTitle extends Composite {
+public class TabbedPropertyTitle extends Composite
+{
 
 	private CLabel label;
 
@@ -65,52 +66,62 @@ public class TabbedPropertyTitle extends Composite {
 	 * @param factory
 	 *            the widget factory for the tabbed property sheet
 	 */
-	public TabbedPropertyTitle(Composite parent, FormWidgetFactory factory) {
-		super(parent, SWT.NO_FOCUS);
+	public TabbedPropertyTitle( Composite parent, FormWidgetFactory factory )
+	{
+		super( parent, SWT.NO_FOCUS );
 		this.factory = factory;
 
-		this.addPaintListener(new PaintListener() {
+		this.addPaintListener( new PaintListener( ) {
 
-			public void paintControl(PaintEvent e) {
-				if (image == null && (text == null || text.equals(BLANK))) {
-					label.setVisible(false);
-				} else {
-					label.setVisible(true);
-					drawTitleBackground(e);
+			public void paintControl( PaintEvent e )
+			{
+				if ( image == null && ( text == null || text.equals( BLANK ) ) )
+				{
+					label.setVisible( false );
+				}
+				else
+				{
+					label.setVisible( true );
+					drawTitleBackground( e );
 				}
 			}
-		});
+		} );
 
-		factory.getColors().initializeSectionToolBarColors();
-		setBackground(factory.getColors().getBackground());
-		setForeground(factory.getColors().getForeground());
+		factory.getColors( ).initializeSectionToolBarColors( );
+		setBackground( factory.getColors( ).getBackground( ) );
+		setForeground( factory.getColors( ).getForeground( ) );
 
-		FormLayout layout = new FormLayout();
+		FormLayout layout = new FormLayout( );
 		layout.marginWidth = ITabbedPropertyConstants.HSPACE + 6;
 		layout.marginHeight = 5;
-		setLayout(layout);
+		setLayout( layout );
 
-		label = factory.createCLabel(this, BLANK);
-		label.setBackground(new Color[] {
-				factory.getColors().getColor(FormColors.TB_BG),
-				factory.getColors().getColor(FormColors.TB_GBG) },
-				new int[] { 100 }, true);
+		label = factory.createCLabel( this, BLANK );
+		label.setBackground( new Color[]{
+				factory.getColors( ).getColor( FormColors.TB_BG ),
+				factory.getColors( ).getColor( FormColors.TB_GBG )
+		}, new int[]{
+			100
+		}, true );
 
-		
-		if (!JFaceResources.getFontRegistry().hasValueFor("Custom Bold")) {
-			Font dialogFont = JFaceResources.getDialogFont();
-			FontData[] fonts = dialogFont.getFontData();
-			fonts[0].setStyle(SWT.BOLD);
-			JFaceResources.getFontRegistry().put("Custom Bold", new FontData[]{fonts[0]});
+		if ( !JFaceResources.getFontRegistry( ).hasValueFor( "Custom Bold" ) )
+		{
+			Font dialogFont = JFaceResources.getDialogFont( );
+			FontData[] fonts = dialogFont.getFontData( );
+			fonts[0].setStyle( SWT.BOLD );
+			JFaceResources.getFontRegistry( ).put( "Custom Bold",
+					new FontData[]{
+						fonts[0]
+					} );
 		}
-		Font font = JFaceResources.getFontRegistry().get("Custom Bold");;
-		label.setFont(font);
-		FormData data = new FormData();
-		data.left = new FormAttachment(0, 0);
-		data.top = new FormAttachment(0, 0);
-		data.right = new FormAttachment(100, 0);
-		data.bottom = new FormAttachment(100, 0);
-		label.setLayoutData(data);
+		Font font = JFaceResources.getFontRegistry( ).get( "Custom Bold" );;
+		label.setFont( font );
+		FormData data = new FormData( );
+		data.left = new FormAttachment( 0, 0 );
+		data.top = new FormAttachment( 0, 0 );
+		data.right = new FormAttachment( 100, 0 );
+		data.bottom = new FormAttachment( 100, 0 );
+		label.setLayoutData( data );
 
 		/*
 		 * setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
@@ -121,46 +132,61 @@ public class TabbedPropertyTitle extends Composite {
 	/**
 	 * @param e
 	 */
-	protected void drawTitleBackground(PaintEvent e) {
-		Color bg = factory.getColors().getColor(FormColors.TB_BG);
-		Color gbg = factory.getColors().getColor(FormColors.TB_GBG);
-		Color border = factory.getColors().getColor(FormColors.TB_BORDER);
-		Rectangle bounds = getClientArea();
-		
+	protected void drawTitleBackground( PaintEvent e )
+	{
+		Color bg = factory.getColors( ).getColor( FormColors.TB_BG );
+		Color gbg = factory.getColors( ).getColor( FormColors.TB_GBG );
+		Color border = factory.getColors( ).getColor( FormColors.TB_BORDER );
+		Rectangle bounds = getClientArea( );
+
 		Point labelSize = null;
-		if (label != null) {
-			labelSize = label.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+		if ( label != null )
+		{
+			labelSize = label.computeSize( SWT.DEFAULT, SWT.DEFAULT, true );
 		}
 
 		int tvmargin = 4;
-		int theight = getHeight();
-		
-		if (labelSize != null) {
-			theight = Math.max(theight, labelSize.y);
+		int theight = getHeight( );
+
+		if ( labelSize != null )
+		{
+			theight = Math.max( theight, labelSize.y );
 		}
 		theight += tvmargin + tvmargin;
-		int midpoint = (theight * 66) / 100;
+		int midpoint = ( theight * 66 ) / 100;
 		int rem = theight - midpoint;
 		GC gc = e.gc;
-		gc.setForeground(bg);
-		gc.setBackground(gbg);
-		gc.fillGradientRectangle(marginWidth, marginHeight, bounds.width - 1
-				- marginWidth - marginWidth, midpoint - 1, true);
-		gc.setForeground(gbg);
-		gc.setBackground(getBackground());
-		gc.fillGradientRectangle(marginWidth, marginHeight + midpoint - 1,
-				bounds.width - 1 - marginWidth - marginWidth, rem - 1, true);
-		gc.setForeground(border);
-		gc.drawLine(marginWidth, marginHeight + 2, marginWidth, marginHeight
-				+ theight - 1);
-		gc.drawLine(marginWidth, marginHeight + 2, marginWidth + 2,
-				marginHeight);
-		gc.drawLine(marginWidth + 2, marginHeight, bounds.width - marginWidth
-				- 3, marginHeight);
-		gc.drawLine(bounds.width - marginWidth - 3, marginHeight, bounds.width
-				- marginWidth - 1, marginHeight + 2);
-		gc.drawLine(bounds.width - marginWidth - 1, marginHeight + 2,
-				bounds.width - marginWidth - 1, marginHeight + theight - 1);
+		gc.setForeground( bg );
+		gc.setBackground( gbg );
+		gc.fillGradientRectangle( marginWidth, marginHeight, bounds.width
+				- 1
+				- marginWidth
+				- marginWidth, midpoint - 1, true );
+		gc.setForeground( gbg );
+		gc.setBackground( getBackground( ) );
+		gc.fillGradientRectangle( marginWidth,
+				marginHeight + midpoint - 1,
+				bounds.width - 1 - marginWidth - marginWidth,
+				rem - 1,
+				true );
+		gc.setForeground( border );
+		gc.drawLine( marginWidth, marginHeight + 2, marginWidth, marginHeight
+				+ theight
+				- 1 );
+		gc.drawLine( marginWidth,
+				marginHeight + 2,
+				marginWidth + 2,
+				marginHeight );
+		gc.drawLine( marginWidth + 2, marginHeight, bounds.width
+				- marginWidth
+				- 3, marginHeight );
+		gc.drawLine( bounds.width - marginWidth - 3, marginHeight, bounds.width
+				- marginWidth
+				- 1, marginHeight + 2 );
+		gc.drawLine( bounds.width - marginWidth - 1,
+				marginHeight + 2,
+				bounds.width - marginWidth - 1,
+				marginHeight + theight - 1 );
 	}
 
 	/**
@@ -169,30 +195,35 @@ public class TabbedPropertyTitle extends Composite {
 	 * @param text
 	 *            the text label.
 	 */
-	public void setTitle(String text, Image image) {
+	public void setTitle( String text, Image image )
+	{
 		this.text = text;
 		this.image = image;
-		if (text != null) {
-			label.setText(text);
-		} else {
-			label.setText(BLANK);
+		if ( text != null )
+		{
+			label.setText( text );
 		}
-		label.setImage(image);
-		redraw();
+		else
+		{
+			label.setText( BLANK );
+		}
+		label.setImage( image );
+		redraw( );
 	}
 
 	/**
 	 * @return the height of the title.
 	 */
-	public int getHeight() {
-		Shell shell = new Shell();
-		GC gc = new GC(shell);
-		gc.setFont(getFont());
-		Point point = gc.textExtent(BLANK);
+	public int getHeight( )
+	{
+		Shell shell = new Shell( );
+		GC gc = new GC( shell );
+		gc.setFont( getFont( ) );
+		Point point = gc.textExtent( BLANK );
 		point.x++;
-		int textOrImageHeight = Math.max(point.x, 16);
-		gc.dispose();
-		shell.dispose();
+		int textOrImageHeight = Math.max( point.x, 16 );
+		gc.dispose( );
+		shell.dispose( );
 		return textOrImageHeight + 8;
 	}
 }

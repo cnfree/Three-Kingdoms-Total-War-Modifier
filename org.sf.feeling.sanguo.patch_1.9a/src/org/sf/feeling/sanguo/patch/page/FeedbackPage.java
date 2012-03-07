@@ -8,6 +8,7 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.page;
 
 import org.eclipse.swt.SWT;
@@ -19,18 +20,18 @@ public class FeedbackPage extends TabPage
 
 	private Browser browser;
 
-	public void buildUI(Composite parent)
+	public void buildUI( Composite parent )
 	{
-		browser = new Browser(parent, SWT.NONE);
-		browser.setUrl("http://www.1mod.org/forum.php?mod=viewthread&tid=37918&extra=pageD1%3D&page=1");
+		browser = new Browser( parent, SWT.NONE );
+		browser.setUrl( "http://www.1mod.org/forum.php?mod=viewthread&tid=37918&extra=pageD1%3D&page=1" );
 	}
 
-	public Composite getControl()
+	public Composite getControl( )
 	{
 		return browser;
 	}
 
-	public String getDisplayName()
+	public String getDisplayName( )
 	{
 		return "修改器反馈中心";
 	}

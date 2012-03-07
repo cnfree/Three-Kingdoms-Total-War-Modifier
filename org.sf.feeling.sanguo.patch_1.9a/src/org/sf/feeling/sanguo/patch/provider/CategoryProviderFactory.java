@@ -8,6 +8,7 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.provider;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import org.sf.feeling.sanguo.patch.page.UnitModifyPage;
 import org.sf.feeling.sanguo.patch.page.UnitPatchPage;
 import org.sf.feeling.sanguo.patch.page.UsagePage;
 
-public class CategoryProviderFactory 
+public class CategoryProviderFactory
 {
 
 	private static CategoryProviderFactory instance = new CategoryProviderFactory( );
@@ -52,7 +53,8 @@ public class CategoryProviderFactory
 		return instance;
 	}
 
-	private String[] getCategoryNames(){
+	private String[] getCategoryNames( )
+	{
 		String[] names = new String[]{
 				"基本修改",
 				"开局初始化修改",
@@ -69,18 +71,19 @@ public class CategoryProviderFactory
 				"编辑势力",
 				"代码查找",
 				"备份与还原",
-				//"功能或Bug提交",
+				// "功能或Bug提交",
 				"三国全战百度贴吧",
 				"修改器反馈中心",
 				"修改器使用手册",
 				"注意事项"
 		};
-		List list = new ArrayList();
-		list.addAll(Arrays.asList(names));
-		return (String[])list.toArray(new String[0]);
+		List list = new ArrayList( );
+		list.addAll( Arrays.asList( names ) );
+		return (String[]) list.toArray( new String[0] );
 	}
-	
-	private Class[] getCategoryClasses(){
+
+	private Class[] getCategoryClasses( )
+	{
 		Class[] classes = new Class[]{
 				BasicPatchPage.class,
 				StartPatchPage.class,
@@ -97,15 +100,15 @@ public class CategoryProviderFactory
 				FactionEditPage.class,
 				CodePage.class,
 				BakAndRestorePage.class,
-				//BugSubmitPage.class,
+				// BugSubmitPage.class,
 				TiebaPage.class,
 				FeedbackPage.class,
 				UsagePage.class,
 				AboutPage.class,
 		};
-		List list = new ArrayList();
-		list.addAll(Arrays.asList(classes));
-		return (Class[])list.toArray(new Class[0]);
+		List list = new ArrayList( );
+		list.addAll( Arrays.asList( classes ) );
+		return (Class[]) list.toArray( new Class[0] );
 	}
 
 	/**
@@ -113,7 +116,7 @@ public class CategoryProviderFactory
 	 */
 	public ICategoryProvider getCategoryProvider( )
 	{
-			return new CategoryProvider( getCategoryNames(),getCategoryClasses()  );
-		
+		return new CategoryProvider( getCategoryNames( ), getCategoryClasses( ) );
+
 	}
 }

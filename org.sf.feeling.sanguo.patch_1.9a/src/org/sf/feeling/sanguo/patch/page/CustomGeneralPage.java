@@ -559,7 +559,8 @@ public class CustomGeneralPage extends SimpleTabPage
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置新武将能力", true );
+				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置新武将能力",
+						true );
 				if ( skills == null )
 				{
 					skills = new SortMap( );
@@ -1285,7 +1286,7 @@ public class CustomGeneralPage extends SimpleTabPage
 		ch3Button.setSelection( false );
 		ch4Button.setSelection( false );
 		posXSpinner.setSelection( 0 );
-		posYSpinner.setSelection( 0 );	
+		posYSpinner.setSelection( 0 );
 		if ( skills != null )
 		{
 			skills.clear( );
@@ -1298,7 +1299,7 @@ public class CustomGeneralPage extends SimpleTabPage
 		}
 		skills = null;
 		baowus = null;
-		jueweis = null;	
+		jueweis = null;
 		soldier = null;
 		smallImage = null;
 		bigImage = null;

@@ -8,25 +8,30 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.page;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
 
-public class SimpleTabPage extends TabPage {
+public class SimpleTabPage extends TabPage
+{
 
 	protected ScrolledForm container;
 
-	public void buildUI(Composite parent) {
-		container = WidgetUtil.getToolkit().createScrolledForm(parent);
+	public void buildUI( Composite parent )
+	{
+		container = WidgetUtil.getToolkit( ).createScrolledForm( parent );
 	}
 
-	public Composite getControl() {
+	public Composite getControl( )
+	{
 		return container;
 	}
 
-	public String getDisplayName() {
+	public String getDisplayName( )
+	{
 		return null;
 	}
 

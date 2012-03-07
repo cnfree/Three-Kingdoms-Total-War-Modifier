@@ -8,6 +8,7 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.page;
 
 import org.eclipse.swt.events.SelectionAdapter;
@@ -15,12 +16,15 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Control;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 
-public class RestoreListener extends SelectionAdapter {
-	public void widgetSelected(SelectionEvent e) {
-		if (e.widget instanceof Control)
-			((Control) e.widget).setEnabled(false);
-		BakUtil.restoreCurrectVersionBakFile();
-		if (e.widget instanceof Control)
-			((Control) e.widget).setEnabled(true);
+public class RestoreListener extends SelectionAdapter
+{
+
+	public void widgetSelected( SelectionEvent e )
+	{
+		if ( e.widget instanceof Control )
+			( (Control) e.widget ).setEnabled( false );
+		BakUtil.restoreCurrectVersionBakFile( );
+		if ( e.widget instanceof Control )
+			( (Control) e.widget ).setEnabled( true );
 	}
 }

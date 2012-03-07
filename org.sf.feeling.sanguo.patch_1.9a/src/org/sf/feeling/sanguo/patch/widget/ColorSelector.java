@@ -234,10 +234,10 @@ public class ColorSelector
 		if ( newColor != null )
 		{
 			fColorValue = newColor;
-			Event event = new Event();
+			Event event = new Event( );
 			event.data = fColorValue;
 			event.widget = fButton;
-			fireModifyEvent(event);
+			fireModifyEvent( event );
 			updateColorImage( );
 		}
 		shell.dispose( );

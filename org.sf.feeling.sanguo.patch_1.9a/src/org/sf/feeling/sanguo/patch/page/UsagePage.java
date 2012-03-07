@@ -8,6 +8,7 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.page;
 
 import java.io.BufferedReader;
@@ -25,10 +26,10 @@ public class UsagePage extends TabPage
 
 	private Browser browser;
 
-	public void buildUI(Composite parent)
+	public void buildUI( Composite parent )
 	{
-		browser = new Browser(parent, SWT.NONE);
-		
+		browser = new Browser( parent, SWT.NONE );
+
 		try
 		{
 			URL url = new URL( "http://feeling.sourceforge.net/patch/1.9a/usage.txt" );
@@ -37,7 +38,7 @@ public class UsagePage extends TabPage
 			BufferedReader reader = new BufferedReader( new InputStreamReader( conn.getInputStream( ) ) );
 			String website = reader.readLine( );
 			conn.disconnect( );
-			browser.setUrl(website);
+			browser.setUrl( website );
 		}
 		catch ( IOException e )
 		{
@@ -45,12 +46,12 @@ public class UsagePage extends TabPage
 		}
 	}
 
-	public Composite getControl()
+	public Composite getControl( )
 	{
 		return browser;
 	}
 
-	public String getDisplayName()
+	public String getDisplayName( )
 	{
 		return "修改器使用手册（感谢吧友王妃婧婧友情提供）";
 	}

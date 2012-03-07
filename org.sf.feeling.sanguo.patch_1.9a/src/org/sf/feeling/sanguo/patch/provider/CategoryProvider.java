@@ -8,14 +8,11 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.provider;
 
 import org.sf.feeling.sanguo.patch.page.CategoryPage;
 import org.sf.feeling.sanguo.patch.page.ICategoryPage;
-
-
-
-
 
 public class CategoryProvider implements ICategoryProvider
 {
@@ -36,7 +33,8 @@ public class CategoryProvider implements ICategoryProvider
 		this.categories = new ICategoryPage[categories.length];
 		for ( int i = 0; i < categories.length; i++ )
 		{
-			this.categories[i] = new CategoryPage( categories[i],pageClasses[i] );
+			this.categories[i] = new CategoryPage( categories[i],
+					pageClasses[i] );
 		}
 	}
 

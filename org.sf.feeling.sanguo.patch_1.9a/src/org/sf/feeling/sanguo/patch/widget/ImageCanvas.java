@@ -31,7 +31,8 @@ import org.eclipse.swt.widgets.Composite;
  * Special Canvas class used to display the image.
  * 
  */
-public class ImageCanvas extends Canvas {
+public class ImageCanvas extends Canvas
+{
 
 	private Image sourceImage;
 
@@ -42,9 +43,10 @@ public class ImageCanvas extends Canvas {
 	 * 
 	 * @param parent
 	 */
-	public ImageCanvas(final Composite parent) {
-		this(parent, 0);
-		initAccessible();
+	public ImageCanvas( final Composite parent )
+	{
+		this( parent, 0 );
+		initAccessible( );
 	}
 
 	/**
@@ -54,67 +56,78 @@ public class ImageCanvas extends Canvas {
 	 * @param style
 	 * 
 	 */
-	public ImageCanvas(final Composite parent, int style) {
-		super(parent, style);
+	public ImageCanvas( final Composite parent, int style )
+	{
+		super( parent, style );
 
-		addPaintListener(new PaintListener() {
+		addPaintListener( new PaintListener( ) {
 
-			public void paintControl(final PaintEvent event) {
-				paint(event.gc);
+			public void paintControl( final PaintEvent event )
+			{
+				paint( event.gc );
 			}
-		});
-		initAccessible();
+		} );
+		initAccessible( );
 	}
 
-	void initAccessible() {
-		getAccessible().addAccessibleControlListener(
-				new AccessibleControlAdapter() {
+	void initAccessible( )
+	{
+		getAccessible( ).addAccessibleControlListener( new AccessibleControlAdapter( ) {
 
-					public void getChildAtPoint(AccessibleControlEvent e) {
-						Point testPoint = toControl(e.x, e.y);
-						if (getBounds().contains(testPoint)) {
-							e.childID = ACC.CHILDID_SELF;
-						}
-					}
+			public void getChildAtPoint( AccessibleControlEvent e )
+			{
+				Point testPoint = toControl( e.x, e.y );
+				if ( getBounds( ).contains( testPoint ) )
+				{
+					e.childID = ACC.CHILDID_SELF;
+				}
+			}
 
-					public void getLocation(AccessibleControlEvent e) {
-						Rectangle location = getBounds();
-						Point pt = toDisplay(location.x, location.y);
-						e.x = pt.x;
-						e.y = pt.y;
-						e.width = location.width;
-						e.height = location.height;
-					}
+			public void getLocation( AccessibleControlEvent e )
+			{
+				Rectangle location = getBounds( );
+				Point pt = toDisplay( location.x, location.y );
+				e.x = pt.x;
+				e.y = pt.y;
+				e.width = location.width;
+				e.height = location.height;
+			}
 
-					public void getChildCount(AccessibleControlEvent e) {
-						e.detail = 0;
-					}
+			public void getChildCount( AccessibleControlEvent e )
+			{
+				e.detail = 0;
+			}
 
-					public void getRole(AccessibleControlEvent e) {
-						e.detail = ACC.ROLE_LABEL;
-					}
+			public void getRole( AccessibleControlEvent e )
+			{
+				e.detail = ACC.ROLE_LABEL;
+			}
 
-					public void getState(AccessibleControlEvent e) {
-						e.detail = ACC.STATE_NORMAL;
-					}
+			public void getState( AccessibleControlEvent e )
+			{
+				e.detail = ACC.STATE_NORMAL;
+			}
 
-					public void getValue(AccessibleControlEvent e) {
-						e.result = "Preview Image"; //$NON-NLS-1$
-					}
-
-				});
-
-		AccessibleAdapter accessibleAdapter = new AccessibleAdapter() {
-
-			public void getHelp(AccessibleEvent e) {
+			public void getValue( AccessibleControlEvent e )
+			{
 				e.result = "Preview Image"; //$NON-NLS-1$
 			}
 
-			public void getName(AccessibleEvent e) {
+		} );
+
+		AccessibleAdapter accessibleAdapter = new AccessibleAdapter( ) {
+
+			public void getHelp( AccessibleEvent e )
+			{
+				e.result = "Preview Image"; //$NON-NLS-1$
+			}
+
+			public void getName( AccessibleEvent e )
+			{
 				e.result = "Preview Image"; //$NON-NLS-1$
 			}
 		};
-		getAccessible().addAccessibleListener(accessibleAdapter);
+		getAccessible( ).addAccessibleListener( accessibleAdapter );
 	}
 
 	/*
@@ -122,17 +135,21 @@ public class ImageCanvas extends Canvas {
 	 * 
 	 * @see org.eclipse.swt.widgets.Widget#dispose()
 	 */
-	public void dispose() {
-		if (sourceImage != null && !sourceImage.isDisposed()) {
-			sourceImage.dispose();
+	public void dispose( )
+	{
+		if ( sourceImage != null && !sourceImage.isDisposed( ) )
+		{
+			sourceImage.dispose( );
 		}
 
-		if (screenImage != null && !screenImage.isDisposed()) {
-			screenImage.dispose();
+		if ( screenImage != null && !screenImage.isDisposed( ) )
+		{
+			screenImage.dispose( );
 		}
 	}
 
-	private void paint(GC gc) {
+	private void paint( GC gc )
+	{
 		try
 		{
 			gc.setAdvanced( true );
@@ -142,33 +159,40 @@ public class ImageCanvas extends Canvas {
 		catch ( Exception e )
 		{
 		}
-		if (sourceImage != null && !sourceImage.isDisposed()) {
-			if (((float) getSize().x / getSize().y) >= ((float) sourceImage
-					.getImageData().width / sourceImage.getImageData().height)) {
-				
-				int width = (int) (getSize().y * ((float) sourceImage
-						.getImageData().width / sourceImage.getImageData().height));
-				if (width > sourceImage.getImageData().width)
-					width = sourceImage.getImageData().width;
-				int height = (int) (width * (sourceImage.getImageData().height / (float) sourceImage
-						.getImageData().width));
-				gc.drawImage(sourceImage, 0, 0,
-						sourceImage.getImageData().width, sourceImage
-								.getImageData().height,
-						(getSize().x - width) / 2 - 1,
-						(getSize().y - height) / 2 - 1, width, height);
-			} else {
-				int height = (int) (getSize().x * ((float) sourceImage
-						.getImageData().height / sourceImage.getImageData().width));
-				if (height > sourceImage.getImageData().height)
-					height = sourceImage.getImageData().height;
-				int width = (int) (height * (sourceImage.getImageData().width / (float) sourceImage
-						.getImageData().height));
-				gc.drawImage(sourceImage, 0, 0,
-						sourceImage.getImageData().width, sourceImage
-								.getImageData().height,
-						(getSize().x - width) / 2 - 1,
-						(getSize().y - height) / 2 - 1, width, height);
+		if ( sourceImage != null && !sourceImage.isDisposed( ) )
+		{
+			if ( ( (float) getSize( ).x / getSize( ).y ) >= ( (float) sourceImage.getImageData( ).width / sourceImage.getImageData( ).height ) )
+			{
+
+				int width = (int) ( getSize( ).y * ( (float) sourceImage.getImageData( ).width / sourceImage.getImageData( ).height ) );
+				if ( width > sourceImage.getImageData( ).width )
+					width = sourceImage.getImageData( ).width;
+				int height = (int) ( width * ( sourceImage.getImageData( ).height / (float) sourceImage.getImageData( ).width ) );
+				gc.drawImage( sourceImage,
+						0,
+						0,
+						sourceImage.getImageData( ).width,
+						sourceImage.getImageData( ).height,
+						( getSize( ).x - width ) / 2 - 1,
+						( getSize( ).y - height ) / 2 - 1,
+						width,
+						height );
+			}
+			else
+			{
+				int height = (int) ( getSize( ).x * ( (float) sourceImage.getImageData( ).height / sourceImage.getImageData( ).width ) );
+				if ( height > sourceImage.getImageData( ).height )
+					height = sourceImage.getImageData( ).height;
+				int width = (int) ( height * ( sourceImage.getImageData( ).width / (float) sourceImage.getImageData( ).height ) );
+				gc.drawImage( sourceImage,
+						0,
+						0,
+						sourceImage.getImageData( ).width,
+						sourceImage.getImageData( ).height,
+						( getSize( ).x - width ) / 2 - 1,
+						( getSize( ).y - height ) / 2 - 1,
+						width,
+						height );
 			}
 		}
 	}
@@ -178,7 +202,8 @@ public class ImageCanvas extends Canvas {
 	 * 
 	 * @return sourceImage.
 	 */
-	public Image getSourceImage() {
+	public Image getSourceImage( )
+	{
 		return sourceImage;
 	}
 
@@ -187,27 +212,31 @@ public class ImageCanvas extends Canvas {
 	 * 
 	 * @param data
 	 */
-	public void setImageData(ImageData data) {
-		if (sourceImage != null) {
-			sourceImage.dispose();
+	public void setImageData( ImageData data )
+	{
+		if ( sourceImage != null )
+		{
+			sourceImage.dispose( );
 			sourceImage = null;
 		}
-		if (data != null)
-			sourceImage = new Image(getDisplay(), data);
-		redraw();
+		if ( data != null )
+			sourceImage = new Image( getDisplay( ), data );
+		redraw( );
 	}
 
 	/**
 	 * Clear the canvas
 	 */
-	public void clear() {
-		if (sourceImage != null) {
-			sourceImage.dispose();
+	public void clear( )
+	{
+		if ( sourceImage != null )
+		{
+			sourceImage.dispose( );
 			sourceImage = null;
 		}
-		GC clearGC = new GC(this);
-		paint(clearGC);
-		clearGC.dispose();
+		GC clearGC = new GC( this );
+		paint( clearGC );
+		clearGC.dispose( );
 	}
 
 }

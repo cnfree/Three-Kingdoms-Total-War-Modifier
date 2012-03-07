@@ -55,7 +55,9 @@ import java.util.zip.ZipException;
  * </ul>
  * 
  */
-public class ZipFileInfo {
+public class ZipFileInfo
+{
+
 	/**
 	 * The encoding to use for filenames and the file comment.
 	 * 
@@ -69,7 +71,9 @@ public class ZipFileInfo {
 	private String encoding = null;
 
 	private String comment = null;
-	public String getComment() {
+
+	public String getComment( )
+	{
 		return comment;
 	}
 
@@ -88,8 +92,9 @@ public class ZipFileInfo {
 	 * @throws IOException
 	 *             if an error occurs while reading the file.
 	 */
-	public ZipFileInfo(File f) throws IOException {
-		this(f, null);
+	public ZipFileInfo( File f ) throws IOException
+	{
+		this( f, null );
 	}
 
 	/**
@@ -102,8 +107,9 @@ public class ZipFileInfo {
 	 * @throws IOException
 	 *             if an error occurs while reading the file.
 	 */
-	public ZipFileInfo(String name) throws IOException {
-		this(new File(name), null);
+	public ZipFileInfo( String name ) throws IOException
+	{
+		this( new File( name ), null );
 	}
 
 	/**
@@ -118,8 +124,9 @@ public class ZipFileInfo {
 	 * @throws IOException
 	 *             if an error occurs while reading the file.
 	 */
-	public ZipFileInfo(String name, String encoding) throws IOException {
-		this(new File(name), encoding);
+	public ZipFileInfo( String name, String encoding ) throws IOException
+	{
+		this( new File( name ), encoding );
 	}
 
 	/**
@@ -134,15 +141,22 @@ public class ZipFileInfo {
 	 * @throws IOException
 	 *             if an error occurs while reading the file.
 	 */
-	public ZipFileInfo(File f, String encoding) throws IOException {
+	public ZipFileInfo( File f, String encoding ) throws IOException
+	{
 		this.encoding = encoding;
-		archive = new RandomAccessFile(f, "r");
-		try {
-			populateFromCentralDirectory();
-		} catch (IOException e) {
-			try {
-				archive.close();
-			} catch (IOException e2) {
+		archive = new RandomAccessFile( f, "r" );
+		try
+		{
+			populateFromCentralDirectory( );
+		}
+		catch ( IOException e )
+		{
+			try
+			{
+				archive.close( );
+			}
+			catch ( IOException e2 )
+			{
 				// swallow, throw the original exception instead
 			}
 			throw e;
@@ -154,7 +168,8 @@ public class ZipFileInfo {
 	 * 
 	 * @return null if using the platform's default character encoding.
 	 */
-	public String getEncoding() {
+	public String getEncoding( )
+	{
 		return encoding;
 	}
 
@@ -164,10 +179,10 @@ public class ZipFileInfo {
 	 * @throws IOException
 	 *             if an error occurs closing the archive.
 	 */
-	public void close() throws IOException {
-		archive.close();
+	public void close( ) throws IOException
+	{
+		archive.close( );
 	}
-
 
 	/**
 	 * Reads the central directory of the given archive and populates the
@@ -179,8 +194,9 @@ public class ZipFileInfo {
 	 * additional data to be read.
 	 * </p>
 	 */
-	private void populateFromCentralDirectory() throws IOException {
-		positionAtCentralDirectory();
+	private void populateFromCentralDirectory( ) throws IOException
+	{
+		positionAtCentralDirectory( );
 	}
 
 	private static final int MIN_EOCD_SIZE =
@@ -202,44 +218,52 @@ public class ZipFileInfo {
 	 * Searches for the &quot;End of central dir record&quot;, parses it and
 	 * positions the stream at the first central directory record.
 	 */
-	private void positionAtCentralDirectory() throws IOException {
+	private void positionAtCentralDirectory( ) throws IOException
+	{
 		boolean found = false;
-		long off = archive.length() - MIN_EOCD_SIZE;
-		if (off >= 0) {
-			archive.seek(off);
+		long off = archive.length( ) - MIN_EOCD_SIZE;
+		if ( off >= 0 )
+		{
+			archive.seek( off );
 			byte[] sig = ZipOutputStream.EOCD_SIG;
-			int curr = archive.read();
-			while (curr != -1) {
-				if (curr == sig[0]) {
-					curr = archive.read();
-					if (curr == sig[1]) {
-						curr = archive.read();
-						if (curr == sig[2]) {
-							curr = archive.read();
-							if (curr == sig[3]) {
+			int curr = archive.read( );
+			while ( curr != -1 )
+			{
+				if ( curr == sig[0] )
+				{
+					curr = archive.read( );
+					if ( curr == sig[1] )
+					{
+						curr = archive.read( );
+						if ( curr == sig[2] )
+						{
+							curr = archive.read( );
+							if ( curr == sig[3] )
+							{
 								found = true;
 								break;
 							}
 						}
 					}
 				}
-				archive.seek(--off);
-				curr = archive.read();
+				archive.seek( --off );
+				curr = archive.read( );
 			}
 		}
-		if (!found) {
-			throw new ZipException("archive is not a ZIP archive");
+		if ( !found )
+		{
+			throw new ZipException( "archive is not a ZIP archive" );
 		}
 
-		archive.seek(off + MIN_EOCD_SIZE - 2);
+		archive.seek( off + MIN_EOCD_SIZE - 2 );
 		byte[] commentOffset = new byte[2];
-		archive.readFully(commentOffset);
+		archive.readFully( commentOffset );
 
-		int commentLength = (commentOffset[1] << 8) & 0xFF00;
-		commentLength += (commentOffset[0] & 0xFF);
+		int commentLength = ( commentOffset[1] << 8 ) & 0xFF00;
+		commentLength += ( commentOffset[0] & 0xFF );
 		byte[] commentBytes = new byte[commentLength];
-		archive.readFully(commentBytes);
-		comment = getString(commentBytes);
+		archive.readFully( commentBytes );
+		comment = getString( commentBytes );
 	}
 
 	/**
@@ -252,14 +276,21 @@ public class ZipFileInfo {
 	 * @throws ZipException
 	 *             if the encoding cannot be recognized.
 	 */
-	protected String getString(byte[] bytes) throws ZipException {
-		if (encoding == null) {
-			return new String(bytes);
-		} else {
-			try {
-				return new String(bytes, encoding);
-			} catch (UnsupportedEncodingException uee) {
-				throw new ZipException(uee.getMessage());
+	protected String getString( byte[] bytes ) throws ZipException
+	{
+		if ( encoding == null )
+		{
+			return new String( bytes );
+		}
+		else
+		{
+			try
+			{
+				return new String( bytes, encoding );
+			}
+			catch ( UnsupportedEncodingException uee )
+			{
+				throw new ZipException( uee.getMessage( ) );
 			}
 		}
 	}

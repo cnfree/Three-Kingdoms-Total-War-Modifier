@@ -1,3 +1,4 @@
+
 package org.sf.feeling.sanguo.patch.dialog;
 
 import org.eclipse.jface.dialogs.BaseDialog;
@@ -15,70 +16,80 @@ import org.eclipse.swt.widgets.Shell;
 import org.sf.feeling.sanguo.patch.widget.FormWidgetFactory;
 import org.sf.feeling.swt.win32.extension.widgets.ShellWrapper;
 
-public class BaowuHolderModifyDialog extends BaseDialog implements Listener {
+public class BaowuHolderModifyDialog extends BaseDialog implements Listener
+{
 
 	private Control control;
 	private ScrolledComposite composite;
 
-	public BaowuHolderModifyDialog(String title) {
-		super(title);
+	public BaowuHolderModifyDialog( String title )
+	{
+		super( title );
 	}
 
-	protected Control createDialogArea(Composite parent) {
-		composite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		composite.setExpandHorizontal(true);
-		composite.setExpandVertical(true);
+	protected Control createDialogArea( Composite parent )
+	{
+		composite = new ScrolledComposite( parent, SWT.H_SCROLL | SWT.V_SCROLL );
+		composite.setLayoutData( new GridData( GridData.FILL_BOTH ) );
+		composite.setExpandHorizontal( true );
+		composite.setExpandVertical( true );
 
-		modify = new BaowuHolderModify(true);
-		
-		if (generalBaowus != null)
-			modify.setBaowus(generalBaowus);
+		modify = new BaowuHolderModify( true );
 
-		control = modify.createModifyControl(composite);
-		control.setLayoutData(new GridData(GridData.FILL_BOTH));
+		if ( generalBaowus != null )
+			modify.setBaowus( generalBaowus );
 
-		composite.setContent(control);
+		control = modify.createModifyControl( composite );
+		control.setLayoutData( new GridData( GridData.FILL_BOTH ) );
 
-		composite.addControlListener(new ControlAdapter() {
+		composite.setContent( control );
 
-			public void controlResized(ControlEvent e) {
-				computeSize();
+		composite.addControlListener( new ControlAdapter( ) {
+
+			public void controlResized( ControlEvent e )
+			{
+				computeSize( );
 			}
-		});
-		computeSize();
+		} );
+		computeSize( );
 
 		return composite;
 	}
 
-	private void computeSize() {
-		composite.setMinSize(control.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		((Composite) control).layout();
+	private void computeSize( )
+	{
+		composite.setMinSize( control.computeSize( SWT.DEFAULT, SWT.DEFAULT ) );
+		( (Composite) control ).layout( );
 	}
 
-	protected Control createContents(Composite parent) {
-		Control control = super.createContents(parent);
-		FormWidgetFactory.getInstance().paintFormStyle((Composite) parent);
-		FormWidgetFactory.getInstance().adapt((Composite) parent);
+	protected Control createContents( Composite parent )
+	{
+		Control control = super.createContents( parent );
+		FormWidgetFactory.getInstance( ).paintFormStyle( (Composite) parent );
+		FormWidgetFactory.getInstance( ).adapt( (Composite) parent );
 		return control;
 	}
 
-	public int open() {
-		if (getShell() == null) {
-			create();
-			getShell().setImages(((Shell) getShell().getParent()).getImages());
-			ShellWrapper wrapper = new ShellWrapper(getShell());
-			wrapper.installTheme();
+	public int open( )
+	{
+		if ( getShell( ) == null )
+		{
+			create( );
+			getShell( ).setImages( ( (Shell) getShell( ).getParent( ) ).getImages( ) );
+			ShellWrapper wrapper = new ShellWrapper( getShell( ) );
+			wrapper.installTheme( );
 		}
-		if (initDialog()) {
-			return super.open();
+		if ( initDialog( ) )
+		{
+			return super.open( );
 		}
 		return Dialog.CANCEL;
 	}
 
 	// private boolean isVerified = false;
 
-	public void handleEvent(Event event) {
+	public void handleEvent( Event event )
+	{
 		// if (event.type == SWT.Verify) {
 		// if (getOkButton() != null && !getOkButton().isDisposed()) {
 		// if (event.doit)
@@ -91,8 +102,9 @@ public class BaowuHolderModifyDialog extends BaseDialog implements Listener {
 		// }
 	}
 
-	protected Control createButtonBar(Composite parent) {
-		Composite composite = (Composite) super.createButtonBar(parent);
+	protected Control createButtonBar( Composite parent )
+	{
+		Composite composite = (Composite) super.createButtonBar( parent );
 		// getOkButton().setEnabled(isVerified);
 		return composite;
 	}
@@ -100,18 +112,21 @@ public class BaowuHolderModifyDialog extends BaseDialog implements Listener {
 	private Object result = null;
 	private BaowuHolderModify modify;
 
-	public void okPressed() {
-		result = modify.saveBaowu();
-		super.okPressed();
+	public void okPressed( )
+	{
+		result = modify.saveBaowu( );
+		super.okPressed( );
 	}
 
-	public Object getResult() {
+	public Object getResult( )
+	{
 		return result;
 	}
 
 	private String[] generalBaowus = null;
 
-	public void setGeneralBaowus(String[] generalBaowus) {
+	public void setGeneralBaowus( String[] generalBaowus )
+	{
 		this.generalBaowus = generalBaowus;
 	}
 }

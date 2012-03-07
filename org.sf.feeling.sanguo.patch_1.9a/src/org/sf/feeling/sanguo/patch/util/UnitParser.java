@@ -56,7 +56,7 @@ public class UnitParser
 						"GBK" ) );
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.split( ";" ).length == 0 )
+					if ( line.trim( ).startsWith( ";" ) )
 					{
 						continue;
 					}
@@ -65,7 +65,7 @@ public class UnitParser
 						Pattern pattern = Pattern.compile( "^\\s*(type)(\\s+)("
 								+ soldierType
 								+ ")(\\s*)$" );
-						if ( line.split( ";" ).length == 0 )
+						if ( line.trim( ).startsWith( ";" ) )
 						{
 							continue;
 						}
@@ -520,7 +520,7 @@ public class UnitParser
 				boolean startEngine = false;
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.split( ";" ).length == 0 )
+					if ( line.trim( ).startsWith( ";" ) )
 					{
 						printer.println( line );
 						continue;
@@ -1316,7 +1316,7 @@ public class UnitParser
 				boolean startMountEffect = false;
 				while ( ( line = in.readLine( ) ) != null )
 				{
-					if ( line.split( ";" ).length == 0 )
+					if ( line.trim( ).startsWith( ";" ) )
 					{
 						continue;
 					}

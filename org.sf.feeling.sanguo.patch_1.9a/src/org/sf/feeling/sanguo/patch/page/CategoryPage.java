@@ -8,6 +8,7 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.page;
 
 public class CategoryPage implements ICategoryPage
@@ -16,7 +17,7 @@ public class CategoryPage implements ICategoryPage
 	private String displayLabel;
 	private Class pageClass;
 
-	public CategoryPage( String displayLabel ,Class pageClass )
+	public CategoryPage( String displayLabel, Class pageClass )
 	{
 		this.displayLabel = displayLabel;
 		this.pageClass = pageClass;
@@ -27,7 +28,7 @@ public class CategoryPage implements ICategoryPage
 		return displayLabel;
 	}
 
-	public TabPage createPage(  )
+	public TabPage createPage( )
 	{
 		try
 		{
@@ -36,7 +37,7 @@ public class CategoryPage implements ICategoryPage
 		}
 		catch ( Exception e )
 		{
-			e.printStackTrace();
+			e.printStackTrace( );
 			return null;
 		}
 	}

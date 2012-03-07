@@ -152,6 +152,7 @@ public class ErrorLogDialog extends Dialog
 		}
 		return control;
 	}
+
 	public boolean close( )
 	{
 		font.dispose( );

@@ -42,7 +42,7 @@ public class Unit
 			return true;
 		return false;
 	}
-	
+
 	public boolean hasSecondWeapon( )
 	{
 		if ( second != null && second.length > 5 && !"no".equals( second[5] ) )

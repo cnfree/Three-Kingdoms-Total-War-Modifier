@@ -398,23 +398,27 @@ public class BasicPatchPage extends SimpleTabPage
 							{
 
 								Pattern pattern = null;
-								if(typeCombo.getSelectionIndex( ) == 0){
+								if ( typeCombo.getSelectionIndex( ) == 0 )
+								{
 									pattern = Pattern.compile( PATTERN_CONSTRUCTION );
 								}
-								else{
+								else
+								{
 									pattern = Pattern.compile( PATTERN_COST_BUILDING );
 								}
 								Matcher matcher = pattern.matcher( line );
 								if ( matcher.find( ) )
 								{
 									String string = null;
-									if(typeCombo.getSelectionIndex( ) == 0){
-										string = line.trim( ).split( ";" )[0].substring( "construction".length( ) ); 
+									if ( typeCombo.getSelectionIndex( ) == 0 )
+									{
+										string = line.trim( ).split( ";" )[0].substring( "construction".length( ) );
 									}
-									else{
-										string = line.trim( ).split( ";" )[0].substring( "cost".length( ) ); 
+									else
+									{
+										string = line.trim( ).split( ";" )[0].substring( "cost".length( ) );
 									}
-									
+
 									int number = Integer.parseInt( string.trim( )
 											.split( "\\." )[0] );
 									if ( numberCombo.getSelectionIndex( ) == 0 )
@@ -429,11 +433,15 @@ public class BasicPatchPage extends SimpleTabPage
 									{
 										number = compute( number, 1, 3 );
 									}
-									if(typeCombo.getSelectionIndex( ) == 0){
-										printer.println( "            construction  "+number );
+									if ( typeCombo.getSelectionIndex( ) == 0 )
+									{
+										printer.println( "            construction  "
+												+ number );
 									}
-									else{
-										printer.println( "            cost  "+number );
+									else
+									{
+										printer.println( "            cost  "
+												+ number );
 									}
 									continue;
 								}

@@ -8,10 +8,10 @@
  * Contributors:
  *  cnfree  - initial API and implementation
  *******************************************************************************/
+
 package org.sf.feeling.sanguo.patch.provider;
 
 import org.sf.feeling.sanguo.patch.page.ICategoryPage;
-
 
 /**
  * The instance which provides category pages element.

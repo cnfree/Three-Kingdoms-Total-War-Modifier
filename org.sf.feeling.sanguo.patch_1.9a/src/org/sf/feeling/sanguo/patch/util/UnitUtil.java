@@ -1277,6 +1277,11 @@ public class UnitUtil
 		return MapUtil.mountModelToTypeMap;
 	}
 
+	public static SortMap getGeneralModelProperties( )
+	{
+		return MapUtil.generalModelProperty;
+	}
+
 	public static void setUnitName( String unitType, String name )
 	{
 		String dictionary = (String) MapUtil.unitTypeToDictionaryMap.get( unitType );
@@ -2121,5 +2126,99 @@ public class UnitUtil
 		}
 
 		changeGeneralFaction( general, leader );
+	}
+
+	public static List getModelInfo( String modelCode )
+	{
+		List infos = new ArrayList( );
+		try
+		{
+			String line = null;
+			BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.battleFile ),
+					"GBK" ) );
+			boolean startGeneral = false;
+			boolean startTexture = false;
+			boolean startSprite = false;
+			while ( ( line = in.readLine( ) ) != null )
+			{
+				if ( startGeneral == false )
+				{
+					Pattern pattern2 = Pattern.compile( "^\\s*(type)(\\s+)"
+							+ modelCode
+							+ "\\s*$", Pattern.CASE_INSENSITIVE );
+					Matcher matcher2 = pattern2.matcher( line );
+					if ( matcher2.find( ) )
+					{
+						startGeneral = true;
+					}
+				}
+				else
+				{
+					{
+						Pattern pattern2 = Pattern.compile( "^\\s*(skeleton_horse)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher2 = pattern2.matcher( line );
+						if ( matcher2.find( ) )
+						{
+							infos.add( line.replace( "skeleton_horse",
+									"skeleton" ) );
+							continue;
+						}
+					}
+					{
+						Pattern pattern2 = Pattern.compile( "^\\s*(texture)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher2 = pattern2.matcher( line );
+						if ( matcher2.find( ) )
+						{
+							if ( !startTexture )
+							{
+								infos.add( line.replaceAll( "texture.+,",
+										"texture		 		" ) );
+								startTexture = true;
+							}
+							continue;
+						}
+					}
+					{
+						Pattern pattern2 = Pattern.compile( "^\\s*(model_sprite)(\\s+)",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher2 = pattern2.matcher( line );
+						if ( matcher2.find( ) )
+						{
+							if ( !startSprite )
+							{
+								infos.add( line.replaceAll( "model_sprite.+\\d+",
+										"model_sprite		60.0" ) );
+								startSprite = true;
+							}
+							continue;
+						}
+					}
+
+					Pattern pattern2 = Pattern.compile( "^\\s*(type)(\\s+)",
+							Pattern.CASE_INSENSITIVE );
+					Matcher matcher2 = pattern2.matcher( line );
+					if ( matcher2.find( ) )
+					{
+						break;
+					}
+
+					if ( line.trim( ).length( ) == 0 )
+						continue;
+					if ( line.trim( ).startsWith( ";" ) )
+						continue;
+					if ( line.trim( ).startsWith( "skeleton" ) )
+						continue;
+					infos.add( line );
+				}
+			}
+			in.close( );
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace( );
+		}
+		return infos;
 	}
 }

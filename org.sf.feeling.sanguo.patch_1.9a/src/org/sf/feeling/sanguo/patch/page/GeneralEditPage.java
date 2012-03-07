@@ -553,7 +553,8 @@ public class GeneralEditPage extends SimpleTabPage
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置武将能力", false );
+				GeneralModifyDialog dialog = new GeneralModifyDialog( "设置武将能力",
+						false );
 				if ( skills != null )
 				{
 					dialog.setGeneralSkills( general, skills );
@@ -911,7 +912,8 @@ public class GeneralEditPage extends SimpleTabPage
 						imageFiles.addAll( Arrays.asList( BakUtil.getUnitImageFiles( UnitUtil.getGeneralFaction( general ),
 								generalUnit ) ) );
 					}
-					BakUtil.bakDataAndResources( "编辑武将：" + generalCombo.getText( ),
+					BakUtil.bakDataAndResources( "编辑武将："
+							+ generalCombo.getText( ),
 							(File[]) imageFiles.toArray( new File[0] ) );
 				}
 				GeneralEditor customGeneral = new GeneralEditor( );
@@ -1022,7 +1024,7 @@ public class GeneralEditPage extends SimpleTabPage
 						.trim( ) );
 				customGeneral.editGeneral( );
 				MapUtil.initMap( );
-				
+
 				soldier = null;
 				skills = null;
 				smallImage = null;
@@ -1033,10 +1035,9 @@ public class GeneralEditPage extends SimpleTabPage
 				jueweis = null;
 				imageCanvas.clear( );
 				generalDesc.setText( "" );
-				
-				generalCombo.notifyListeners( SWT.Selection,
-						new Event( ) );
-				
+
+				generalCombo.notifyListeners( SWT.Selection, new Event( ) );
+
 				applyButton.setEnabled( true );
 				checkEnableStatus( );
 				refresh( );
