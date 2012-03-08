@@ -468,7 +468,135 @@ public class ModelPatchPage extends SimpleTabPage
 			} );
 
 		}
+		{
+			final Button importGeneralBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "导入1.7a雾影版吕玲绮卫队女兵模型", SWT.CHECK );
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 2;
+			importGeneralBtn.setLayoutData( gd );
 
+			final Button importGeneralApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			importGeneralApply.setEnabled( false );
+			final Button importGeneralRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+
+			importGeneralBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					importGeneralApply.setEnabled( importGeneralBtn.getSelection( ) );
+				}
+
+			} );
+
+			importGeneralRestore.addSelectionListener( new RestoreListener( ) );
+			importGeneralApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					importGeneralApply.setEnabled( false );
+					BakUtil.bakData( "导入1.7a雾影版吕玲绮卫队女兵模型" );
+
+					String general = (String) UnitUtil.getGeneralModelProperties( )
+							.get( "雾隐女兵" );
+					String customModel = "custom_" + general;
+					if ( FileConstants.battleFile.exists( )
+							&& !FileUtil.containMatchString( FileConstants.battleFile,
+									customModel ) )
+					{
+						List modelInfo = UnitUtil.getModelInfo( "GuanYu_general" );
+						if ( modelInfo.size( ) > 0 )
+						{
+							try
+							{
+								StringWriter writer1 = new StringWriter( );
+								PrintWriter printer1 = new PrintWriter( writer1 );
+
+								BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.battleFile ),
+										"GBK" ) );
+								String line = null;
+								while ( ( line = in.readLine( ) ) != null )
+								{
+									printer1.println( line );
+								}
+								in.close( );
+								writer1.close( );
+
+								PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.battleFile ),
+										"GBK" ) ),
+										false );
+								out.println( "type		" + customModel );
+								boolean startFlexi = false;
+								for ( int i = 0; i < modelInfo.size( ); i++ )
+								{
+									String info = (String) modelInfo.get( i );
+									if ( info.startsWith( "texture" ) )
+									{
+										out.println( "texture            patch/bi/data/models_unit/sanguo/textures/YueLi_test.tga" );
+									}
+									else if ( info.startsWith( "model_flexi" ) )
+									{
+										if ( !startFlexi )
+										{
+											startFlexi = true;
+											out.println( "model_flexi				 patch/bi/data/models_unit/sanguo/YueLi_test.cas, 15" );
+											out.println( "model_flexi				 patch/bi/data/models_unit/sanguo/YueLi_test.cas, 30" );
+											out.println( "model_flexi				 patch/bi/data/models_unit/sanguo/YueLi_test.cas, 40" );
+											out.println( "model_flexi				 patch/bi/data/models_unit/sanguo/YueLi_test.cas, max" );
+										}
+									}
+									else
+									{
+										out.println( info );
+									}
+								}
+								out.println( );
+								out.print( writer1.getBuffer( ) );
+								out.close( );
+							}
+							catch ( IOException e1 )
+							{
+								e1.printStackTrace( );
+							}
+						}
+					}
+
+					File modelRootFile = new File( Patch.GAME_ROOT
+							+ "\\patch\\bi\\data\\models_unit\\sanguo" );
+					File textureRootFile = new File( Patch.GAME_ROOT
+							+ "\\patch\\bi\\data\\models_unit\\sanguo\\textures" );
+					if ( modelRootFile.exists( ) && modelRootFile.isFile( ) )
+					{
+						modelRootFile.delete( );
+					}
+					if ( !modelRootFile.exists( ) )
+					{
+						modelRootFile.mkdirs( );
+					}
+					if ( !textureRootFile.exists( ) )
+					{
+						textureRootFile.mkdirs( );
+					}
+					if ( modelRootFile.exists( ) && modelRootFile.isDirectory( ) )
+					{
+						FileUtil.writeToBinarayFile( new File( modelRootFile.getAbsolutePath( )
+								+ "\\YueLi_test.cas" ),
+								ModelPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/models/YueLi_test.cas" ) );
+					}
+					if ( textureRootFile.exists( )
+							&& textureRootFile.isDirectory( ) )
+					{
+						FileUtil.writeToBinarayFile( new File( textureRootFile.getAbsolutePath( )
+								+ "\\YueLi_test.tga.dds" ),
+								ModelPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/models/YueLi_test.tga.dds" ) );
+					}
+
+					refresh( );
+					importGeneralApply.setEnabled( true );
+				}
+			} );
+		}
 		{
 			final Button importGeneralBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "导入将军模型作为骑兵士兵模型", SWT.CHECK );
@@ -950,7 +1078,8 @@ public class ModelPatchPage extends SimpleTabPage
 				e1.printStackTrace( );
 			}
 			generalCombo.removeAll( );
-			generalCombo.setItems( (String[])MapUtil.getCustomGeneralModelList( ).toArray( new String[0] ) );
+			generalCombo.setItems( (String[]) MapUtil.getCustomGeneralModelList( )
+					.toArray( new String[0] ) );
 		}
 
 	}
