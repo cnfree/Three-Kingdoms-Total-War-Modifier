@@ -1932,6 +1932,8 @@ public class UnitModify
 			} );
 			for ( int i = 0; i < generals.length; i++ )
 			{
+				if ( "雾隐女兵".equals( generals[i] ) )
+					continue;
 				soldierModelCombo.add( generals[i] );
 			}
 
