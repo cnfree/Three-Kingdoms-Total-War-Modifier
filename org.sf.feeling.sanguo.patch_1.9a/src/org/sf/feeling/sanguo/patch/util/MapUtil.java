@@ -962,23 +962,24 @@ public class MapUtil
 		for ( int i = 0; i < unitMap.size( ); i++ )
 		{
 			String unit = (String) unitMap.getKeyList( ).get( i );
-			if ( generalUnitNames.contains( unitMap.get( unit ) ) )
+			Object obj = unitMap.get( unit );
+			if(obj == null)
+				continue;
+			if ( generalUnitNames.contains( obj ) )
 			{
-				availableGeneralUnitMap.put( unit, unitMap.get( unit ) );
+				availableGeneralUnitMap.put( unit, obj );
 			}
 			if ( generalUnitList.contains( unit ) )
 			{
-				if ( generalUnitMap.getValueList( )
-						.contains( unitMap.get( unit ) ) )
-					renameSoldierNameList.add( unitMap.get( unit ) );
-				generalUnitMap.put( unit, unitMap.get( unit ) );
+				if ( generalUnitMap.getValueList( ).contains( obj ) )
+					renameSoldierNameList.add( obj );
+				generalUnitMap.put( unit, obj );
 			}
 			else if ( soldierUnitList.contains( unit ) )
 			{
-				if ( soldierUnitMap.getValueList( )
-						.contains( unitMap.get( unit ) ) )
-					renameSoldierNameList.add( unitMap.get( unit ) );
-				soldierUnitMap.put( unit, unitMap.get( unit ) );
+				if ( soldierUnitMap.getValueList( ).contains( obj ) )
+					renameSoldierNameList.add( obj );
+				soldierUnitMap.put( unit, obj );
 			}
 		}
 		Collections.sort( generalUnitMap.getKeyList( ), new Comparator( ) {
