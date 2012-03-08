@@ -82,6 +82,7 @@ public class MapUtil
 	static HashSet unAvailableGeneralPoints = new HashSet( );
 	static SortMap factionProperty;
 	static SortMap generalModelProperty;
+	static List customGeneralModelList;
 	static
 	{
 		try
@@ -182,6 +183,7 @@ public class MapUtil
 		initNonRelativeGeneralList( );
 		factionTextureMap = initFactionTextureMap( );
 		factionDescriptionMap = initFactionDescriptionMap( );
+		customGeneralModelList = getCustomGeneralModelList( );
 	}
 
 	private static SortMap initFactionTextureMap( )
@@ -1219,4 +1221,56 @@ public class MapUtil
 				|| name.indexOf( "精銳" ) != -1;
 	}
 
+	public static List getCustomGeneralModelList( )
+	{
+		List customGeneralList = new ArrayList( );
+		try
+		{
+			BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.battleFile ),
+					"GBK" ) );
+			String line = null;
+			while ( ( line = in.readLine( ) ) != null )
+			{
+
+				Pattern pattern = Pattern.compile( "^\\s*(type)(\\s+)",
+						Pattern.CASE_INSENSITIVE );
+				Matcher matcher = pattern.matcher( line );
+				if ( matcher.find( ) )
+				{
+					String general = line.replaceFirst( "type", "" ).trim( );
+					if ( general.startsWith( "custom_" ) )
+					{
+						general = general.replaceFirst( "custom_", "" ).trim( );
+						int index = UnitUtil.getGeneralModelProperties( )
+								.getValueList( )
+								.indexOf( general );
+						if ( index != -1 )
+						{
+							customGeneralList.add( UnitUtil.getGeneralModelProperties( )
+									.getKeyList( )
+									.get( index ) );
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			in.close( );
+		}
+		catch ( IOException e1 )
+		{
+			e1.printStackTrace( );
+		}
+
+		Collections.sort( customGeneralList, new Comparator( ) {
+
+			public int compare( Object o1, Object o2 )
+			{
+				return PinyinComparator.compare( o1.toString( ), o2.toString( ) );
+			}
+		} );
+		return customGeneralList;
+	}
 }

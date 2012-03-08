@@ -34,6 +34,7 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
 import org.sf.feeling.sanguo.patch.util.FileUtil;
+import org.sf.feeling.sanguo.patch.util.PinyinComparator;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
@@ -199,8 +200,23 @@ public class CodePage extends SimpleTabPage
 						|| code.indexOf( "-bg-" ) != -1 )
 					cityList.add( name );
 			}
-			Collections.sort( cityList );
-			Collections.sort( regionList );
+			
+			Collections.sort( cityList, new Comparator( ) {
+
+				public int compare( Object o1, Object o2 )
+				{
+					return PinyinComparator.compare( o1.toString( ), o2.toString( ) );
+				}
+			} );
+			
+			Collections.sort( regionList, new Comparator( ) {
+
+				public int compare( Object o1, Object o2 )
+				{
+					return PinyinComparator.compare( o1.toString( ), o2.toString( ) );
+				}
+			} );
+			
 			cityCombo.setItems( (String[]) cityList.toArray( new String[0] ) );
 			regionCombo.setItems( (String[]) regionList.toArray( new String[0] ) );
 			cityCombo.addModifyListener( new ModifyListener( ) {

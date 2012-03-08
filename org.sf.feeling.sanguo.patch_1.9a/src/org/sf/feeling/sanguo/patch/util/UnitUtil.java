@@ -2221,4 +2221,9 @@ public class UnitUtil
 		}
 		return infos;
 	}
+
+	public static List getCustomGeneralModelList( )
+	{
+		return MapUtil.getCustomGeneralModelList( );
+	}
 }

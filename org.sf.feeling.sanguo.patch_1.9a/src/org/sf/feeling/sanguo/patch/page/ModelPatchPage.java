@@ -56,6 +56,8 @@ import org.sf.feeling.swt.win32.extension.util.SortMap;
 public class ModelPatchPage extends SimpleTabPage
 {
 
+	private CCombo generalCombo;
+
 	public void buildUI( Composite parent )
 	{
 		super.buildUI( parent );
@@ -562,6 +564,7 @@ public class ModelPatchPage extends SimpleTabPage
 							}
 						}
 					}
+					refresh( );
 					importGeneralApply.setEnabled( true );
 				}
 			} );
@@ -571,25 +574,13 @@ public class ModelPatchPage extends SimpleTabPage
 			final Button removeGeneralBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "移除作为骑兵士兵模型的将军模型", SWT.CHECK );
 
-			final CCombo generalCombo = WidgetUtil.getToolkit( )
-					.createCCombo( patchClient, SWT.READ_ONLY );
+			generalCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+					SWT.READ_ONLY );
 
 			GridData gd = new GridData( );
 			gd.widthHint = 150;
 			generalCombo.setLayoutData( gd );
 			generalCombo.setEnabled( false );
-			String[] generals = (String[]) UnitUtil.getGeneralModelProperties( )
-					.keySet( )
-					.toArray( new String[0] );
-			Arrays.sort( generals, new Comparator( ) {
-
-				public int compare( Object o1, Object o2 )
-				{
-					return PinyinComparator.compare( o1.toString( ),
-							o2.toString( ) );
-				}
-			} );
-			generalCombo.setItems( generals );
 
 			final Button removeGeneralApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
@@ -684,7 +675,9 @@ public class ModelPatchPage extends SimpleTabPage
 							e1.printStackTrace( );
 						}
 					}
-					removeCustomModel(customModel);
+					removeCustomModel( customModel );
+					MapUtil.initMap( );
+					refresh( );
 					removeGeneralApply.setEnabled( true );
 				}
 			} );
@@ -903,5 +896,62 @@ public class ModelPatchPage extends SimpleTabPage
 				e.printStackTrace( );
 			}
 		}
+	}
+
+	public void refresh( )
+	{
+		super.refresh( );
+		refreshPage( );
+	}
+
+	private void refreshPage( )
+	{
+		if ( FileConstants.battleFile.exists( ) )
+		{
+			List customGeneralList = new ArrayList( );
+			try
+			{
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.battleFile ),
+						"GBK" ) );
+				String line = null;
+				while ( ( line = in.readLine( ) ) != null )
+				{
+
+					Pattern pattern = Pattern.compile( "^\\s*(type)(\\s+)",
+							Pattern.CASE_INSENSITIVE );
+					Matcher matcher = pattern.matcher( line );
+					if ( matcher.find( ) )
+					{
+						String general = line.replaceFirst( "type", "" ).trim( );
+						if ( general.startsWith( "custom_" ) )
+						{
+							general = general.replaceFirst( "custom_", "" )
+									.trim( );
+							int index = UnitUtil.getGeneralModelProperties( )
+									.getValueList( )
+									.indexOf( general );
+							if ( index != -1 )
+							{
+								customGeneralList.add( UnitUtil.getGeneralModelProperties( )
+										.getKeyList( )
+										.get( index ) );
+							}
+						}
+						else
+						{
+							break;
+						}
+					}
+				}
+				in.close( );
+			}
+			catch ( IOException e1 )
+			{
+				e1.printStackTrace( );
+			}
+			generalCombo.removeAll( );
+			generalCombo.setItems( (String[])MapUtil.getCustomGeneralModelList( ).toArray( new String[0] ) );
+		}
+
 	}
 }

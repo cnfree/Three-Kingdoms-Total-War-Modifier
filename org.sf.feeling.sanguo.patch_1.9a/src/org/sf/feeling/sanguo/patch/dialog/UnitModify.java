@@ -4,6 +4,8 @@ package org.sf.feeling.sanguo.patch.dialog;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,6 +30,7 @@ import org.sf.feeling.sanguo.patch.model.Unit;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
 import org.sf.feeling.sanguo.patch.util.MapUtil;
+import org.sf.feeling.sanguo.patch.util.PinyinComparator;
 import org.sf.feeling.sanguo.patch.util.UnitParser;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.WidgetUtil;
@@ -36,7 +39,6 @@ import org.sf.feeling.swt.win32.extension.util.SortMap;
 public class UnitModify
 {
 
-	private Unit currentUnit;
 	private SortMap generalUnitMap = UnitUtil.getGeneralUnits( );
 	private SortMap officerMap = UnitUtil.getAvailableOfficers( );
 	private SortMap horseMap = UnitUtil.getAvailableHorses( );
@@ -381,13 +383,29 @@ public class UnitModify
 						{
 							if ( "infantry".equals( soldier.getCategory( ) ) )
 							{
-								unitType = (String) soldierBuMap.getKeyList( )
-										.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+								if ( soldierModelCombo.getSelectionIndex( ) <= soldierQiMap.getKeyList( )
+										.size( ) )
+								{
+									unitType = (String) soldierBuMap.getKeyList( )
+											.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+								}
+								else
+								{
+									unitType = "custom_general";
+								}
 							}
 							else if ( "cavalry".equals( soldier.getCategory( ) ) )
 							{
-								unitType = (String) soldierQiMap.getKeyList( )
-										.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+								if ( soldierModelCombo.getSelectionIndex( ) <= soldierQiMap.getKeyList( )
+										.size( ) )
+								{
+									unitType = (String) soldierQiMap.getKeyList( )
+											.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+								}
+								else
+								{
+									unitType = "custom_general";
+								}
 							}
 							else if ( "siege".equals( soldier.getCategory( ) ) )
 							{
@@ -400,20 +418,39 @@ public class UnitModify
 										.get( soldierModelCombo.getSelectionIndex( ) - 1 );
 							}
 
-							Unit unit = UnitParser.getUnit( unitType );
-							if ( ( unit.hasSecondWeapon( ) && !soldier.hasSecondWeapon( ) )
-									|| ( unit.hasPrimaryWeapon( ) && !soldier.hasPrimaryWeapon( ) ) )
+							if ( "custom_general".equals( unitType ) )
 							{
-								MessageDialog.openInformation( Display.getDefault( )
-										.getActiveShell( ),
-										"错误信息提示",
-										"不能选择“"
-												+ soldierModelCombo.getText( )
-												+ "”作为该兵种士兵兵模。" );
-								soldierModelCombo.select( 0 );
-								soldierModelCombo.notifyListeners( SWT.Selection,
-										new Event( ) );
-								return;
+								if ( soldier.hasSecondWeapon( ) )
+								{
+									MessageDialog.openInformation( Display.getDefault( )
+											.getActiveShell( ),
+											"错误信息提示",
+											"不能选择“"
+													+ soldierModelCombo.getText( )
+													+ "”作为该兵种士兵兵模。" );
+									soldierModelCombo.select( 0 );
+									soldierModelCombo.notifyListeners( SWT.Selection,
+											new Event( ) );
+									return;
+								}
+							}
+							else
+							{
+								Unit unit = UnitParser.getUnit( unitType );
+								if ( ( !unit.hasSecondWeapon( ) && soldier.hasSecondWeapon( ) )
+										|| ( !unit.hasPrimaryWeapon( ) && soldier.hasPrimaryWeapon( ) ) )
+								{
+									MessageDialog.openInformation( Display.getDefault( )
+											.getActiveShell( ),
+											"错误信息提示",
+											"不能选择“"
+													+ soldierModelCombo.getText( )
+													+ "”作为该兵种士兵兵模。" );
+									soldierModelCombo.select( 0 );
+									soldierModelCombo.notifyListeners( SWT.Selection,
+											new Event( ) );
+									return;
+								}
 							}
 						}
 					}
@@ -1175,10 +1212,6 @@ public class UnitModify
 					soldier.setChargeDist( Integer.parseInt( chargeCombo.getItem( chargeCombo.indexOf( chargeCombo.getText( ) ) ) ) );
 				}
 
-				if ( currentUnit != null )
-				{
-					soldier.setPrimary( currentUnit.getPrimary( ) );
-				}
 				String[] primary = soldier.getPrimary( );
 				if ( primary != null && primary.length == 11 )
 				{
@@ -1208,10 +1241,6 @@ public class UnitModify
 					}
 				}
 
-				if ( currentUnit != null )
-				{
-					soldier.setSecond( currentUnit.getSecond( ) );
-				}
 				String[] second = soldier.getSecond( );
 				if ( second != null && second.length == 11 )
 				{
@@ -1390,10 +1419,6 @@ public class UnitModify
 					}
 				}
 
-				if ( currentUnit != null )
-				{
-					soldier.setPrimaryAttr( currentUnit.getPrimaryAttr( ) );
-				}
 				List primaryAttrs = soldier.getPrimaryAttr( );
 				if ( primaryAttrs != null )
 				{
@@ -1441,10 +1466,6 @@ public class UnitModify
 					}
 				}
 
-				if ( currentUnit != null )
-				{
-					soldier.setSecondAttr( currentUnit.getSecondAttr( ) );
-				}
 				List secondAttrs = soldier.getSecondAttr( );
 				if ( secondAttrs != null )
 				{
@@ -1596,11 +1617,30 @@ public class UnitModify
 				{
 					if ( "infantry".equals( soldier.getCategory( ) ) )
 					{
-						soldier.getSoldier( )[0] = (String) soldierBuMap.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+						if ( soldierModelCombo.getSelectionIndex( ) <= soldierBuMap.size( ) )
+						{
+							soldier.getSoldier( )[0] = (String) soldierBuMap.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+						}
+						else if ( UnitUtil.getGeneralModelProperties( )
+								.containsKey( soldierModelCombo.getText( ) ) )
+						{
+							soldier.getSoldier( )[0] = (String) UnitUtil.getGeneralModelProperties( )
+									.get( soldierModelCombo.getText( ) );
+						}
 					}
 					else if ( "cavalry".equals( soldier.getCategory( ) ) )
 					{
-						soldier.getSoldier( )[0] = (String) soldierQiMap.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+						if ( soldierModelCombo.getSelectionIndex( ) <= soldierQiMap.size( ) )
+						{
+							soldier.getSoldier( )[0] = (String) soldierQiMap.get( soldierModelCombo.getSelectionIndex( ) - 1 );
+						}
+						else if ( UnitUtil.getGeneralModelProperties( )
+								.containsKey( soldierModelCombo.getText( ) ) )
+						{
+							soldier.getSoldier( )[0] = "custom_"
+									+ UnitUtil.getGeneralModelProperties( )
+											.get( soldierModelCombo.getText( ) );
+						}
 					}
 					else if ( "siege".equals( soldier.getCategory( ) ) )
 					{
@@ -1879,9 +1919,38 @@ public class UnitModify
 			soldierModelCombo.setItems( this.soldierBus );
 			soldierModelCombo.add( "", 0 );
 
+			String[] generals = (String[]) UnitUtil.getGeneralModelProperties( )
+					.getKeyList( )
+					.toArray( new String[0] );
+			Arrays.sort( generals, new Comparator( ) {
+
+				public int compare( Object o1, Object o2 )
+				{
+					return PinyinComparator.compare( o1.toString( ),
+							o2.toString( ) );
+				}
+			} );
+			for ( int i = 0; i < generals.length; i++ )
+			{
+				soldierModelCombo.add( generals[i] );
+			}
+
 			int index = soldierBuMap.getKeyList( ).indexOf( soldier.getType( ) );
 			if ( index != -1 )
 				soldierModelCombo.select( index + 1 );
+			else if ( UnitUtil.getGeneralModelProperties( )
+					.values( )
+					.contains( soldier.getType( ) ) )
+			{
+				String type = soldier.getType( );
+				int generalIndex = UnitUtil.getGeneralModelProperties( )
+						.getValueList( )
+						.indexOf( type );
+				String general = (String) UnitUtil.getGeneralModelProperties( )
+						.getKeyList( )
+						.get( generalIndex );
+				soldierModelCombo.setText( general );
+			}
 			else
 				soldierModelCombo.deselectAll( );
 
@@ -1894,9 +1963,29 @@ public class UnitModify
 			soldierModelCombo.setItems( this.soldierQis );
 			soldierModelCombo.add( "", 0 );
 
+			for ( int i = 0; i < UnitUtil.getCustomGeneralModelList( ).size( ); i++ )
+			{
+				soldierModelCombo.add( UnitUtil.getCustomGeneralModelList( )
+						.get( i )
+						.toString( ) );
+			}
+
 			int index = soldierQiMap.getKeyList( ).indexOf( soldier.getType( ) );
 			if ( index != -1 )
 				soldierModelCombo.select( index + 1 );
+			else if ( UnitUtil.getGeneralModelProperties( )
+					.values( )
+					.contains( soldier.getType( ).replaceFirst( "custom_", "" ) ) )
+			{
+				String type = soldier.getType( ).replaceFirst( "custom_", "" );
+				int generalIndex = UnitUtil.getGeneralModelProperties( )
+						.getValueList( )
+						.indexOf( type );
+				String general = (String) UnitUtil.getGeneralModelProperties( )
+						.getKeyList( )
+						.get( generalIndex );
+				soldierModelCombo.setText( general );
+			}
 			else
 				soldierModelCombo.deselectAll( );
 
