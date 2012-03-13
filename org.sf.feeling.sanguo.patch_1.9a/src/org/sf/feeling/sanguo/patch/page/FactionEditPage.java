@@ -179,6 +179,7 @@ public class FactionEditPage extends SimpleTabPage
 	private Text cityBannerText;
 	private ColorSelector cityBannerColorSelector;
 	private ColorSelector primaryColorSelector;
+	private Text guohaoText;
 
 	public void buildUI( Composite parent )
 	{
@@ -251,7 +252,7 @@ public class FactionEditPage extends SimpleTabPage
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );
-		gd.verticalSpan = 15;
+		gd.verticalSpan = 16;
 		gd.widthHint = 256;
 		gd.minimumHeight = 256;
 		imageCanvas.setLayoutData( gd );
@@ -272,6 +273,15 @@ public class FactionEditPage extends SimpleTabPage
 		nameText.setLayoutData( gd );
 
 		nameText.addModifyListener( nameListener );
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置势力国号：" );
+
+		guohaoText = WidgetUtil.getToolkit( ).createText( patchClient, "" );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 4;
+		guohaoText.setLayoutData( gd );
+
+		guohaoText.addModifyListener( nameListener );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "设置势力文化：" );
 
@@ -848,7 +858,7 @@ public class FactionEditPage extends SimpleTabPage
 				applyButton.setEnabled( false );
 				String factionName = nameText.getText( ).trim( );
 				String faction = factionCombo.getText( ).trim( );
-
+				String guohao = guohaoText.getText( ).trim( );
 				List txtFiles = new ArrayList( );
 				if ( !faction.equals( factionName )
 						|| leaderCombo.getText( ).trim( ).length( ) > 0 )
@@ -860,6 +870,10 @@ public class FactionEditPage extends SimpleTabPage
 				if ( firstNameText.getText( ).trim( ).length( ) > 0 )
 				{
 					txtFiles.add( FileConstants.nameFile );
+				}
+				if ( guohao.length( ) > 0 )
+				{
+					txtFiles.add( FileConstants.vnVsFile );
 				}
 
 				FactionDescription desc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
@@ -1176,7 +1190,87 @@ public class FactionEditPage extends SimpleTabPage
 					}
 
 				}
+				if ( guohao.length( ) > 0 )
+				{
+					if ( FileConstants.vnVsFile.exists( ) )
+					{
+						try
+						{
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.vnVsFile ),
+									"UTF-16LE" ) );
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							while ( ( line = in.readLine( ) ) != null )
+							{
 
+								Pattern pattern = Pattern.compile( "(?i)^\\s*\\{\\s*HuangDi\\-"
+										+ idText.getText( ).trim( ) );
+								Matcher matcher = pattern.matcher( line );
+								if ( matcher.find( ) )
+								{
+									Pattern pattern1 = Pattern.compile( "(?i)^\\s*\\{\\s*HuangDi\\-"
+											+ idText.getText( ).trim( )
+											+ "1101\\s*\\}" );
+									Matcher matcher1 = pattern1.matcher( line );
+									if ( matcher1.find( ) )
+									{
+										printer.println( "{HuangDi-"
+												+ idText.getText( ).trim( ).toLowerCase( )
+												+ "1101}[★皇太子]"
+												+ ChangeCode.toShort( guohao ) );
+										continue;
+									}
+
+									Pattern pattern2 = Pattern.compile( "(?i)^\\s*\\{\\s*HuangDi\\-"
+											+ idText.getText( )
+													.trim( )
+													.toLowerCase( )
+											+ "1102\\s*\\}" );
+									Matcher matcher2 = pattern2.matcher( line );
+									if ( matcher2.find( ) )
+									{
+										printer.println( "{HuangDi-"
+												+ idText.getText( )
+														.trim( )
+														.toLowerCase( )
+												+ "1102}[★皇帝]"
+												+ ChangeCode.toShort( guohao ) );
+										continue;
+									}
+
+									Pattern pattern3 = Pattern.compile( "(?i)^\\s*\\{\\s*HuangDi\\-"
+											+ idText.getText( ).trim( )
+											+ "1102_epithet_desc\\s*\\}" );
+									Matcher matcher3 = pattern3.matcher( line );
+									if ( matcher3.find( ) )
+									{
+										printer.println( "{HuangDi-"
+												+ idText.getText( )
+														.trim( )
+														.toLowerCase( )
+												+ "1102_epithet_desc}·"
+												+ ChangeCode.toShort( guohao )
+												+ "·皇帝" );
+										continue;
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.vnVsFile ),
+									"UTF-16LE" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+							printer.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+				}
 				if ( bigCaptionBannerText.getText( ).trim( ).length( ) > 0 )
 				{
 					if ( bigCaptionBannerImage != null )
@@ -1681,6 +1775,7 @@ public class FactionEditPage extends SimpleTabPage
 		if ( nameText.getText( ).trim( ).length( ) > 0
 				&& idText.getText( ).trim( ).length( ) > 0 )
 		{
+			guohaoText.setEnabled( true );
 			primaryColorSelector.setEnabled( true );
 			bigCaptionBannerText.setEnabled( true );
 			bigCaptionBannerFontCombo.setEnabled( true );
@@ -1720,6 +1815,7 @@ public class FactionEditPage extends SimpleTabPage
 		}
 		else
 		{
+			guohaoText.setEnabled( false );
 			primaryColorSelector.setEnabled( false );
 			bigCaptionBannerText.setEnabled( false );
 			bigCaptionBannerFontCombo.setEnabled( false );
