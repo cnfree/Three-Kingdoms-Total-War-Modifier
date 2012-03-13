@@ -604,6 +604,104 @@ public class ScriptPatchPage extends SimpleTabPage
 			} );
 		}
 		{
+			final Button guanjueBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "全势力官爵升级", SWT.CHECK );
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 3;
+			guanjueBtn.setLayoutData( gd );
+			final Button guanjueApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			guanjueApply.setEnabled( false );
+			final Button guanjueRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			guanjueBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					guanjueApply.setEnabled( guanjueBtn.getSelection( ) );
+				}
+
+			} );
+			guanjueApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+
+					if ( FileConstants.characterTraitFile.exists( ) )
+					{
+						guanjueApply.setEnabled( false );
+						BakUtil.bakData( "全势力官爵升级" );						
+						try
+						{
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.characterTraitFile ),
+									"GBK" ) );
+							boolean startGuanJue = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+								if ( !startGuanJue )
+								{
+									Pattern pattern = Pattern.compile( "(?i)^\\s*Trigger GJ\\-" );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startGuanJue = true;
+										printer.println( line );
+
+										while ( ( line = in.readLine( ) ) != null )
+										{
+											pattern = Pattern.compile( "(?i)^\\s*Affects" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												startGuanJue = false;
+												break;
+											}
+											
+											pattern = Pattern.compile( "(?i)^\\s*and\\s+FactionType" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												continue;
+											}
+											else{
+												printer.println( line );
+											}
+										}
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.characterTraitFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+						guanjueApply.setEnabled( true );
+					}
+				}
+			} );
+			guanjueRestore.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					guanjueRestore.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					guanjueRestore.setEnabled( true );
+				}
+			} );
+		}
+		{
 			final Button disastersBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "自然灾害（次/年）", SWT.CHECK );
 			GridData gd = new GridData( );

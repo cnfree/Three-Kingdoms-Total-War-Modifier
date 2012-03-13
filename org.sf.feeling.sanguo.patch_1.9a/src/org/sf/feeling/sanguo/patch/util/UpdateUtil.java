@@ -134,7 +134,7 @@ public class UpdateUtil
 
 	public static void main( String[] args )
 	{
-		System.out.println( FileUtil.getMD5Str( new File( "C:\\Users\\cchen\\Desktop\\Patch\\output\\patch_1.9a_3.5.zip" ) ) );
+		System.out.println( FileUtil.getMD5Str( new File( "C:\\Users\\cchen\\Desktop\\Patch\\output\\patch_1.9a_3.7.zip" ) ) );
 	}
 
 	private static boolean checkZipEncoding( File file, String encoding )

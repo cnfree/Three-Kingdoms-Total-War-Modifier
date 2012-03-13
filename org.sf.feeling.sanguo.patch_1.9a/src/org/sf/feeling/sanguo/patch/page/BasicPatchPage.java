@@ -22,6 +22,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -471,6 +474,170 @@ public class BasicPatchPage extends SimpleTabPage
 					typeCombo.setEnabled( buildingBtn.getSelection( ) );
 					numberCombo.setEnabled( buildingBtn.getSelection( ) );
 					buildingApply.setEnabled( buildingBtn.getSelection( ) );
+				}
+			} );
+
+		}
+		{
+			final String factions[] = new String[]{
+					"	romans_senate	;朝廷（1.7张绣）", "	spain		;在野", "	slave		;乱军"
+			};
+			final Button unlockFactionBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "解锁势力", SWT.CHECK );
+
+			final CCombo factionCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			factionCombo.add( "朝廷" );
+			factionCombo.add( "在野" );
+			factionCombo.add( "乱军" );
+			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.horizontalSpan = 2;
+			factionCombo.setLayoutData( gd );
+			factionCombo.setEnabled( false );
+
+			final Button unlockFactionApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			unlockFactionApply.setEnabled( false );
+			final Button unlockFactionRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			unlockFactionApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( factionCombo.getSelectionIndex( ) == -1
+							|| factionCombo.getSelectionIndex( ) == -1 )
+						return;
+
+					String playableFaction = factions[factionCombo.getSelectionIndex( )];
+
+					unlockFactionApply.setEnabled( false );
+					if ( FileConstants.buildingsFile.exists( ) )
+					{
+						BakUtil.bakData( "解锁势力：" + factionCombo.getText( ) );
+						try
+						{
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.stratFile ),
+									"GBK" ) );
+							boolean startPlayable = false;
+							boolean startUnlockable = false;
+							boolean startNonplayable = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+								if ( !startPlayable )
+								{
+									Pattern pattern = Pattern.compile( "(?i)^\\s*playable" );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startPlayable = true;
+										printer.println( line );
+
+										while ( ( line = in.readLine( ) ) != null )
+										{
+											pattern = Pattern.compile( "(?i)^\\s*end" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												printer.println( "	romans_scipii	;曹操" );
+												printer.println( "	macedon		;吕布" );
+												printer.println( "	seleucid	;孔融" );
+												printer.println( "	greek_cities	;陶谦" );
+												printer.println( "	thrace		;袁术" );
+												printer.println( "	carthage	;袁绍" );
+												printer.println( "	scythia		;公孙瓒" );
+												printer.println( "	numidia		;张燕" );
+												printer.println( "	egypt		;马腾" );
+												printer.println( "	germans		;李傕" );
+												printer.println( "	parthia		;刘表" );
+												printer.println( "	armenia		;韩玄" );
+												printer.println( "	romans_brutii	;孙策" );
+												printer.println( "	pontus		;严白虎" );
+												printer.println( "	romans_julii	;刘备" );
+												printer.println( "	gauls		;刘璋" );
+												printer.println( "	britons		;张鲁" );
+												printer.println( "	dacia		;孟获" );
+												printer.println( playableFaction );
+												break;
+											}
+										}
+									}
+								}
+
+								if ( !startUnlockable )
+								{
+									Pattern pattern = Pattern.compile( "(?i)^\\s*unlockable" );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startUnlockable = true;
+										printer.println( line );
+
+										while ( ( line = in.readLine( ) ) != null )
+										{
+											pattern = Pattern.compile( "(?i)^\\s*end" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												break;
+											}
+										}
+									}
+								}
+
+								if ( !startNonplayable )
+								{
+									Pattern pattern = Pattern.compile( "(?i)^\\s*nonplayable" );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startNonplayable = true;
+										printer.println( line );
+
+										while ( ( line = in.readLine( ) ) != null )
+										{
+											pattern = Pattern.compile( "(?i)^\\s*end" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												List list = new ArrayList( );
+												list.addAll( Arrays.asList( factions ) );
+												list.remove( playableFaction );
+												printer.println( list.get( 0 ) );
+												printer.println( list.get( 1 ) );
+												break;
+											}
+										}
+									}
+								}
+
+								printer.println( line );
+							}
+							in.close( );
+
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.stratFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+					}
+					unlockFactionApply.setEnabled( true );
+				}
+			} );
+			unlockFactionRestore.addSelectionListener( new RestoreListener( ) );
+			unlockFactionBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					unlockFactionApply.setEnabled( unlockFactionBtn.getSelection( ) );
+					factionCombo.setEnabled( unlockFactionBtn.getSelection( ) );
 				}
 			} );
 
