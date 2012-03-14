@@ -1,0 +1,16 @@
+;------------------------------------------
+Trigger ZhuGeLiang3100-Patch
+    WhenToTest CharacterTurnEnd
+    Condition IsGeneral
+          and Trait Lz-3201-0 >= 1
+          and Trait ZhuGeLiang3100 = 1
+    Affects ZhuGeLiang3100  1000  Chance  100
+    Affects ZhuGeLiang3100  1000  Chance  100
+
+;------------------------------------------    
+Trigger ZhuGeLiang3100-1003-Patch
+    WhenToTest AcceptBribe
+    Condition IsGeneral
+          and Trait Lz-3201-0 >= 1
+          and Trait ZhuGeLiang3100 = 3
+    Affects ZhuGeLiang3100  1000  Chance  100

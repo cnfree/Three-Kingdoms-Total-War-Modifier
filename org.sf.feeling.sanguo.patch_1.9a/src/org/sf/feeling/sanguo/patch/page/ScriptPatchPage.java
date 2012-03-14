@@ -74,7 +74,8 @@ public class ScriptPatchPage extends SimpleTabPage
 		createPatchArea( );
 
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
-				"<form><p>注意：<br/>1、灾害次数值越小越好。<br/>2、投石误差值越小越精准，但过于精准将无法射中移动目标。<br/>3、三国全面战争1.7a版巨型城墙生命值为250，仅供参考。<br/>4、心灰意冷或心怀不满状态的武将无法被收买，解除该状态后武将负面效果依然存在，并可被收买。</p></form>",
+				"<form><p>注意：<br/>1、灾害次数值越小越好。<br/>2、投石误差值越小越精准，但过于精准将无法射中移动目标。<br/>3、三国全面战争1.7a版巨型城墙生命值为250，仅供参考。<br/>4、心灰意冷或心怀不满状态的武将无法被收买，解除该状态后武将负面效果依然存在，并可被收买。" +
+				"<br/>5、只有部分武将特殊技能能够全势力爆发。</p></form>",
 				true,
 				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
@@ -231,9 +232,9 @@ public class ScriptPatchPage extends SimpleTabPage
 						BakUtil.bakData( "解除部分武将能力深藏状态" );
 						// FileUtil.bakFile(FileConstants.characterTraitFile);
 						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
-								"(Trigger NengLiShenCang1100-Patch)" ) )
+								"(?i)(Trigger\\s+NengLiShenCang1100-Patch)" ) )
 								&& FileUtil.containMatchString( FileConstants.characterTraitFile,
-										"NengLiShenCang1200" ) )
+										"(?i)NengLiShenCang1200" ) )
 						{
 							FileUtil.appendToFile( FileConstants.characterTraitFile,
 									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/nenglishengcang.txt" ) );
@@ -283,9 +284,9 @@ public class ScriptPatchPage extends SimpleTabPage
 						BakUtil.bakData( "解除部分武将命运危机状态" );
 						// FileUtil.bakFile(FileConstants.characterTraitFile);
 						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
-								"(Trigger MingYun1100-Patch)" ) )
+								"(?i)(Trigger\\s+MingYun1100-Patch)" ) )
 								&& FileUtil.containMatchString( FileConstants.characterTraitFile,
-										"MingYun1100" ) )
+										"(?i)MingYun1100" ) )
 						{
 							FileUtil.appendToFile( FileConstants.characterTraitFile,
 									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/mingyunweiji.txt" ) );
@@ -346,7 +347,7 @@ public class ScriptPatchPage extends SimpleTabPage
 							{
 								if ( !startWeiyan )
 								{
-									Pattern pattern = Pattern.compile( "^\\s*(Trait)(\\s+)(WeiYan1200)(\\s*)" );
+									Pattern pattern = Pattern.compile( "(?i)^\\s*(Trait)(\\s+)(WeiYan1200)(\\s*)" );
 									Matcher matcher = pattern.matcher( line );
 									if ( matcher.find( ) )
 									{
@@ -355,7 +356,7 @@ public class ScriptPatchPage extends SimpleTabPage
 								}
 								else
 								{
-									Pattern pattern = Pattern.compile( "^\\s*(Effect)(\\s+)(.+)(;*)" );
+									Pattern pattern = Pattern.compile( "(?i)^\\s*(Effect)(\\s+)(.+)(;*)" );
 									Matcher matcher = pattern.matcher( line );
 									if ( matcher.find( ) )
 									{
@@ -368,7 +369,7 @@ public class ScriptPatchPage extends SimpleTabPage
 												.indexOf( "Influence" ) > -1 )
 											continue;
 									}
-									pattern = Pattern.compile( "^\\s*(Trait)(\\s*)" );
+									pattern = Pattern.compile( "(?i)^\\s*(Trait)(\\s+)" );
 									matcher = pattern.matcher( line );
 									if ( matcher.find( ) )
 									{
@@ -445,7 +446,7 @@ public class ScriptPatchPage extends SimpleTabPage
 							{
 								if ( !startCaocao )
 								{
-									Pattern pattern = Pattern.compile( "^\\s*(Trait)(\\s+)(Caocao2020)(\\s*)" );
+									Pattern pattern = Pattern.compile( "(?i)^\\s*(Trait)(\\s+)(Caocao2020)(\\s*)" );
 									Matcher matcher = pattern.matcher( line );
 									if ( matcher.find( ) )
 									{
@@ -454,13 +455,13 @@ public class ScriptPatchPage extends SimpleTabPage
 								}
 								else
 								{
-									Pattern pattern = Pattern.compile( "^\\s*(Effect)(\\s+)(.+)(;*)" );
+									Pattern pattern = Pattern.compile( "(?i)^\\s*(Effect)(\\s+)(.+)(;*)" );
 									Matcher matcher = pattern.matcher( line );
 									if ( matcher.find( ) )
 									{
 										continue;
 									}
-									pattern = Pattern.compile( "^\\s*(Trait)(\\s*)" );
+									pattern = Pattern.compile( "(?i)^\\s*(Trait)(\\s+)" );
 									matcher = pattern.matcher( line );
 									if ( matcher.find( ) )
 									{
@@ -527,16 +528,67 @@ public class ScriptPatchPage extends SimpleTabPage
 						BakUtil.bakData( "解除部分武将心灰意冷或心怀不满状态" );
 						// FileUtil.bakFile(FileConstants.characterTraitFile);
 						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
-								"(Trigger ZhongCheng3100-Patch)" ) ) )
+								"(?i)(Trigger\\s+ZhongCheng3100-Patch)" ) ) )
 						{
 							FileUtil.appendToFile( FileConstants.characterTraitFile,
 									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/xinhuiyileng.txt" ) );
 						}
 						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
-								"(Trigger ZhongCheng2100-Patch)" ) ) )
+								"(?i)(Trigger\\s+ZhongCheng2100-Patch)" ) ) )
 						{
 							FileUtil.appendToFile( FileConstants.characterTraitFile,
 									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/xinhuaibuman.txt" ) );
+						}
+						xinhuiyilengApply.setEnabled( true );
+					}
+				}
+			} );
+			xinhuiyilengRestore.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					xinhuiyilengRestore.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					xinhuiyilengRestore.setEnabled( true );
+				}
+			} );
+		}
+		{
+			final Button xinhuiyilengBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "解除诸葛亮外出云游状态", SWT.CHECK );
+			GridData gd = new GridData( );
+
+			gd.horizontalSpan = 3;
+			xinhuiyilengBtn.setLayoutData( gd );
+			final Button xinhuiyilengApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			xinhuiyilengApply.setEnabled( false );
+			final Button xinhuiyilengRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			xinhuiyilengBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					xinhuiyilengApply.setEnabled( xinhuiyilengBtn.getSelection( ) );
+				}
+
+			} );
+			xinhuiyilengApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+
+					if ( FileConstants.characterTraitFile.exists( ) )
+					{
+						xinhuiyilengApply.setEnabled( false );
+						BakUtil.bakData( "解除诸葛亮外出云游状态" );
+						// FileUtil.bakFile(FileConstants.characterTraitFile);
+						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
+								"(?i)(Trigger\\s+ZhuGeLiang3100-Patch)" ) ) )
+						{
+							FileUtil.appendToFile( FileConstants.characterTraitFile,
+									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/waichuyunyou.txt" ) );
 						}
 						xinhuiyilengApply.setEnabled( true );
 					}
@@ -583,7 +635,7 @@ public class ScriptPatchPage extends SimpleTabPage
 						BakUtil.bakData( "降低电脑势力所有武将忠诚度" );
 						// FileUtil.bakFile(FileConstants.characterTraitFile);
 						if ( !( FileUtil.containMatchString( FileConstants.characterTraitFile,
-								"(Trigger ZhongCheng-Patch)" ) ) )
+								"(?i)(Trigger\\s+ZhongCheng-Patch)" ) ) )
 						{
 							FileUtil.appendToFile( FileConstants.characterTraitFile,
 									ScriptPatchPage.class.getResourceAsStream( "/org/sf/feeling/sanguo/patch/script/zhongcheng.txt" ) );
@@ -605,7 +657,7 @@ public class ScriptPatchPage extends SimpleTabPage
 		}
 		{
 			final Button guanjueBtn = WidgetUtil.getToolkit( )
-					.createButton( patchClient, "全势力官爵升级", SWT.CHECK );
+					.createButton( patchClient, "武将全势力官爵晋级", SWT.CHECK );
 			GridData gd = new GridData( );
 			gd.horizontalSpan = 3;
 			guanjueBtn.setLayoutData( gd );
@@ -630,7 +682,7 @@ public class ScriptPatchPage extends SimpleTabPage
 					if ( FileConstants.characterTraitFile.exists( ) )
 					{
 						guanjueApply.setEnabled( false );
-						BakUtil.bakData( "全势力官爵升级" );						
+						BakUtil.bakData( "武将全势力官爵晋级" );
 						try
 						{
 							String line = null;
@@ -643,7 +695,7 @@ public class ScriptPatchPage extends SimpleTabPage
 							{
 								if ( !startGuanJue )
 								{
-									Pattern pattern = Pattern.compile( "(?i)^\\s*Trigger GJ\\-" );
+									Pattern pattern = Pattern.compile( "(?i)^\\s*Trigger\\s+GJ\\-" );
 									Matcher matcher = pattern.matcher( line );
 									if ( matcher.find( ) )
 									{
@@ -659,16 +711,136 @@ public class ScriptPatchPage extends SimpleTabPage
 												startGuanJue = false;
 												break;
 											}
-											
+
 											pattern = Pattern.compile( "(?i)^\\s*and\\s+FactionType" );
 											matcher = pattern.matcher( line );
 											if ( matcher.find( ) )
 											{
 												continue;
 											}
-											else{
+											else
+											{
 												printer.println( line );
 											}
+										}
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.characterTraitFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+						guanjueApply.setEnabled( true );
+					}
+				}
+			} );
+			guanjueRestore.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					guanjueRestore.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					guanjueRestore.setEnabled( true );
+				}
+			} );
+		}
+		{
+			final Button guanjueBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "武将部分特殊技能全势力触发", SWT.CHECK );
+			GridData gd = new GridData( );
+			gd.horizontalSpan = 3;
+			guanjueBtn.setLayoutData( gd );
+			final Button guanjueApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			guanjueApply.setEnabled( false );
+			final Button guanjueRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			guanjueBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					guanjueApply.setEnabled( guanjueBtn.getSelection( ) );
+				}
+
+			} );
+			guanjueApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+
+					if ( FileConstants.characterTraitFile.exists( ) )
+					{
+						guanjueApply.setEnabled( false );
+						BakUtil.bakData( "武将部分特殊技能全势力触发" );
+						try
+						{
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.characterTraitFile ),
+									"GBK" ) );
+							boolean startGuanJue = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+								if ( !startGuanJue )
+								{
+									Pattern pattern = Pattern.compile( "(?i)^\\s*Trigger\\s+J\\-" );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startGuanJue = true;
+										printer.println( line );
+
+										while ( ( line = in.readLine( ) ) != null )
+										{
+											pattern = Pattern.compile( "(?i)^\\s*Affects" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												startGuanJue = false;
+												break;
+											}
+
+											pattern = Pattern.compile( "(?i)^\\s*and\\s+FactionType" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												continue;
+											}
+											
+											pattern = Pattern.compile( "(?i)^\\s*and\\s+FactionLeaderTrait" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												continue;
+											}
+											
+											pattern = Pattern.compile( "(?i)^\\s*and\\s+I_SettlementOwner" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												continue;
+											}
+											
+											pattern = Pattern.compile( "(?i)^\\s*and\\s+I_NumberOfSettlements" );
+											matcher = pattern.matcher( line );
+											if ( matcher.find( ) )
+											{
+												continue;
+											}
+
+											printer.println( line );
+
 										}
 									}
 								}

@@ -134,7 +134,7 @@ public class Patch
 				e.printStackTrace( );
 			}
 
-			shell.setSize( 850, 600 );
+			shell.setSize( 850, 650 );
 			shell.setImages( new Image[]{
 				ImageCache.getImage( "/patch.png" ),
 			} );
