@@ -36,6 +36,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
@@ -55,6 +58,19 @@ import org.sf.feeling.swt.win32.extension.util.SortMap;
 public class BasicPatchPage extends SimpleTabPage
 {
 
+	private static final String[] wallTypes = new String[]{
+			"medium_reinforced", "huge_reinforced", "medium_iron", "huge_iron"
+	};
+	private static final String[] disasterTypes = new String[]{
+			"earthquake", "plague", "flood", "storm"
+	};
+	private static final String[] accuracyTypes = new String[]{
+			"accuracy_vs_units", "accuracy_vs_buildings"
+	};
+	private List comboList = new ArrayList( );
+	private String[] projectTileTypes;
+	private String[] typeNames;
+	
 	private static final String re1 = "(stat_cost)"; // Variable Name 1
 	private static final String re2 = "(\\s+)"; // White Space 1
 	private static final String re3 = "(\\d+)"; // Integer Number 1
@@ -78,6 +94,14 @@ public class BasicPatchPage extends SimpleTabPage
 
 		createTitle( );
 		createPatchArea( );
+		
+		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
+				"<form><p>注意：<br/>1、灾害次数值越小越好。<br/>2、投石误差值越小越精准，但过于精准将无法射中移动目标。<br/>3、三国全面战争1.7a版巨型城墙生命值为250，仅供参考。</p></form>",
+				true,
+				true );
+		TableWrapData data = new TableWrapData( TableWrapData.FILL );
+		data.maxWidth = 600;
+		noteText.setLayoutData( data );
 	}
 
 	private void createPatchArea( )
@@ -643,6 +667,438 @@ public class BasicPatchPage extends SimpleTabPage
 
 		}
 		{
+			final Button disastersBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "自然灾害（次/年）", SWT.CHECK );
+			GridData gd = new GridData( );
+			disastersBtn.setLayoutData( gd );
+
+			final CCombo disasterTypeCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.widthHint = 100;
+			disasterTypeCombo.setLayoutData( gd );
+			disasterTypeCombo.setEnabled( false );
+			disasterTypeCombo.setItems( new String[]{
+					"地震", "瘟疫", "洪水", "台风"
+			} );
+			comboList.add( disasterTypeCombo );
+			final CCombo disasterValueCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.widthHint = 100;
+			disasterValueCombo.setLayoutData( gd );
+			disasterValueCombo.setEnabled( false );
+			initNumberCombo( disasterValueCombo, 0, 50 );
+
+			disasterTypeCombo.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					refreshDisasterCombo( disasterTypeCombo,
+							disasterTypes,
+							disasterValueCombo );
+				}
+			} );
+
+			final Button disastersApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			disastersApply.setEnabled( false );
+			final Button disastersRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			disastersBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					disastersApply.setEnabled( disastersBtn.getSelection( ) );
+					disasterTypeCombo.setEnabled( disastersBtn.getSelection( ) );
+					disasterValueCombo.setEnabled( disastersBtn.getSelection( ) );
+				}
+			} );
+			disastersApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( FileConstants.disasterFile.exists( )
+							&& disasterTypeCombo.getSelectionIndex( ) > -1
+							&& disasterValueCombo.getSelectionIndex( ) > 0 )
+					{
+						disastersApply.setEnabled( false );
+						BakUtil.bakData( "自然灾害修改："
+								+ disasterTypeCombo.getText( )
+								+ "每年"
+								+ disasterValueCombo.getText( )
+								+ "次" );
+						try
+						{
+							String disasterType = disasterTypes[disasterTypeCombo.getSelectionIndex( )];
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.disasterFile ),
+									"GBK" ) );
+							boolean startDisaster = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+								if ( !startDisaster )
+								{
+									Pattern pattern = Pattern.compile( "^\\s*(event)(\\s+)("
+											+ disasterType
+											+ ")(\\s*)(;*)" );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startDisaster = true;
+									}
+								}
+								else
+								{
+									Pattern pattern = Pattern.compile( "^\\s*(frequency)(\\s+)" );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										printer.println( matcher.group( )
+												+ disasterValueCombo.getText( ) );
+										continue;
+									}
+									pattern = Pattern.compile( "^\\s*(event)(\\s*)" );
+									matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startDisaster = false;
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.disasterFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+						disastersApply.setEnabled( true );
+					}
+				}
+			} );
+			disastersRestore.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					disastersRestore.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					disastersRestore.setEnabled( true );
+				}
+			} );
+		}
+		{
+			final String[] accuracyTypeNames = new String[]{
+					"部队", "设施"
+			};
+
+			for ( int j = 0; j < accuracyTypes.length; j++ )
+			{
+				final String accuracyType = accuracyTypes[j];
+				final String accuracyTypeName = accuracyTypeNames[j];
+				final Button accuracyBtn = WidgetUtil.getToolkit( )
+						.createButton( patchClient,
+								"投石命中" + accuracyTypeNames[j] + "误差",
+								SWT.CHECK );
+				GridData gd = new GridData( );
+				accuracyBtn.setLayoutData( gd );
+
+				final CCombo accuracyTypeCombo = WidgetUtil.getToolkit( )
+						.createCCombo( patchClient, SWT.READ_ONLY );
+				gd = new GridData( GridData.FILL_HORIZONTAL );
+				gd.widthHint = 100;
+				accuracyTypeCombo.setLayoutData( gd );
+				accuracyTypeCombo.setEnabled( false );
+				if ( FileUtil.containMatchString( FileConstants.projectTileFile,
+						"big_fiery_boulder" ) )
+				{
+					projectTileTypes = new String[]{
+							"big_boulder", "big_fiery_boulder"
+					};
+					typeNames = new String[]{
+							"投石", "投石（开火）"
+					};
+				}
+				else
+				{
+					projectTileTypes = new String[]{
+						"big_boulder"
+					};
+					typeNames = new String[]{
+						"投石"
+					};
+				}
+				accuracyTypeCombo.setItems( typeNames );
+				comboList.add( accuracyTypeCombo );
+
+				final Spinner accuracyValueSpinner = WidgetUtil.getToolkit( )
+						.createSpinner( patchClient );
+				gd = new GridData( GridData.FILL_HORIZONTAL );
+				gd.widthHint = 100;
+				accuracyValueSpinner.setLayoutData( gd );
+				accuracyValueSpinner.setEnabled( false );
+				initSpinner( accuracyValueSpinner, 0, 10000, 2, 5 );
+
+				accuracyTypeCombo.addSelectionListener( new SelectionAdapter( ) {
+
+					public void widgetSelected( SelectionEvent e )
+					{
+						refreshPrjectTileCombo( accuracyTypeCombo,
+								projectTileTypes,
+								accuracyValueSpinner,
+								accuracyType );
+					}
+				} );
+
+				final Button accuracyApply = WidgetUtil.getToolkit( )
+						.createButton( patchClient, "应用", SWT.PUSH );
+				accuracyApply.setEnabled( false );
+				final Button accuracyRestore = WidgetUtil.getToolkit( )
+						.createButton( patchClient, "还原", SWT.PUSH );
+				accuracyBtn.addSelectionListener( new SelectionAdapter( ) {
+
+					public void widgetSelected( SelectionEvent e )
+					{
+						accuracyApply.setEnabled( accuracyBtn.getSelection( ) );
+						accuracyTypeCombo.setEnabled( accuracyBtn.getSelection( ) );
+						accuracyValueSpinner.setEnabled( accuracyBtn.getSelection( ) );
+					}
+				} );
+				accuracyApply.addSelectionListener( new SelectionAdapter( ) {
+
+					public void widgetSelected( SelectionEvent e )
+					{
+						if ( FileConstants.projectTileFile.exists( )
+								&& accuracyTypeCombo.getSelectionIndex( ) > -1
+								&& accuracyValueSpinner.getText( )
+										.trim( )
+										.length( ) > 0 )
+						{
+							accuracyApply.setEnabled( false );
+							BakUtil.bakData( accuracyTypeCombo.getText( )
+									+ "命中"
+									+ accuracyTypeName
+									+ "误差："
+									+ accuracyValueSpinner.getText( ).trim( ) );
+							try
+							{
+								String projectTileType = projectTileTypes[accuracyTypeCombo.getSelectionIndex( )];
+								String line = null;
+								StringWriter writer = new StringWriter( );
+								PrintWriter printer = new PrintWriter( writer );
+								BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.projectTileFile ),
+										"GBK" ) );
+								boolean startProjectTile = false;
+								while ( ( line = in.readLine( ) ) != null )
+								{
+									if ( !startProjectTile )
+									{
+										Pattern pattern = Pattern.compile( "^\\s*(projectile)(\\s+)("
+												+ projectTileType
+												+ ")(\\s*)(;*)" );
+										Matcher matcher = pattern.matcher( line );
+										if ( matcher.find( ) )
+										{
+											startProjectTile = true;
+										}
+									}
+									else
+									{
+										Pattern pattern = Pattern.compile( "^\\s*("
+												+ accuracyType
+												+ ")(\\s+)" );
+										Matcher matcher = pattern.matcher( line );
+										if ( matcher.find( ) )
+										{
+											float accuracy = ( (float) accuracyValueSpinner.getSelection( ) ) / 10000;
+											printer.println( matcher.group( )
+													+ accuracy );
+											continue;
+										}
+										pattern = Pattern.compile( "^\\s*(projectile)(\\s*)" );
+										matcher = pattern.matcher( line );
+										if ( matcher.find( ) )
+										{
+											startProjectTile = false;
+										}
+									}
+									printer.println( line );
+								}
+								in.close( );
+
+								PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.projectTileFile ),
+										"GBK" ) ),
+										false );
+								out.print( writer.getBuffer( ) );
+								out.close( );
+							}
+							catch ( IOException e1 )
+							{
+								e1.printStackTrace( );
+							}
+							accuracyApply.setEnabled( true );
+						}
+					}
+				} );
+				accuracyRestore.addSelectionListener( new SelectionAdapter( ) {
+
+					public void widgetSelected( SelectionEvent e )
+					{
+						accuracyRestore.setEnabled( false );
+						BakUtil.restoreCurrectVersionBakFile( );
+						refreshPage( );
+						accuracyRestore.setEnabled( true );
+					}
+				} );
+			}
+		}
+		{
+			final Button wallsBtn = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "城墙生命", SWT.CHECK );
+			GridData gd = new GridData( );
+			wallsBtn.setLayoutData( gd );
+
+			final CCombo wallTypeCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.widthHint = 100;
+			wallTypeCombo.setLayoutData( gd );
+			wallTypeCombo.setEnabled( false );
+			wallTypeCombo.setItems( new String[]{
+					"城墙", "中型城墙", "大型城墙", "巨型城墙"
+			} );
+			comboList.add( wallTypeCombo );
+			final CCombo wallValueCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.widthHint = 100;
+			wallValueCombo.setLayoutData( gd );
+			wallValueCombo.setEnabled( false );
+			wallValueCombo.setItems( new String[]{
+					"50",
+					"100",
+					"150",
+					"200",
+					"250",
+					"300",
+					"400",
+					"500",
+					"750",
+					"1000",
+					"1500",
+					"2000"
+			} );
+
+			wallTypeCombo.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					refreshWallCombo( wallTypeCombo, wallTypes, wallValueCombo );
+				}
+			} );
+
+			final Button wallsApply = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "应用", SWT.PUSH );
+			wallsApply.setEnabled( false );
+			final Button wallsRestore = WidgetUtil.getToolkit( )
+					.createButton( patchClient, "还原", SWT.PUSH );
+			wallsBtn.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					wallsApply.setEnabled( wallsBtn.getSelection( ) );
+					wallTypeCombo.setEnabled( wallsBtn.getSelection( ) );
+					wallValueCombo.setEnabled( wallsBtn.getSelection( ) );
+				}
+			} );
+			wallsApply.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( FileConstants.descrWallsFile.exists( )
+							&& wallTypeCombo.getSelectionIndex( ) > -1
+							&& wallValueCombo.getSelectionIndex( ) > -1 )
+					{
+						wallsApply.setEnabled( false );
+						BakUtil.bakData( "城墙生命值修改："
+								+ wallTypeCombo.getText( )
+								+ "："
+								+ wallValueCombo.getText( ) );
+						try
+						{
+							String wallType = wallTypes[wallTypeCombo.getSelectionIndex( )];
+							String line = null;
+							StringWriter writer = new StringWriter( );
+							PrintWriter printer = new PrintWriter( writer );
+							BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.descrWallsFile ),
+									"GBK" ) );
+							boolean startWall = false;
+							while ( ( line = in.readLine( ) ) != null )
+							{
+								if ( !startWall )
+								{
+									Pattern pattern = Pattern.compile( "^\\s*(gate)(\\s+)("
+											+ wallType
+											+ ")(\\s*)(;*)",
+											Pattern.CASE_INSENSITIVE );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										startWall = true;
+									}
+								}
+								else
+								{
+									Pattern pattern = Pattern.compile( "^\\s*(full_health)(\\s+)",
+											Pattern.CASE_INSENSITIVE );
+									Matcher matcher = pattern.matcher( line );
+									if ( matcher.find( ) )
+									{
+										printer.println( matcher.group( )
+												+ wallValueCombo.getText( ) );
+										startWall = false;
+										continue;
+									}
+								}
+								printer.println( line );
+							}
+							in.close( );
+
+							PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( FileConstants.descrWallsFile ),
+									"GBK" ) ),
+									false );
+							out.print( writer.getBuffer( ) );
+							out.close( );
+						}
+						catch ( IOException e1 )
+						{
+							e1.printStackTrace( );
+						}
+						wallsApply.setEnabled( true );
+					}
+				}
+			} );
+			wallsRestore.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					wallsRestore.setEnabled( false );
+					BakUtil.restoreCurrectVersionBakFile( );
+					refreshPage( );
+					wallsRestore.setEnabled( true );
+				}
+			} );
+		}
+		{
 			final Button windowBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient,
 							"创建游戏窗口化启动快捷方式到桌面（Alt+Tab键切换窗口）",
@@ -744,5 +1200,192 @@ public class BasicPatchPage extends SimpleTabPage
 		}
 		else
 			printer.println( line );
+	}
+	
+	public void refresh( )
+	{
+		super.refresh( );
+		refreshPage( );
+	}
+
+	private void refreshPage( )
+	{
+		for ( int i = 0; i < comboList.size( ); i++ )
+		{
+			CCombo combo = (CCombo) comboList.get( i );
+			if ( combo.getSelectionIndex( ) > -1 )
+				combo.notifyListeners( SWT.Selection, new Event( ) );
+		}
+	}
+	
+	private void refreshDisasterCombo( final CCombo disasterTypeCombo,
+			final String[] disasterTypes, final CCombo disasterValueCombo )
+	{
+		String disasterType = disasterTypes[disasterTypeCombo.getSelectionIndex( )];
+		String freq = "";
+		if ( FileConstants.disasterFile.exists( ) )
+		{
+			try
+			{
+				String line = null;
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.disasterFile ),
+						"GBK" ) );
+				boolean startDisaster = false;
+				while ( ( line = in.readLine( ) ) != null )
+				{
+					if ( !startDisaster )
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(event)(\\s+)("
+								+ disasterType
+								+ ")(\\s*)(;*)" );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							startDisaster = true;
+							continue;
+						}
+					}
+					else
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(frequency)(\\s+)" );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							freq = line.substring( matcher.end( ) );
+							in.close( );
+							break;
+						}
+					}
+				}
+				in.close( );
+			}
+			catch ( IOException e1 )
+			{
+				e1.printStackTrace( );
+			}
+		}
+		if ( freq != null )
+			disasterValueCombo.setText( freq );
+	}
+
+	private void refreshWallCombo( final CCombo wallTypeCombo,
+			final String[] wallTypes, final CCombo wallValueCombo )
+	{
+		String wallType = wallTypes[wallTypeCombo.getSelectionIndex( )];
+		String freq = "";
+		if ( FileConstants.descrWallsFile.exists( ) )
+		{
+			try
+			{
+				String line = null;
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.descrWallsFile ),
+						"GBK" ) );
+				boolean startWall = false;
+				while ( ( line = in.readLine( ) ) != null )
+				{
+					if ( !startWall )
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(gate)(\\s+)("
+								+ wallType
+								+ ")(\\s*)(;*)" );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							startWall = true;
+							continue;
+						}
+					}
+					else
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(full_health)(\\s+)" );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							freq = line.substring( matcher.end( ) );
+							in.close( );
+							break;
+						}
+					}
+				}
+				in.close( );
+			}
+			catch ( IOException e1 )
+			{
+				e1.printStackTrace( );
+			}
+		}
+		if ( freq != null )
+			wallValueCombo.setText( freq );
+	}
+
+	private void refreshPrjectTileCombo( final CCombo projectTileTypeCombo,
+			final String[] projectTileTypes,
+			final Spinner projectTileValueSpinner, String accuracyType )
+	{
+		String projectTileType = projectTileTypes[projectTileTypeCombo.getSelectionIndex( )];
+		String accuracy = "";
+		if ( FileConstants.projectTileFile.exists( ) )
+		{
+			try
+			{
+				String line = null;
+				BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( FileConstants.projectTileFile ),
+						"GBK" ) );
+				boolean startProjectTile = false;
+				while ( ( line = in.readLine( ) ) != null )
+				{
+					if ( !startProjectTile )
+					{
+						Pattern pattern = Pattern.compile( "^\\s*(projectile)(\\s+)("
+								+ projectTileType
+								+ ")(\\s*)(;*)" );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							startProjectTile = true;
+							continue;
+						}
+					}
+					else
+					{
+						Pattern pattern = Pattern.compile( "^\\s*("
+								+ accuracyType
+								+ ")(\\s+)" );
+						Matcher matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							accuracy = line.substring( matcher.end( ) );
+							in.close( );
+							break;
+						}
+					}
+				}
+				in.close( );
+			}
+			catch ( IOException e1 )
+			{
+				e1.printStackTrace( );
+			}
+		}
+		if ( accuracy != null )
+			projectTileValueSpinner.setSelection( (int) ( Float.parseFloat( accuracy.trim( ) ) * 10000 ) );
+	}
+	
+	private void initNumberCombo( CCombo combo, int min, int max )
+	{
+		for ( int i = min; i <= max; i++ )
+		{
+			combo.add( "" + i );
+		}
+		combo.add( "", 0 );
+	}
+
+	private void initSpinner( Spinner combo, int min, int max, int digit,
+			int step )
+	{
+		combo.setMinimum( min );
+		combo.setMaximum( max );
+		combo.setDigits( digit );
+		combo.setIncrement( step );
 	}
 }
