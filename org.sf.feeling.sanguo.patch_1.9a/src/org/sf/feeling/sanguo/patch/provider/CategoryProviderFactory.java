@@ -22,6 +22,7 @@ import org.sf.feeling.sanguo.patch.page.BasicPatchPage;
 import org.sf.feeling.sanguo.patch.page.BuildingBonusPage;
 import org.sf.feeling.sanguo.patch.page.CodePage;
 import org.sf.feeling.sanguo.patch.page.CustomGeneralPage;
+import org.sf.feeling.sanguo.patch.page.CustomUnitPage;
 import org.sf.feeling.sanguo.patch.page.FactionEditPage;
 import org.sf.feeling.sanguo.patch.page.FeedbackPage;
 import org.sf.feeling.sanguo.patch.page.GeneralEditPage;
@@ -62,6 +63,7 @@ public class CategoryProviderFactory
 				"难度调整",
 				"模型导入",
 				"建筑加成修改",
+				"创建新兵种",
 				"兵种修改",
 				"宝物修改",
 				"势力兵种添加",
@@ -91,6 +93,7 @@ public class CategoryProviderFactory
 				HardAdjustPage.class,
 				ModelPatchPage.class,
 				BuildingBonusPage.class,
+				CustomUnitPage.class,
 				UnitModifyPage.class,
 				BaowuModifyPage.class,
 				UnitPatchPage.class,
