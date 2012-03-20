@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.sf.feeling.sanguo.patch.Patch;
 import org.sf.feeling.sanguo.patch.model.General;
 import org.sf.feeling.sanguo.patch.model.Unit;
+import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 import org.sf.feeling.swt.win32.extension.util.SortMap;
 
@@ -367,11 +368,17 @@ public class GeneralEditor
 		ImageData bigImageData = null;
 		if ( generalImages[0] != null )
 		{
-			bigImageData = generalImages[0].scaledTo( 69, 96 );
+			bigImageData = GraphicsUtil.resizeImage( generalImages[0],
+					69,
+					96,
+					true );
 		}
 		if ( generalImages[1] != null )
 		{
-			smallImageData = generalImages[1].scaledTo( 44, 63 );
+			smallImageData = GraphicsUtil.resizeImage( generalImages[1],
+					44,
+					63,
+					true );
 		}
 		try
 		{
@@ -446,9 +453,9 @@ public class GeneralEditor
 			try
 			{
 				TgaLoader.saveImage( new FileOutputStream( bigFilePath ),
-						soldierImage.scaledTo( 160, 210 ) );
+						GraphicsUtil.resizeImage( soldierImage, 160, 210, true ) );
 				TgaLoader.saveImage( new FileOutputStream( smallFilePath ),
-						soldierImage.scaledTo( 48, 64 ) );
+						GraphicsUtil.resizeImage( soldierImage, 48, 64, true ) );
 			}
 			catch ( IOException e )
 			{

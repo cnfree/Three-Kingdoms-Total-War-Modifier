@@ -12,6 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -230,7 +236,27 @@ public class CustomGeneralPage extends SimpleTabPage
 		nameText.setLayoutData( gd );
 
 		nameText.addModifyListener( nameListener );
-
+		nameText.addFocusListener( new FocusAdapter( ) {
+			public void focusLost( FocusEvent e )
+			{
+				if(idText.getText( ).trim( ).length( ) == 0){
+					HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat( );
+					defaultFormat.setCaseType( HanyuPinyinCaseType.LOWERCASE );
+					defaultFormat.setToneType( HanyuPinyinToneType.WITHOUT_TONE );
+					try
+					{
+						idText.setText(  PinyinHelper.toHanyuPinyinString( nameText.getText( ).trim( ),
+								defaultFormat,
+								"" ));
+					}
+					catch ( BadHanyuPinyinOutputFormatCombination e1 )
+					{
+						e1.printStackTrace();
+					}
+				}
+			}
+		} );
+		
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );

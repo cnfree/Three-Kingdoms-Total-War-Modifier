@@ -7,11 +7,18 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Comparator;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -33,12 +40,11 @@ import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 import org.sf.feeling.sanguo.patch.Patch;
 import org.sf.feeling.sanguo.patch.dialog.UnitModifyDialog;
-import org.sf.feeling.sanguo.patch.model.General;
 import org.sf.feeling.sanguo.patch.model.Unit;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
 import org.sf.feeling.sanguo.patch.util.CustomGeneral;
-import org.sf.feeling.sanguo.patch.util.FileConstants;
+import org.sf.feeling.sanguo.patch.util.CustomUnit;
 import org.sf.feeling.sanguo.patch.util.MapUtil;
 import org.sf.feeling.sanguo.patch.util.PinyinComparator;
 import org.sf.feeling.sanguo.patch.util.UnitParser;
@@ -75,11 +81,10 @@ public class CustomUnitPage extends SimpleTabPage
 		}
 	}
 	private Button applyButton;
-	private SortMap availableGeneralMap;
-	private Button bigButton;
-	private ImageData bigImage = null;
+	private Button soldierCardButton;
+	private ImageData soldierCardImage;
 
-	private CCombo bigImageCombo;
+	private CCombo soldierCardImageCombo;
 	private String faction = null;
 	private CCombo factionCombo;
 	private SortMap factionMap;
@@ -98,9 +103,6 @@ public class CustomUnitPage extends SimpleTabPage
 
 	};
 	private Text nameText;
-	private Button smallButton;
-	private ImageData smallImage = null;
-	private CCombo smallImageCombo;
 	private Unit soldier = null;
 	private Button soldierButton;
 	private ImageData soldierImage = null;
@@ -110,6 +112,7 @@ public class CustomUnitPage extends SimpleTabPage
 	private CCombo bingyingCombo;
 	private Button yesButton;
 	private Button noButton;
+	private SortMap soldierUnitMap;
 
 	public void buildUI( Composite parent )
 	{
@@ -134,10 +137,8 @@ public class CustomUnitPage extends SimpleTabPage
 				&& UnitUtil.getUnitDictionary( soldierType ) == null )
 		{
 			soldierButton.setEnabled( true );
-			smallImageCombo.setEnabled( true );
-			smallButton.setEnabled( true );
-			bigImageCombo.setEnabled( true );
-			bigButton.setEnabled( true );
+			soldierCardImageCombo.setEnabled( true );
+			soldierCardButton.setEnabled( true );
 			soldierImageCombo.setEnabled( true );
 			soldierButton.setEnabled( true );
 			soldierImageButton.setEnabled( true );
@@ -146,20 +147,21 @@ public class CustomUnitPage extends SimpleTabPage
 			yesButton.setEnabled( true );
 			noButton.setEnabled( true );
 			bingyingCombo.setEnabled( true );
-			if ( faction != null && bigImage != null && soldier != null )
+			if ( faction != null && soldierCardImage != null && soldier != null )
 			{
 				applyButton.setEnabled( true );
 			}
 			else
 				applyButton.setEnabled( false );
+
+			soldierCardImageCombo.setEnabled( !yesButton.getSelection( ) );
+			soldierCardButton.setEnabled( !yesButton.getSelection( ) );
 		}
 		else
 		{
 			soldierButton.setEnabled( false );
-			smallImageCombo.setEnabled( false );
-			smallButton.setEnabled( false );
-			bigImageCombo.setEnabled( false );
-			bigButton.setEnabled( false );
+			soldierCardImageCombo.setEnabled( false );
+			soldierCardButton.setEnabled( false );
 			soldierImageCombo.setEnabled( false );
 			soldierButton.setEnabled( false );
 			soldierImageButton.setEnabled( false );
@@ -196,11 +198,34 @@ public class CustomUnitPage extends SimpleTabPage
 		nameText.setLayoutData( gd );
 
 		nameText.addModifyListener( nameListener );
+		nameText.addFocusListener( new FocusAdapter( ) {
+
+			public void focusLost( FocusEvent e )
+			{
+				if ( idText.getText( ).trim( ).length( ) == 0 )
+				{
+					HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat( );
+					defaultFormat.setCaseType( HanyuPinyinCaseType.LOWERCASE );
+					defaultFormat.setToneType( HanyuPinyinToneType.WITHOUT_TONE );
+					try
+					{
+						idText.setText( PinyinHelper.toHanyuPinyinString( nameText.getText( )
+								.trim( ),
+								defaultFormat,
+								"" ) );
+					}
+					catch ( BadHanyuPinyinOutputFormatCombination e1 )
+					{
+						e1.printStackTrace( );
+					}
+				}
+			}
+		} );
 
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );
-		gd.verticalSpan = 9;
+		gd.verticalSpan = 8;
 		gd.widthHint = 160;
 		imageCanvas.setLayoutData( gd );
 
@@ -254,8 +279,8 @@ public class CustomUnitPage extends SimpleTabPage
 		} );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "4.选择新兵种兵营等级：" );
-		bingyingCombo = WidgetUtil.getToolkit( )
-				.createCCombo( patchClient, SWT.READ_ONLY );
+		bingyingCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
 
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.widthHint = 180;
@@ -272,7 +297,7 @@ public class CustomUnitPage extends SimpleTabPage
 		bingyingCombo.setItems( new String[]{
 				"所有兵营", "2级以上兵营", "3级以上兵营", "4级以上兵营", "5级兵营"
 		} );
-		
+
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "5.新兵种是否为将军卫队：" );
 
 		Composite chArea = WidgetUtil.getToolkit( )
@@ -294,6 +319,15 @@ public class CustomUnitPage extends SimpleTabPage
 		gd = new GridData( );
 		gd.widthHint = 80;
 		yesButton.setLayoutData( gd );
+		yesButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent arg0 )
+			{
+				soldierCardImageCombo.setEnabled( !yesButton.getSelection( ) );
+				soldierCardButton.setEnabled( !yesButton.getSelection( ) );
+			}
+		} );
+
 		noButton = WidgetUtil.getToolkit( ).createButton( chArea,
 				"否",
 				SWT.RADIO );
@@ -326,44 +360,76 @@ public class CustomUnitPage extends SimpleTabPage
 		} );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "7.设置新兵种兵牌(可选)：" );
-		bigImageCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
-				SWT.READ_ONLY );
-		bigImageCombo.setText( "宽：69像素，高：96像素" );
-		bigImageCombo.addFocusListener( new FocusAdapter( ) {
+		soldierCardImageCombo = WidgetUtil.getToolkit( )
+				.createCCombo( patchClient, SWT.READ_ONLY );
+		soldierCardImageCombo.setText( "宽：48像素，高：64像素" );
+		soldierCardImageCombo.addFocusListener( new FocusAdapter( ) {
 
 			public void focusLost( FocusEvent e )
 			{
-				if ( bigImageCombo.getText( ).length( ) == 0 )
+				if ( soldierCardImageCombo.getText( ).length( ) == 0 )
 				{
-					bigImageCombo.setText( "宽：69像素，高：96像素" );
+					soldierCardImageCombo.setText( "宽：48像素，高：64像素" );
 				}
 			}
 		} );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.widthHint = 160;
-		bigImageCombo.setLayoutData( gd );
+		soldierCardImageCombo.setLayoutData( gd );
 
-		bigImageCombo.addSelectionListener( new SelectionAdapter( ) {
+		soldierCardImageCombo.addSelectionListener( new SelectionAdapter( ) {
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				bigImage = null;
-				if ( bigImageCombo.getSelectionIndex( ) != -1 )
+				if ( soldierCardImageCombo.getSelectionIndex( ) != -1 )
 				{
-					String generalCode = (String) availableGeneralMap.getKeyList( )
-							.get( bigImageCombo.getSelectionIndex( ) );
-					if ( bigImage != null )
-						imageCanvas.setImageData( bigImage );
+					imageCanvas.clear( );
+					String soldierType = (String) soldierUnitMap.getKeyList( )
+							.get( soldierCardImageCombo.getSelectionIndex( ) );
+					if ( soldierType != null )
+					{
+						Unit soldier = UnitParser.getUnit( soldierType );
+						String dictionary = soldier.getDictionary( );
+						String[] factions = (String[]) soldier.getFactions( )
+								.toArray( new String[0] );
+						for ( int i = 0; i < factions.length; i++ )
+						{
+							String faction = factions[i].equalsIgnoreCase( "all" ) ? "romans_scipii"
+									: factions[i];
+							faction = faction.equalsIgnoreCase( "barbarian" ) ? "slave"
+									: faction;
+							File file = new File( Patch.GAME_ROOT
+									+ "\\alexander\\data\\ui\\units\\"
+									+ faction
+									+ "\\#"
+									+ dictionary
+									+ ".tga" );
+							if ( file.exists( ) && file.length( ) > 0 )
+							{
+								try
+								{
+									ImageData image = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( file ) ) );
+									imageCanvas.setImageData( image );
+									soldierCardImage = image;
+									break;
+								}
+								catch ( IOException e1 )
+								{
+									e1.printStackTrace( );
+								}
+							}
+						}
+					}
 				}
 				checkEnableStatus( );
 			}
 		} );
 
-		bigButton = WidgetUtil.getToolkit( ).createButton( patchClient,
+		soldierCardButton = WidgetUtil.getToolkit( ).createButton( patchClient,
 				SWT.PUSH,
 				true );
-		bigButton.setText( "自定义" );
-		bigButton.addSelectionListener( new SelectionAdapter( ) {
+		soldierCardButton.setText( "自定义" );
+		soldierCardButton.addSelectionListener( new SelectionAdapter( ) {
 
 			public void widgetSelected( SelectionEvent e )
 			{
@@ -378,11 +444,12 @@ public class CustomUnitPage extends SimpleTabPage
 				String path = dialog.open( );
 				if ( path != null && new File( path ).exists( ) )
 				{
-					bigImageCombo.clearSelection( );
-					bigImageCombo.setText( path );
-					bigImage = null;
+					soldierCardImageCombo.clearSelection( );
+					soldierCardImageCombo.setText( path );
+					soldierCardImage = null;
 
-					File imageFile = new File( bigImageCombo.getText( ).trim( ) );
+					File imageFile = new File( soldierCardImageCombo.getText( )
+							.trim( ) );
 					if ( imageFile.exists( ) && imageFile.isFile( ) )
 					{
 						try
@@ -404,11 +471,11 @@ public class CustomUnitPage extends SimpleTabPage
 
 							}
 
-							bigImage = GraphicsUtil.resizeImage( imageData,
-									69,
-									96,
+							soldierCardImage = GraphicsUtil.resizeImage( imageData,
+									48,
+									64,
 									true );
-							imageCanvas.setImageData( bigImage );
+							imageCanvas.setImageData( soldierCardImage );
 						}
 						catch ( IOException e1 )
 						{
@@ -444,18 +511,27 @@ public class CustomUnitPage extends SimpleTabPage
 			{
 				if ( soldierImageCombo.getSelectionIndex( ) != -1 )
 				{
-					String soldierType = (String) generalUnitMap.getKeyList( )
-							.get( soldierImageCombo.getSelectionIndex( ) );
+					imageCanvas.clear( );
+					String soldierType = soldierImageCombo.getSelectionIndex( ) < generalUnitMap.size( ) ? (String) generalUnitMap.getKeyList( )
+							.get( soldierImageCombo.getSelectionIndex( ) )
+							: (String) soldierUnitMap.getKeyList( )
+									.get( soldierImageCombo.getSelectionIndex( )
+											- generalUnitMap.size( ) );
 					if ( soldierType != null )
 					{
 						Unit soldier = UnitParser.getUnit( soldierType );
 						String dictionary = soldier.getDictionary( );
-						String[] factions = UnitUtil.getFactionsFromSoldierType( soldierType );
+						String[] factions = (String[]) soldier.getFactions( )
+								.toArray( new String[0] );
 						for ( int i = 0; i < factions.length; i++ )
 						{
+							String faction = factions[i].equalsIgnoreCase( "all" ) ? "romans_scipii"
+									: factions[i];
+							faction = faction.equalsIgnoreCase( "barbarian" ) ? "slave"
+									: faction;
 							File file = new File( Patch.GAME_ROOT
 									+ "\\alexander\\data\\ui\\unit_info\\"
-									+ factions[i]
+									+ faction
 									+ "\\"
 									+ dictionary
 									+ "_info.tga" );
@@ -577,14 +653,16 @@ public class CustomUnitPage extends SimpleTabPage
 			public void widgetSelected( SelectionEvent e )
 			{
 				applyButton.setEnabled( false );
-				BakUtil.bakData( "自定义武将：" + nameText.getText( ) );
-				CustomGeneral customGeneral = new CustomGeneral( );
-				customGeneral.setDisplayName( nameText.getText( ).trim( ) );
-				customGeneral.setName( idText.getText( ).trim( ) );
-				customGeneral.setFaction( faction );
+				BakUtil.bakData( "自定义新兵种：" + nameText.getText( ) );
 
+				CustomUnit customUnit = new CustomUnit( );
+				customUnit.setDisplayName( nameText.getText( ).trim( ) );
+				customUnit.setName( idText.getText( ).trim( ) );
+				customUnit.setFaction( (String) factionMap.getKeyList( )
+						.get( factionCombo.getSelectionIndex( ) ) );
+				customUnit.setGeneralUnit( yesButton.getSelection( ) );
 				if ( soldierImage != null )
-					customGeneral.setGeneralSoldierImage( soldierImage );
+					customUnit.setSoldierImage( soldierImage );
 				else
 				{
 					String dictionary = soldier.getDictionary( );
@@ -602,7 +680,7 @@ public class CustomUnitPage extends SimpleTabPage
 							try
 							{
 								ImageData image = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( file ) ) );
-								customGeneral.setGeneralSoldierImage( image );
+								customUnit.setSoldierImage( image );
 								break;
 							}
 							catch ( IOException e1 )
@@ -612,14 +690,44 @@ public class CustomUnitPage extends SimpleTabPage
 						}
 					}
 				}
-				customGeneral.setGeneralImages( new ImageData[]{
-						bigImage, smallImage
-				} );
-				customGeneral.setGeneralSoldier( soldier );
-				customGeneral.setGeneralDescription( generalDesc.getText( )
-						.trim( ) );
 
-				customGeneral.createCustomGeneral( );
+				if ( !yesButton.getSelection( ) )
+				{
+					if ( soldierCardImage != null )
+						customUnit.setSoldierCardImage( soldierCardImage );
+					else
+					{
+						String dictionary = soldier.getDictionary( );
+						String[] factions = UnitUtil.getFactionsFromSoldierType( soldier.getType( ) );
+						for ( int i = 0; i < factions.length; i++ )
+						{
+							File file = new File( Patch.GAME_ROOT
+									+ "\\alexander\\data\\ui\\units\\"
+									+ factions[i]
+									+ "\\#"
+									+ dictionary
+									+ ".tga" );
+							if ( file.exists( ) && file.length( ) > 0 )
+							{
+								try
+								{
+									ImageData image = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( file ) ) );
+									customUnit.setSoldierCardImage( image );
+									break;
+								}
+								catch ( IOException e1 )
+								{
+									e1.printStackTrace( );
+								}
+							}
+						}
+					}
+				}
+
+				customUnit.setSoldier( soldier );
+				customUnit.setDescription( generalDesc.getText( ).trim( ) );
+				customUnit.createCustomUtil( );
+
 				MapUtil.initMap( );
 				applyButton.setEnabled( true );
 
@@ -660,20 +768,27 @@ public class CustomUnitPage extends SimpleTabPage
 
 	private void initPage( )
 	{
-		availableGeneralMap = UnitUtil.getAvailableGenerals( );
-		for ( int i = 0; i < availableGeneralMap.getKeyList( ).size( ); i++ )
+		generalUnitMap = UnitUtil.getAvailableGeneralUnits( );
+
+		soldierUnitMap = UnitUtil.getAllSoldierUnits( );
+		for ( int i = 0; i < soldierUnitMap.getKeyList( ).size( ); i++ )
 		{
-			String generalName = ChangeCode.toLong( (String) availableGeneralMap.get( i ) );
-			smallImageCombo.add( generalName );
-			bigImageCombo.add( generalName );
+			String unitName = ChangeCode.toLong( (String) soldierUnitMap.get( i ) );
+			soldierCardImageCombo.add( unitName );
 		}
 
-		generalUnitMap = UnitUtil.getAvailableGeneralUnits( );
 		for ( int i = 0; i < generalUnitMap.getKeyList( ).size( ); i++ )
 		{
 			String unitName = ChangeCode.toLong( (String) generalUnitMap.get( i ) );
 			soldierImageCombo.add( unitName );
 		}
+
+		for ( int i = 0; i < soldierUnitMap.getKeyList( ).size( ); i++ )
+		{
+			String unitName = ChangeCode.toLong( (String) soldierUnitMap.get( i ) );
+			soldierImageCombo.add( unitName );
+		}
+
 		checkEnableStatus( );
 	}
 
@@ -685,12 +800,12 @@ public class CustomUnitPage extends SimpleTabPage
 
 	private void refreshPage( )
 	{
-		availableGeneralMap = UnitUtil.getAvailableGenerals( );
-		generalUnitMap = UnitUtil.getAvailableGeneralUnits( );
+		generalUnitMap = UnitUtil.getGeneralUnits( );
+		soldierUnitMap = UnitUtil.getAllSoldierUnits( );
+
 		factionMap = UnitUtil.getFactionMap( );
 
-		smallImageCombo.setItems( new String[0] );
-		bigImageCombo.setItems( new String[0] );
+		soldierCardImageCombo.setItems( new String[0] );
 		soldierImageCombo.setItems( new String[0] );
 
 		String faction = factionCombo.getText( );
@@ -704,15 +819,21 @@ public class CustomUnitPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 			factionCombo.setText( faction );
 
-		for ( int i = 0; i < availableGeneralMap.size( ); i++ )
+		for ( int i = 0; i < soldierUnitMap.getKeyList( ).size( ); i++ )
 		{
-			String generalName = ChangeCode.toLong( (String) availableGeneralMap.get( i ) );
-			smallImageCombo.add( generalName );
-			bigImageCombo.add( generalName );
+			String unitName = ChangeCode.toLong( (String) soldierUnitMap.get( i ) );
+			soldierCardImageCombo.add( unitName );
 		}
+
 		for ( int i = 0; i < generalUnitMap.getKeyList( ).size( ); i++ )
 		{
 			String unitName = ChangeCode.toLong( (String) generalUnitMap.get( i ) );
+			soldierImageCombo.add( unitName );
+		}
+
+		for ( int i = 0; i < soldierUnitMap.getKeyList( ).size( ); i++ )
+		{
+			String unitName = ChangeCode.toLong( (String) soldierUnitMap.get( i ) );
 			soldierImageCombo.add( unitName );
 		}
 
@@ -726,10 +847,8 @@ public class CustomUnitPage extends SimpleTabPage
 		generalDesc.setText( "" );
 		factionCombo.clearSelection( );
 		factionCombo.setText( "" );
-		smallImageCombo.clearSelection( );
-		smallImageCombo.setText( "" );
-		bigImageCombo.clearSelection( );
-		bigImageCombo.setText( "" );
+		soldierCardImageCombo.clearSelection( );
+		soldierCardImageCombo.setText( "" );
 		soldierImageCombo.clearSelection( );
 		soldierImageCombo.setText( "" );
 		if ( soldier != null )
@@ -738,8 +857,7 @@ public class CustomUnitPage extends SimpleTabPage
 			soldierButton.setText( "设置（未设置）" );
 		}
 		soldier = null;
-		smallImage = null;
-		bigImage = null;
+		soldierCardImage = null;
 		soldierImage = null;
 		faction = null;
 		imageCanvas.clear( );

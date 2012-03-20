@@ -36,7 +36,7 @@ import org.sf.feeling.sanguo.patch.Patch;
 import org.sf.feeling.sanguo.patch.model.Unit;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
-import org.sf.feeling.sanguo.patch.util.CustomGeneralUnit;
+import org.sf.feeling.sanguo.patch.util.CustomUnit;
 import org.sf.feeling.sanguo.patch.util.UnitUtil;
 import org.sf.feeling.sanguo.patch.widget.FormWidgetFactory;
 import org.sf.feeling.sanguo.patch.widget.ImageCanvas;
@@ -347,13 +347,13 @@ public class CustomGeneralUnitDialog extends BaseDialog
 	{
 
 		BakUtil.bakData( "创建将军卫队：" + nameText.getText( ) );
-		CustomGeneralUnit customGeneral = new CustomGeneralUnit( );
+		CustomUnit customGeneral = new CustomUnit( );
 		customGeneral.setDisplayName( nameText.getText( ).trim( ) );
 		customGeneral.setName( idText.getText( ).trim( ) );
 		customGeneral.setFaction( (String) factionMap.getKeyList( )
 				.get( factionCombo.getSelectionIndex( ) ) );
 		if ( soldierImage != null )
-			customGeneral.setGeneralSoldierImage( soldierImage );
+			customGeneral.setSoldierImage( soldierImage );
 		else
 		{
 			String dictionary = soldier.getDictionary( );
@@ -371,7 +371,7 @@ public class CustomGeneralUnitDialog extends BaseDialog
 					try
 					{
 						ImageData image = TgaLoader.loadImage( new BufferedInputStream( new FileInputStream( file ) ) );
-						customGeneral.setGeneralSoldierImage( image );
+						customGeneral.setSoldierImage( image );
 						break;
 					}
 					catch ( IOException e1 )
@@ -381,9 +381,9 @@ public class CustomGeneralUnitDialog extends BaseDialog
 				}
 			}
 		}
-		customGeneral.setGeneralSoldier( soldier );
+		customGeneral.setSoldier( soldier );
 		customGeneral.setDescription( generalDesc.getText( ).trim( ) );
-		customGeneral.createCustomGeneral( );
+		customGeneral.createCustomUtil( );
 		result = nameText.getText( );
 		super.okPressed( );
 	}

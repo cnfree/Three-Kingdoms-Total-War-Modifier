@@ -390,9 +390,9 @@ public class CustomGeneral
 			try
 			{
 				TgaLoader.saveImage( new FileOutputStream( bigFilePath ),
-						soldierImage.scaledTo( 160, 210 ) );
+						GraphicsUtil.resizeImage( soldierImage, 160, 210, true ) );
 				TgaLoader.saveImage( new FileOutputStream( smallFilePath ),
-						soldierImage.scaledTo( 48, 64 ) );
+						GraphicsUtil.resizeImage( soldierImage, 48, 64, true ) );
 			}
 			catch ( IOException e )
 			{
