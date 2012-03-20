@@ -193,6 +193,13 @@ public class FactionEditPage extends SimpleTabPage
 
 		createTitle( );
 		createPatchArea( );
+		
+		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
+				"注意：部分玩家编辑势力后，会导致游戏势力选择界面花屏，但选择势力后不影响游戏。" );
+		TableWrapData data = new TableWrapData( TableWrapData.FILL );
+		data.maxWidth = 600;
+		noteText.setLayoutData( data );
+		
 		initPage( );
 		checkEnableStatus( );
 	}

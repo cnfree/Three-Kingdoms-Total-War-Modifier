@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
@@ -124,6 +125,13 @@ public class CustomUnitPage extends SimpleTabPage
 
 		createTitle( );
 		createPatchArea( );
+		
+		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
+				"注意：只有步兵兵营等级最高为5级，其他兵种兵营等级最高为4级。" );
+		TableWrapData data = new TableWrapData( TableWrapData.FILL );
+		data.maxWidth = 600;
+		noteText.setLayoutData( data );
+		
 		initPage( );
 	}
 
