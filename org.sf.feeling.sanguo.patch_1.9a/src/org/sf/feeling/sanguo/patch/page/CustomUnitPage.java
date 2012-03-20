@@ -18,7 +18,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -43,7 +42,6 @@ import org.sf.feeling.sanguo.patch.dialog.UnitModifyDialog;
 import org.sf.feeling.sanguo.patch.model.Unit;
 import org.sf.feeling.sanguo.patch.util.BakUtil;
 import org.sf.feeling.sanguo.patch.util.ChangeCode;
-import org.sf.feeling.sanguo.patch.util.CustomGeneral;
 import org.sf.feeling.sanguo.patch.util.CustomUnit;
 import org.sf.feeling.sanguo.patch.util.MapUtil;
 import org.sf.feeling.sanguo.patch.util.PinyinComparator;
@@ -147,15 +145,12 @@ public class CustomUnitPage extends SimpleTabPage
 			yesButton.setEnabled( true );
 			noButton.setEnabled( true );
 			bingyingCombo.setEnabled( true );
-			if ( faction != null && soldierCardImage != null && soldier != null )
+			if ( faction != null && soldier != null )
 			{
 				applyButton.setEnabled( true );
 			}
 			else
 				applyButton.setEnabled( false );
-
-			soldierCardImageCombo.setEnabled( !yesButton.getSelection( ) );
-			soldierCardButton.setEnabled( !yesButton.getSelection( ) );
 		}
 		else
 		{
@@ -278,27 +273,7 @@ public class CustomUnitPage extends SimpleTabPage
 			}
 		} );
 
-		WidgetUtil.getToolkit( ).createLabel( patchClient, "4.选择新兵种兵营等级：" );
-		bingyingCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
-				SWT.READ_ONLY );
-
-		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.widthHint = 180;
-		gd.horizontalSpan = 2;
-		bingyingCombo.setLayoutData( gd );
-		bingyingCombo.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent e )
-			{
-
-				checkEnableStatus( );
-			}
-		} );
-		bingyingCombo.setItems( new String[]{
-				"所有兵营", "2级以上兵营", "3级以上兵营", "4级以上兵营", "5级兵营"
-		} );
-
-		WidgetUtil.getToolkit( ).createLabel( patchClient, "5.新兵种是否为将军卫队：" );
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "4.新兵种是否为将军卫队：" );
 
 		Composite chArea = WidgetUtil.getToolkit( )
 				.createComposite( patchClient );
@@ -319,21 +294,13 @@ public class CustomUnitPage extends SimpleTabPage
 		gd = new GridData( );
 		gd.widthHint = 80;
 		yesButton.setLayoutData( gd );
-		yesButton.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent arg0 )
-			{
-				soldierCardImageCombo.setEnabled( !yesButton.getSelection( ) );
-				soldierCardButton.setEnabled( !yesButton.getSelection( ) );
-			}
-		} );
 
 		noButton = WidgetUtil.getToolkit( ).createButton( chArea,
 				"否",
 				SWT.RADIO );
 		noButton.setSelection( true );
 
-		WidgetUtil.getToolkit( ).createLabel( patchClient, "6.设置新兵种属性：" );
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "5.设置新兵种属性：" );
 		soldierButton = WidgetUtil.getToolkit( ).createButton( patchClient,
 				"设置（未设置）",
 				SWT.PUSH );
@@ -357,6 +324,26 @@ public class CustomUnitPage extends SimpleTabPage
 				}
 			}
 
+		} );
+
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "6.选择新兵种兵营等级（可选）：" );
+		bingyingCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
+				SWT.READ_ONLY );
+
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.widthHint = 180;
+		gd.horizontalSpan = 2;
+		bingyingCombo.setLayoutData( gd );
+		bingyingCombo.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+
+				checkEnableStatus( );
+			}
+		} );
+		bingyingCombo.setItems( new String[]{
+				"所有兵营", "2级以上兵营", "3级以上兵营", "4级以上兵营", "5级兵营"
 		} );
 
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "7.设置新兵种兵牌(可选)：" );
@@ -661,6 +648,16 @@ public class CustomUnitPage extends SimpleTabPage
 				customUnit.setFaction( (String) factionMap.getKeyList( )
 						.get( factionCombo.getSelectionIndex( ) ) );
 				customUnit.setGeneralUnit( yesButton.getSelection( ) );
+				customUnit.setBuildingLevel( bingyingCombo.getSelectionIndex( ) );
+				if ( bingyingCombo.getSelectionIndex( ) == -1
+						&& yesButton.getSelection( ) )
+				{
+					customUnit.setSpecialGeneralUnit( true );
+				}
+				else
+				{
+					customUnit.setSpecialGeneralUnit( false );
+				}
 				if ( soldierImage != null )
 					customUnit.setSoldierImage( soldierImage );
 				else
@@ -851,6 +848,8 @@ public class CustomUnitPage extends SimpleTabPage
 		soldierCardImageCombo.setText( "" );
 		soldierImageCombo.clearSelection( );
 		soldierImageCombo.setText( "" );
+		bingyingCombo.clearSelection( );
+		bingyingCombo.setText( "" );
 		if ( soldier != null )
 		{
 			soldier = null;
@@ -861,6 +860,8 @@ public class CustomUnitPage extends SimpleTabPage
 		soldierImage = null;
 		faction = null;
 		imageCanvas.clear( );
+		noButton.setSelection( true );
+		yesButton.setSelection( false );
 		checkEnableStatus( );
 	}
 }

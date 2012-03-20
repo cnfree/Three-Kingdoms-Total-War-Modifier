@@ -6,47 +6,43 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.graphics.ImageData;
 import org.sf.feeling.sanguo.patch.Patch;
 import org.sf.feeling.sanguo.patch.model.Unit;
-import org.sf.feeling.swt.win32.extension.graphics.GraphicsUtil;
 import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 
 public class CustomUnit
 {
 
+	private int buildingLevel;
+
 	private String description = null;
 
 	private String displayName;
 
-	private String unitFaction;
+	private boolean isGeneralUnit = true;
+
+	private boolean isSpecialGeneralUnit = true;
 
 	private String name;
 
 	private Unit soldier;
 
+	private ImageData soldierCardImage;
+
 	private String soldierDictionary;
 
 	private ImageData soldierImage;
-
-	private ImageData soldierCardImage;
-
+	
 	private String soldierType;
 
-	private boolean isGeneralUnit;
+	
+	private String unitFaction;
 
-	public boolean isGeneralUnit( )
-	{
-		return isGeneralUnit;
-	}
-
-	public void setGeneralUnit( boolean isGeneralUnit )
-	{
-		this.isGeneralUnit = isGeneralUnit;
-	}
-
+	
 	public void createCustomUtil( )
 	{
 		generalCustomSoldier( );
@@ -112,6 +108,12 @@ public class CustomUnit
 				unitFaction );
 		setSoldierDescription( soldierDictionary, displayName, description );
 		setSoldierImage( );
+		setSoldierBuilding( );
+	}
+
+	public int getBuildingLevel( )
+	{
+		return buildingLevel;
 	}
 
 	public String getDescription( )
@@ -122,6 +124,26 @@ public class CustomUnit
 	public String getFaction( )
 	{
 		return unitFaction;
+	}
+
+	public ImageData getSoldierCardImage( )
+	{
+		return soldierCardImage;
+	}
+
+	public boolean isGeneralUnit( )
+	{
+		return isGeneralUnit;
+	}
+
+	public boolean isSpecialGeneralUnit( )
+	{
+		return isSpecialGeneralUnit;
+	}
+
+	public void setBuildingLevel( int buildingLevel )
+	{
+		this.buildingLevel = buildingLevel;
 	}
 
 	public void setDescription( String description )
@@ -139,19 +161,108 @@ public class CustomUnit
 		this.unitFaction = faction;
 	}
 
-	public void setSoldier( Unit soldier )
+	public void setGeneralUnit( boolean isGeneralUnit )
 	{
-		this.soldier = soldier;
-	}
-
-	public void setSoldierImage( ImageData soldierImage )
-	{
-		this.soldierImage = soldierImage;
+		this.isGeneralUnit = isGeneralUnit;
 	}
 
 	public void setName( String name )
 	{
 		this.name = name;
+	}
+
+	public void setSoldier( Unit soldier )
+	{
+		this.soldier = soldier;
+	}
+
+	private void setSoldierBuilding( )
+	{
+		String[] buildings = null;
+		if ( "missile".equals( soldier.getUnitClass( ) )
+				|| "siege".equals( soldier.getCategory( ) ) )
+		{
+			buildings = new String[]{
+					"practice_field",
+					"archery_range",
+					"catapult_range",
+					"siege_engineer"
+			};
+		}
+		else if ( "infantry".equals( soldier.getCategory( ) )
+				|| "handler".equals( soldier.getCategory( ) ) )
+		{
+			buildings = new String[]{
+					"muster_field",
+					"militia_barracks",
+					"city_barracks",
+					"army_barracks",
+					"royal_barracks"
+			};
+		}
+		else if ( "cavalry".equals( soldier.getCategory( ) ) )
+		{
+			buildings = new String[]{
+					"stables",
+					"cavalry_barracks",
+					"hippodrome",
+					"circus_maximus"
+			};
+		}
+		else if ( "ship".equals( soldier.getCategory( ) ) )
+		{
+			buildings = new String[]{
+					"port", "shipwright", "dockyard"
+			};
+		}
+		else if ( "non_combatant".equals( soldier.getCategory( ) ) )
+		{
+			buildings = new String[]{
+					"governors_house",
+					"governors_villa",
+					"governors_palace",
+					"proconsuls_palace",
+					"imperial_palace"
+			};
+		}
+		if ( buildings != null )
+		{
+			try
+			{
+				if ( buildingLevel > 0 )
+				{
+					List list = new ArrayList( );
+					for ( int i = buildingLevel; i < buildings.length; i++ )
+					{
+						list.add( buildings[i] );
+					}
+					if ( list.size( ) > 0 )
+					{
+						UnitUtil.addUnitToBuildings( soldierType,
+								unitFaction,
+								(String[]) list.toArray( new String[0] ) );
+					}
+				}
+				else
+				{
+					if ( !isGeneralUnit || buildingLevel == 0 )
+					{
+						UnitUtil.addUnitToBuildings( soldierType,
+								unitFaction,
+								buildings );
+					}
+				}
+			}
+			catch ( IOException e )
+			{
+				e.printStackTrace( );
+			}
+		}
+	}
+
+	public void setSoldierCardImage( ImageData soldierCardImage )
+	{
+		this.soldierCardImage = soldierCardImage;
 	}
 
 	private void setSoldierDescription( String soldierDictionary,
@@ -166,12 +277,12 @@ public class CustomUnit
 					false );
 			out.println( );
 
-			String short_description = isGeneralUnit ? displayName + "麾下的精銳親兵。"
+			String short_description = isSpecialGeneralUnit ? displayName + "麾下的精銳親兵。"
 					: displayName;
 			String long_description = displayName + "麾下的精銳親兵。\\n\\n";
 			long_description += ( displayName + "的部下隨" + displayName + "征戰四方。\\n" );
 
-			if ( !isGeneralUnit )
+			if ( !isSpecialGeneralUnit )
 				long_description = displayName + "。\\n";
 
 			if ( description != null && description.length( ) > 0 )
@@ -229,25 +340,19 @@ public class CustomUnit
 			try
 			{
 				TgaLoader.saveImage( new FileOutputStream( bigFilePath ),
-						GraphicsUtil.resizeImage( soldierImage, 160, 210, true ) );
+						soldierImage.scaledTo( 160, 210 ) );
 
-				if ( !isGeneralUnit )
+				if ( !isSpecialGeneralUnit )
 				{
 					if ( soldierCardImage != null )
 					{
 						TgaLoader.saveImage( new FileOutputStream( smallFilePath ),
-								GraphicsUtil.resizeImage( soldierCardImage,
-										48,
-										64,
-										true ) );
+								soldierCardImage.scaledTo( 48, 64 ) );
 					}
 					else
 					{
 						TgaLoader.saveImage( new FileOutputStream( smallFilePath ),
-								GraphicsUtil.resizeImage( soldierImage,
-										48,
-										64,
-										true ) );
+								soldierImage.scaledTo( 48, 64 ) );
 					}
 				}
 			}
@@ -258,13 +363,13 @@ public class CustomUnit
 		}
 	}
 
-	public ImageData getSoldierCardImage( )
+	public void setSoldierImage( ImageData soldierImage )
 	{
-		return soldierCardImage;
+		this.soldierImage = soldierImage;
 	}
 
-	public void setSoldierCardImage( ImageData soldierCardImage )
+	public void setSpecialGeneralUnit( boolean isSpecialGeneralUnit )
 	{
-		this.soldierCardImage = soldierCardImage;
+		this.isSpecialGeneralUnit = isSpecialGeneralUnit;
 	}
 }
