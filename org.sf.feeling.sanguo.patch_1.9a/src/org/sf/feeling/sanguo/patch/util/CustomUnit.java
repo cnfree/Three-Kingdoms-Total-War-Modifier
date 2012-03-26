@@ -245,7 +245,7 @@ public class CustomUnit
 				}
 				else
 				{
-					if ( !isGeneralUnit || buildingLevel == 0 )
+					if ( !isGeneralUnit && buildingLevel == 0 )
 					{
 						UnitUtil.addUnitToBuildings( soldierType,
 								unitFaction,
