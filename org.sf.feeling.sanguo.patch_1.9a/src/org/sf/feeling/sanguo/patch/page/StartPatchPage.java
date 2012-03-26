@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -649,7 +650,7 @@ public class StartPatchPage extends SimpleTabPage
 				public void widgetSelected( SelectionEvent e )
 				{
 					if ( generalChangeCombo.isEnabled( )
-							&& generalChangeCombo.getSelectionIndex( ) != -1 )
+							&& generalChangeCombo.getText( ).trim( ).length( ) > 0 )
 					{
 						posXSpinner.setEnabled( true );
 						posYSpinner.setEnabled( true );
@@ -725,8 +726,10 @@ public class StartPatchPage extends SimpleTabPage
 							{
 								Point point = computeGeneralPosition( new Point( Integer.parseInt( model.getPosX( ) ),
 										Integer.parseInt( model.getPosY( ) ) ),
-										true,
-										true );
+										new Random( ).nextInt( 2 ) == 0 ? true
+												: false,
+										new Random( ).nextInt( 2 ) == 0 ? true
+												: false );
 								posXSpinner.setSelection( point.x );
 								posYSpinner.setSelection( point.y );
 							}
@@ -789,7 +792,9 @@ public class StartPatchPage extends SimpleTabPage
 					if ( !model.getPosX( ).equals( "" + point.x )
 							|| !model.getPosY( ).equals( "" + point.y ) )
 					{
-						point = computeGeneralPosition( point, true, true );
+						point = computeGeneralPosition( point,
+								new Random( ).nextInt( 2 ) == 0 ? true : false,
+								new Random( ).nextInt( 2 ) == 0 ? true : false );
 					}
 
 					UnitUtil.changeGeneral( generalCode, factionCode, ""
@@ -1468,9 +1473,9 @@ public class StartPatchPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 		{
 			generalChangeFactionCombo.setText( faction );
-			generalChangeFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
+		generalChangeFactionCombo.notifyListeners( SWT.Selection,
+				new Event( ) );
 
 		int index = generalChangeOutFactionCombo.getSelectionIndex( );
 		faction = generalChangeOutFactionCombo.getText( );
@@ -1483,15 +1488,13 @@ public class StartPatchPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 		{
 			generalChangeOutFactionCombo.setText( faction );
-			generalChangeOutFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
 		else if ( index == 0 )
 		{
 			generalChangeOutFactionCombo.select( 0 );
-			generalChangeOutFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
+		generalChangeOutFactionCombo.notifyListeners( SWT.Selection,
+				new Event( ) );
 
 		index = generalSwitchInFactionCombo.getSelectionIndex( );
 		faction = generalSwitchInFactionCombo.getText( );
@@ -1504,15 +1507,13 @@ public class StartPatchPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 		{
 			generalSwitchInFactionCombo.setText( faction );
-			generalSwitchInFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
 		else if ( index == 0 )
 		{
 			generalSwitchInFactionCombo.select( 0 );
-			generalSwitchInFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
+		generalSwitchInFactionCombo.notifyListeners( SWT.Selection,
+				new Event( ) );
 
 		index = generalSwitchOutFactionCombo.getSelectionIndex( );
 		faction = generalSwitchOutFactionCombo.getText( );
@@ -1525,15 +1526,13 @@ public class StartPatchPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 		{
 			generalSwitchOutFactionCombo.setText( faction );
-			generalSwitchOutFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
 		else if ( index == 0 )
 		{
 			generalSwitchOutFactionCombo.select( 0 );
-			generalSwitchOutFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
+		generalSwitchOutFactionCombo.notifyListeners( SWT.Selection,
+				new Event( ) );
 
 		index = ageFactionCombo.getSelectionIndex( );
 		faction = ageFactionCombo.getText( );
@@ -1546,13 +1545,12 @@ public class StartPatchPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 		{
 			ageFactionCombo.setText( faction );
-			ageFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
 		else if ( index == 0 )
 		{
 			ageFactionCombo.select( 0 );
-			ageFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
+		ageFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		index = generalIdentityFactionCombo.getSelectionIndex( );
 		faction = generalIdentityFactionCombo.getText( );
@@ -1565,27 +1563,25 @@ public class StartPatchPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 		{
 			generalIdentityFactionCombo.setText( faction );
-			generalIdentityFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
 		else if ( index == 0 )
 		{
 			generalIdentityFactionCombo.select( 0 );
-			generalIdentityFactionCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
+		generalIdentityFactionCombo.notifyListeners( SWT.Selection,
+				new Event( ) );
 
 		if ( generalIn != null && generalInCombo.indexOf( generalIn ) != -1 )
 		{
 			generalInCombo.setText( generalIn );
-			generalInCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
+		generalInCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		if ( generalOut != null && generalOutCombo.indexOf( generalOut ) != -1 )
 		{
 			generalOutCombo.setText( generalOut );
-			generalOutCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
+		generalOutCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		for ( int i = 0; i < generalMap.size( ); i++ )
 		{
@@ -1593,24 +1589,24 @@ public class StartPatchPage extends SimpleTabPage
 		}
 		if ( general != null && generalCombo.indexOf( general ) != -1 )
 		{
-			generalCombo.setText( general );
-			generalCombo.notifyListeners( SWT.Selection, new Event( ) );
+			generalCombo.setText( general );	
 		}
+		generalCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		if ( generalChange != null
 				&& generalChangeCombo.indexOf( generalChange ) != -1 )
 		{
 			generalChangeCombo.setText( generalChange );
-			generalChangeCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
+		generalChangeCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		if ( generalIdentity != null
 				&& generalIdentityChangeCombo.indexOf( generalIdentity ) != -1 )
 		{
 			generalIdentityChangeCombo.setText( generalIdentity );
-			generalIdentityChangeCombo.notifyListeners( SWT.Selection,
-					new Event( ) );
 		}
+		generalIdentityChangeCombo.notifyListeners( SWT.Selection,
+				new Event( ) );
 	}
 
 	private void removeComboItems( CCombo combo )
@@ -1641,11 +1637,6 @@ public class StartPatchPage extends SimpleTabPage
 		General model = (General) UnitUtil.getGeneralModels( )
 				.get( generalCode );
 
-		if ( UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
-		{
-			reComputeGeneralPosition( point, x, y, xory );
-		}
-		
 		Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
 
 		while ( iter.hasNext( ) )
@@ -1655,7 +1646,8 @@ public class StartPatchPage extends SimpleTabPage
 				continue;
 
 			if ( ( temp.getPosX( ).equals( Integer.toString( point.x ) ) && temp.getPosY( )
-					.equals( Integer.toString( point.y ) ) ) )
+					.equals( Integer.toString( point.y ) ) )
+					|| UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
 			{
 				return reComputeGeneralPosition( point, x, y, xory );
 			}
@@ -1667,13 +1659,21 @@ public class StartPatchPage extends SimpleTabPage
 	private Point reComputeGeneralPosition( Point point, boolean x, boolean y,
 			boolean xory )
 	{
-		if ( point.x == 189 )
+		if ( point.x >= 189 )
 		{
 			x = false;
 		}
-		if ( point.y == 179 )
+		else if ( point.x <= 0 )
+		{
+			x = true;
+		}
+		if ( point.y >= 179 )
 		{
 			y = false;
+		}
+		else if ( point.y <= 0 )
+		{
+			y = true;
 		}
 		if ( xory )
 		{

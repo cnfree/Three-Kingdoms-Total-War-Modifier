@@ -237,26 +237,29 @@ public class CustomGeneralPage extends SimpleTabPage
 
 		nameText.addModifyListener( nameListener );
 		nameText.addFocusListener( new FocusAdapter( ) {
+
 			public void focusLost( FocusEvent e )
 			{
-				if(idText.getText( ).trim( ).length( ) == 0){
+				if ( idText.getText( ).trim( ).length( ) == 0 )
+				{
 					HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat( );
 					defaultFormat.setCaseType( HanyuPinyinCaseType.LOWERCASE );
 					defaultFormat.setToneType( HanyuPinyinToneType.WITHOUT_TONE );
 					try
 					{
-						idText.setText(  PinyinHelper.toHanyuPinyinString( nameText.getText( ).trim( ),
+						idText.setText( PinyinHelper.toHanyuPinyinString( nameText.getText( )
+								.trim( ),
 								defaultFormat,
-								"" ));
+								"" ) );
 					}
 					catch ( BadHanyuPinyinOutputFormatCombination e1 )
 					{
-						e1.printStackTrace();
+						e1.printStackTrace( );
 					}
 				}
 			}
 		} );
-		
+
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );
@@ -369,8 +372,10 @@ public class CustomGeneralPage extends SimpleTabPage
 						{
 							Point point = computeGeneralPosition( new Point( Integer.parseInt( model.getPosX( ) ),
 									Integer.parseInt( model.getPosY( ) ) ),
-									true,
-									true );
+									new Random( ).nextInt( 2 ) == 0 ? true
+											: false,
+									new Random( ).nextInt( 2 ) == 0 ? true
+											: false );
 							posXSpinner.setSelection( point.x );
 							posYSpinner.setSelection( point.y );
 						}
@@ -1242,27 +1247,22 @@ public class CustomGeneralPage extends SimpleTabPage
 	private Point computeGeneralPosition( Point point, boolean x, boolean y,
 			boolean xory )
 	{
-
-		if ( UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
-		{
-			reComputeGeneralPosition( point, x, y, xory );
-		}
-		
 		Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
 
 		while ( iter.hasNext( ) )
 		{
 			General temp = (General) iter.next( );
 			if ( ( temp.getPosX( ).equals( Integer.toString( point.x ) ) && temp.getPosY( )
-					.equals( Integer.toString( point.y ) ) ))
+					.equals( Integer.toString( point.y ) ) )
+					|| UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
 			{
-				reComputeGeneralPosition( point, x, y, xory );
+				return reComputeGeneralPosition( point, x, y, xory );
 			}
 		}
 
 		return point;
 	}
-	
+
 	private Point reComputeGeneralPosition( Point point, boolean x, boolean y,
 			boolean xory )
 	{

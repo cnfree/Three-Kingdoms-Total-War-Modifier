@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
@@ -326,8 +327,10 @@ public class GeneralEditPage extends SimpleTabPage
 						{
 							Point point = computeGeneralPosition( new Point( Integer.parseInt( model.getPosX( ) ),
 									Integer.parseInt( model.getPosY( ) ) ),
-									true,
-									true );
+									new Random( ).nextInt( 2 ) == 0 ? true
+											: false,
+									new Random( ).nextInt( 2 ) == 0 ? true
+											: false );
 							posXSpinner.setSelection( point.x );
 							posYSpinner.setSelection( point.y );
 						}
@@ -1092,101 +1095,104 @@ public class GeneralEditPage extends SimpleTabPage
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				String general = (String) generalMap.getKeyList( )
-						.get( generalCombo.getSelectionIndex( ) );
-				idText.setText( general );
-
-				String name = generalCombo.getText( );
-				if ( name.indexOf( "（" ) != -1 )
-					name = name.substring( 0, name.indexOf( "（" ) );
-				nameText.setText( name );
-
-				GeneralEditPage.this.general = general;
-
-				General model = (General) generalModelMap.get( general );
-
-				try
+				if ( generalCombo.getSelectionIndex( ) > -1 )
 				{
-					posXSpinner.setSelection( Integer.parseInt( model.getPosX( ) ) );
-					posYSpinner.setSelection( Integer.parseInt( model.getPosY( ) ) );
-				}
-				catch ( NumberFormatException e1 )
-				{
-					e1.printStackTrace( );
-				}
+					String general = (String) generalMap.getKeyList( )
+							.get( generalCombo.getSelectionIndex( ) );
+					idText.setText( general );
 
-				GeneralEditPage.this.skills = GeneralParser.getGeneralSkills( general );
-				soldier = UnitParser.getUnit( UnitUtil.getGeneralUnitType( general ) );
-				bigImageCombo.setText( generalCombo.getText( ) );
-				smallImageCombo.setText( generalCombo.getText( ) );
-				setSmallImage( general );
-				setBigImage( general );
-				imageCanvas.setImageData( null );
-				imageCanvas.clear( );
-				String generalUnit = UnitUtil.getGeneralUnitType( general );
-				if ( generalUnitMap.containsKey( generalUnit ) )
-				{
-					soldierImageCombo.setText( ChangeCode.toLong( (String) generalUnitMap.get( generalUnit ) ) );
-					soldierImageCombo.setEnabled( true );
-					soldierImageButton.setEnabled( true );
-					soldierButton.setText( "设置" );
-					soldierText.setText( "设置武将卫队：", false, false );
-				}
-				else
-				{
-					soldierButton.setText( "创建将军卫队" );
-					soldierText.setText( "<form><p><span color=\"note\">*</span>设置武将卫队：</p></form>",
-							true,
-							false );
-					soldierText.setColor( "note", Display.getDefault( )
-							.getSystemColor( SWT.COLOR_RED ) );
-					soldierImageCombo.clearSelection( );
-					soldierImageCombo.setText( "" );
-					soldierImageCombo.setEnabled( false );
-					soldierImageButton.setEnabled( false );
-					soldierImage = null;
-					soldier = null;
-				}
-				generalModelCombo.deselectAll( );
-				battleModelCombo.deselectAll( );
+					String name = generalCombo.getText( );
+					if ( name.indexOf( "（" ) != -1 )
+						name = name.substring( 0, name.indexOf( "（" ) );
+					nameText.setText( name );
 
-				if ( model != null )
-				{
-					String strat_model = model.getStrat_model( );
-					String battle_model = model.getBattle_model( );
-					if ( strat_model != null )
+					GeneralEditPage.this.general = general;
+
+					General model = (General) generalModelMap.get( general );
+
+					try
 					{
-						int index = officerMap.getKeyList( )
-								.indexOf( strat_model );
-						if ( index != -1 )
+						posXSpinner.setSelection( Integer.parseInt( model.getPosX( ) ) );
+						posYSpinner.setSelection( Integer.parseInt( model.getPosY( ) ) );
+					}
+					catch ( NumberFormatException e1 )
+					{
+						e1.printStackTrace( );
+					}
+
+					GeneralEditPage.this.skills = GeneralParser.getGeneralSkills( general );
+					soldier = UnitParser.getUnit( UnitUtil.getGeneralUnitType( general ) );
+					bigImageCombo.setText( generalCombo.getText( ) );
+					smallImageCombo.setText( generalCombo.getText( ) );
+					setSmallImage( general );
+					setBigImage( general );
+					imageCanvas.setImageData( null );
+					imageCanvas.clear( );
+					String generalUnit = UnitUtil.getGeneralUnitType( general );
+					if ( generalUnitMap.containsKey( generalUnit ) )
+					{
+						soldierImageCombo.setText( ChangeCode.toLong( (String) generalUnitMap.get( generalUnit ) ) );
+						soldierImageCombo.setEnabled( true );
+						soldierImageButton.setEnabled( true );
+						soldierButton.setText( "设置" );
+						soldierText.setText( "设置武将卫队：", false, false );
+					}
+					else
+					{
+						soldierButton.setText( "创建将军卫队" );
+						soldierText.setText( "<form><p><span color=\"note\">*</span>设置武将卫队：</p></form>",
+								true,
+								false );
+						soldierText.setColor( "note", Display.getDefault( )
+								.getSystemColor( SWT.COLOR_RED ) );
+						soldierImageCombo.clearSelection( );
+						soldierImageCombo.setText( "" );
+						soldierImageCombo.setEnabled( false );
+						soldierImageButton.setEnabled( false );
+						soldierImage = null;
+						soldier = null;
+					}
+					generalModelCombo.deselectAll( );
+					battleModelCombo.deselectAll( );
+
+					if ( model != null )
+					{
+						String strat_model = model.getStrat_model( );
+						String battle_model = model.getBattle_model( );
+						if ( strat_model != null )
 						{
-							generalModelCombo.select( index );
+							int index = officerMap.getKeyList( )
+									.indexOf( strat_model );
+							if ( index != -1 )
+							{
+								generalModelCombo.select( index );
+							}
+							else
+							{
+								generalModelCombo.deselectAll( );
+							}
 						}
-						else
+						if ( battle_model != null )
 						{
-							generalModelCombo.deselectAll( );
+							int index = officerMap.getKeyList( )
+									.indexOf( battle_model );
+							if ( index != -1 )
+							{
+								battleModelCombo.select( index );
+							}
+							else
+							{
+								battleModelCombo.deselectAll( );
+							}
 						}
 					}
-					if ( battle_model != null )
-					{
-						int index = officerMap.getKeyList( )
-								.indexOf( battle_model );
-						if ( index != -1 )
-						{
-							battleModelCombo.select( index );
-						}
-						else
-						{
-							battleModelCombo.deselectAll( );
-						}
-					}
-				}
 
-				baowus = BaowuParser.getGeneralBaowus( general );
-				jueweis = GeneralParser.getGeneralJueweis( (String) skills.getKeyList( )
-						.get( 2 ) );
-				generalDesc.setText( "" );
-				checkEnableStatus( );
+					baowus = BaowuParser.getGeneralBaowus( general );
+					jueweis = GeneralParser.getGeneralJueweis( (String) skills.getKeyList( )
+							.get( 2 ) );
+					generalDesc.setText( "" );
+					checkEnableStatus( );
+				}
 			}
 		} );
 
@@ -1271,8 +1277,8 @@ public class GeneralEditPage extends SimpleTabPage
 		if ( index != -1 )
 		{
 			generalCombo.select( index );
-			generalCombo.notifyListeners( SWT.Selection, new Event( ) );
 		}
+		generalCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		General model = (General) generalModelMap.get( general );
 		for ( int i = 0; i < officerMap.size( ); i++ )
@@ -1326,13 +1332,7 @@ public class GeneralEditPage extends SimpleTabPage
 				.get( generalMap.getValueList( )
 						.indexOf( generalCombo.getText( ) ) );
 		General model = (General) UnitUtil.getGeneralModels( ).get( general );
-		
-		if ( UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
-		{
-			reComputeGeneralPosition( point, x, y, xory );
-		}
-		
-		
+
 		Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
 
 		while ( iter.hasNext( ) )
@@ -1342,15 +1342,16 @@ public class GeneralEditPage extends SimpleTabPage
 				continue;
 
 			if ( ( temp.getPosX( ).equals( Integer.toString( point.x ) ) && temp.getPosY( )
-					.equals( Integer.toString( point.y ) ) ))
+					.equals( Integer.toString( point.y ) ) )
+					|| UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
 			{
-				reComputeGeneralPosition( point, x, y, xory );
+				return reComputeGeneralPosition( point, x, y, xory );
 			}
 		}
 
 		return point;
 	}
-	
+
 	private Point reComputeGeneralPosition( Point point, boolean x, boolean y,
 			boolean xory )
 	{

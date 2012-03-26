@@ -135,11 +135,10 @@ public class MapUtil
 				{
 					RGB rgb = mapGround.palette.getRGB( mapGround.getPixel( x,
 							y ) );
+					int posX = ( x - 1 ) / 2;
+					int posY = 179 - y / 2;
 					if ( exclueds.contains( rgb ) )
 					{
-						int posX = ( x - 1 ) / 2;
-						int posY = 179 - y / 2;
-
 						unAvailableGeneralPoints.add( new Point( posX, posY ) );
 					}
 				}
@@ -964,7 +963,7 @@ public class MapUtil
 		{
 			String unit = (String) unitMap.getKeyList( ).get( i );
 			Object obj = unitMap.get( unit );
-			if ( obj == null )
+			if(obj == null)
 				continue;
 			if ( generalUnitNames.contains( obj ) )
 			{
