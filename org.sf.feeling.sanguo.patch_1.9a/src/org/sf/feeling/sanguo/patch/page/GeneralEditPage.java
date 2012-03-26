@@ -1323,8 +1323,16 @@ public class GeneralEditPage extends SimpleTabPage
 			boolean xory )
 	{
 		String general = (String) generalMap.getKeyList( )
-				.get( generalCombo.getSelectionIndex( ) );
+				.get( generalMap.getValueList( )
+						.indexOf( generalCombo.getText( ) ) );
 		General model = (General) UnitUtil.getGeneralModels( ).get( general );
+		
+		if ( UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
+		{
+			reComputeGeneralPosition( point, x, y, xory );
+		}
+		
+		
 		Iterator iter = UnitUtil.getGeneralModels( ).values( ).iterator( );
 
 		while ( iter.hasNext( ) )
@@ -1334,43 +1342,48 @@ public class GeneralEditPage extends SimpleTabPage
 				continue;
 
 			if ( ( temp.getPosX( ).equals( Integer.toString( point.x ) ) && temp.getPosY( )
-					.equals( Integer.toString( point.y ) ) )
-					|| UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
+					.equals( Integer.toString( point.y ) ) ))
 			{
-				if ( point.x == 189 )
-				{
-					x = false;
-				}
-				if ( point.y == 179 )
-				{
-					y = false;
-				}
-				if ( xory )
-				{
-					if ( x )
-					{
-						point.x = point.x + 1;
-					}
-					else
-					{
-						point.x = point.x - 1;
-					}
-				}
-				else
-				{
-					if ( y )
-					{
-						point.y = point.y + 1;
-					}
-					else
-					{
-						point.y = point.y - 1;
-					}
-				}
-				return computeGeneralPosition( point, x, y, !xory );
+				reComputeGeneralPosition( point, x, y, xory );
 			}
 		}
 
 		return point;
+	}
+	
+	private Point reComputeGeneralPosition( Point point, boolean x, boolean y,
+			boolean xory )
+	{
+		if ( point.x == 189 )
+		{
+			x = false;
+		}
+		if ( point.y == 179 )
+		{
+			y = false;
+		}
+		if ( xory )
+		{
+			if ( x )
+			{
+				point.x = point.x + 2;
+			}
+			else
+			{
+				point.x = point.x - 2;
+			}
+		}
+		else
+		{
+			if ( y )
+			{
+				point.y = point.y + 2;
+			}
+			else
+			{
+				point.y = point.y - 2;
+			}
+		}
+		return computeGeneralPosition( point, x, y, !xory );
 	}
 }
