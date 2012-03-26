@@ -7,54 +7,35 @@ import java.util.List;
 public class Unit
 {
 
+	private String animal;
 	private List attributes = new ArrayList( );
 	private String category;
-	private String mount;
-	private String animal;
-	private String engine;
-
 	private int chargeDist;
-
 	private String[] cost = new String[6];
-
 	private String dictionary;
-
+	private String engine;
+	private List factions = new ArrayList( );
+	private List formation = new ArrayList( );
 	private int[] ground = new int[4];
 	private int[] health = new int[2];
 	private int heat;
 	private String[] mental = new String[3];
+	private String mount;
 	private List mountEffect = new ArrayList( );
-	private String[] primary = new String[11];
+	private List officers = new ArrayList( );
+	private String[] primary = new String[11];	
 	private String[] primaryArmour = new String[4];
 	private List primaryAttr = new ArrayList( );
 	private String[] second = new String[11];
+	private String[] secondArmour = new String[3];
 	private List secondAttr = new ArrayList( );
 	private String[] soldier = new String[4];
-	private List formation = new ArrayList( );
-	private List factions = new ArrayList( );
-	private String unitClass;
-	private List officers = new ArrayList( );
 	private String type;
-
-	public boolean hasPrimaryWeapon( )
-	{
-		if ( primary != null && primary.length > 5 && !"no".equals( primary[5] ) )
-			return true;
-		return false;
-	}
-
-	public boolean hasSecondWeapon( )
-	{
-		if ( second != null && second.length > 5 && !"no".equals( second[5] ) )
-			return true;
-		return false;
-	}
-
+	private String unitClass;
 	public String getAnimal( )
 	{
 		return animal;
 	}
-
 	public List getAttributes( )
 	{
 		return attributes;
@@ -150,6 +131,11 @@ public class Unit
 		return second;
 	}
 
+	public String[] getSecondArmour( )
+	{
+		return secondArmour;
+	}
+
 	public List getSecondAttr( )
 	{
 		return secondAttr;
@@ -160,14 +146,28 @@ public class Unit
 		return soldier;
 	}
 
+	public String getType( )
+	{
+		return type;
+	}
+
 	public String getUnitClass( )
 	{
 		return unitClass;
 	}
 
-	public String getType( )
+	public boolean hasPrimaryWeapon( )
 	{
-		return type;
+		if ( primary != null && primary.length > 5 && !"no".equals( primary[5] ) )
+			return true;
+		return false;
+	}
+
+	public boolean hasSecondWeapon( )
+	{
+		if ( second != null && second.length > 5 && !"no".equals( second[5] ) )
+			return true;
+		return false;
 	}
 
 	public void setAnimal( String animal )
@@ -270,6 +270,11 @@ public class Unit
 		this.second = second;
 	}
 
+	public void setSecondArmour( String[] secondArmour )
+	{
+		this.secondArmour = secondArmour;
+	}
+
 	public void setSecondAttr( List secondAttr )
 	{
 		this.secondAttr = secondAttr;
@@ -280,13 +285,13 @@ public class Unit
 		this.soldier = soldier;
 	}
 
-	public void setUnitClass( String unitClass )
-	{
-		this.unitClass = unitClass;
-	}
-
 	public void setType( String type )
 	{
 		this.type = type;
+	}
+
+	public void setUnitClass( String unitClass )
+	{
+		this.unitClass = unitClass;
 	}
 }

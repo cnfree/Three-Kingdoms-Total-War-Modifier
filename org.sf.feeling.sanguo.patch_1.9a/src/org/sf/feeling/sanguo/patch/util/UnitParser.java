@@ -33,6 +33,7 @@ public class UnitParser
 	private static final String PATTERN_SECOND = "^\\s*(stat_sec)(\\s+)";
 	private static final String PATTERN_SECOND_ATTR = "^\\s*(stat_sec_attr)(\\s+)";
 	private static final String PATTERN_PRIMARY_ARMOUR = "^\\s*(stat_pri_armour)(\\s+)";
+	private static final String PATTERN_SECOND_ARMOUR = "^\\s*(stat_sec_armour)(\\s+)";
 	private static final String PATTERN_HEAT = "^\\s*(stat_heat)(\\s+)";
 	private static final String PATTERN_GROUND = "^\\s*(stat_ground)(\\s+)";
 	private static final String PATTERN_MENTAL = "^\\s*(stat_mental)(\\s+)";
@@ -220,6 +221,14 @@ public class UnitParser
 							continue;
 						}
 
+						pattern = Pattern.compile( PATTERN_SECOND_ARMOUR );
+						matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							getSoldierSecondArmour( soldier, line );
+							continue;
+						}
+
 						pattern = Pattern.compile( PATTERN_HEAT );
 						matcher = pattern.matcher( line );
 						if ( matcher.find( ) )
@@ -354,6 +363,18 @@ public class UnitParser
 		{
 			if ( infos.length > i )
 				soldier.getPrimaryArmour( )[i] = infos[i].trim( );
+		}
+	}
+
+	private static void getSoldierSecondArmour( Unit soldier, String line )
+	{
+		String soldierInfo = line.trim( ).split( ";" )[0].substring( "stat_sec_armour".length( ) )
+				.trim( );
+		String[] infos = soldierInfo.split( "," );
+		for ( int i = 0; i < 3; i++ )
+		{
+			if ( infos.length > i )
+				soldier.getSecondArmour( )[i] = infos[i].trim( );
 		}
 	}
 
@@ -729,6 +750,14 @@ public class UnitParser
 							continue;
 						}
 
+						pattern = Pattern.compile( PATTERN_SECOND_ARMOUR );
+						matcher = pattern.matcher( line );
+						if ( matcher.find( ) )
+						{
+							setSoldierSecondArmour( printer, soldier, line );
+							continue;
+						}
+
 						pattern = Pattern.compile( PATTERN_HEAT );
 						matcher = pattern.matcher( line );
 						if ( matcher.find( ) )
@@ -1061,6 +1090,21 @@ public class UnitParser
 					+ armours[2]
 					+ ", "
 					+ armours[3] );
+			printer.println( buffer );
+		}
+		else
+			printer.println( line );
+	}
+
+	private static void setSoldierSecondArmour( PrintWriter printer,
+			Unit soldier, String line )
+	{
+		String[] armours = soldier.getSecondArmour( );
+		if ( armours != null && armours.length == 3 )
+		{
+			StringBuffer buffer = new StringBuffer( );
+			buffer.append( "stat_sec_armour  " );
+			buffer.append( armours[0] + ", " + armours[1] + ", " + armours[2] );
 			printer.println( buffer );
 		}
 		else

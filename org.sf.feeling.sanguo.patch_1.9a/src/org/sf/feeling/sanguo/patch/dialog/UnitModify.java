@@ -1270,20 +1270,38 @@ public class UnitModify
 					}
 				}
 
-				String[] armour = soldier.getPrimaryArmour( );
-				if ( armour != null && armour.length == 4 )
+				if ( shieldCombo.isEnabled( ) )
 				{
-					if ( armourCombo.indexOf( armourCombo.getText( ) ) > 0 )
+					String[] armour = soldier.getPrimaryArmour( );
+					if ( armour != null && armour.length == 4 )
 					{
-						armour[0] = armourCombo.getItem( armourCombo.indexOf( armourCombo.getText( ) ) );
+						if ( armourCombo.indexOf( armourCombo.getText( ) ) > 0 )
+						{
+							armour[0] = armourCombo.getItem( armourCombo.indexOf( armourCombo.getText( ) ) );
+						}
+						if ( skillCombo.indexOf( skillCombo.getText( ) ) > 0 )
+						{
+							armour[1] = skillCombo.getItem( skillCombo.indexOf( skillCombo.getText( ) ) );
+						}
+						if ( shieldCombo.indexOf( shieldCombo.getText( ) ) > 0 )
+						{
+							armour[2] = shieldCombo.getItem( shieldCombo.indexOf( shieldCombo.getText( ) ) );
+						}
 					}
-					if ( skillCombo.indexOf( skillCombo.getText( ) ) > 0 )
+				}
+				else
+				{
+					String[] armour = soldier.getSecondArmour( );
+					if ( armour != null && armour.length == 3 )
 					{
-						armour[1] = skillCombo.getItem( skillCombo.indexOf( skillCombo.getText( ) ) );
-					}
-					if ( shieldCombo.indexOf( shieldCombo.getText( ) ) > 0 )
-					{
-						armour[2] = shieldCombo.getItem( shieldCombo.indexOf( shieldCombo.getText( ) ) );
+						if ( armourCombo.indexOf( armourCombo.getText( ) ) > 0 )
+						{
+							armour[0] = armourCombo.getItem( armourCombo.indexOf( armourCombo.getText( ) ) );
+						}
+						if ( skillCombo.indexOf( skillCombo.getText( ) ) > 0 )
+						{
+							armour[1] = skillCombo.getItem( skillCombo.indexOf( skillCombo.getText( ) ) );
+						}
 					}
 				}
 				String[] mental = soldier.getMental( );
@@ -1722,18 +1740,41 @@ public class UnitModify
 
 		initSoliderPriAndSec( soldier );
 
-		String[] armour = soldier.getPrimaryArmour( );
-		armourCombo.setText( "" );
-		skillCombo.setText( "" );
-		shieldCombo.setText( "" );
-		if ( armour != null && armour.length == 4 )
+		String mount = soldier.getMount( );
+		if ( mount != null
+				&& mount.toLowerCase( ).indexOf( "horse" ) == -1
+				&& mount.toLowerCase( ).indexOf( "ma" ) == -1
+				&& mount.toLowerCase( ).indexOf( "camel" ) == -1 )
 		{
-			if ( armour[0] != null )
-				armourCombo.setText( armour[0] );
-			if ( armour[1] != null )
-				skillCombo.setText( armour[1] );
-			if ( armour[2] != null )
-				shieldCombo.setText( armour[2] );
+			String[] armour = soldier.getSecondArmour( );
+			armourCombo.setText( "" );
+			skillCombo.setText( "" );
+			shieldCombo.setText( "" );
+			if ( armour != null && armour.length == 3 )
+			{
+				if ( armour[0] != null )
+					armourCombo.setText( armour[0] );
+				if ( armour[1] != null )
+					skillCombo.setText( armour[1] );
+			}
+			shieldCombo.setEnabled( false );
+		}
+		else
+		{
+			String[] armour = soldier.getPrimaryArmour( );
+			armourCombo.setText( "" );
+			skillCombo.setText( "" );
+			shieldCombo.setText( "" );
+			if ( armour != null && armour.length == 4 )
+			{
+				if ( armour[0] != null )
+					armourCombo.setText( armour[0] );
+				if ( armour[1] != null )
+					skillCombo.setText( armour[1] );
+				if ( armour[2] != null )
+					shieldCombo.setText( armour[2] );
+			}
+			shieldCombo.setEnabled( true );
 		}
 		String[] mental = soldier.getMental( );
 		moraleCombo.setText( "" );
@@ -1885,7 +1926,6 @@ public class UnitModify
 		}
 
 		mountCombo.setText( "" );
-		String mount = soldier.getMount( );
 		if ( mount != null )
 		{
 			String mountModel = (String) UnitUtil.getMountTypeToModelMap( )
@@ -1898,7 +1938,8 @@ public class UnitModify
 
 		if ( mount != null
 				&& mount.toLowerCase( ).indexOf( "horse" ) == -1
-				&& mount.toLowerCase( ).indexOf( "ma" ) == -1 )
+				&& mount.toLowerCase( ).indexOf( "ma" ) == -1
+				&& mount.toLowerCase( ).indexOf( "camel" ) == -1 )
 		{
 			officer1Combo.setEnabled( false );
 			officer2Combo.setEnabled( false );
