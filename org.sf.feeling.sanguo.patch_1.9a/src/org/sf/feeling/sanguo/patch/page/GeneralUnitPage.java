@@ -67,14 +67,6 @@ public class GeneralUnitPage extends SimpleTabPage
 		layout.topMargin = 15;
 		layout.verticalSpacing = 20;
 		container.getBody( ).setLayout( layout );
-		container.addDisposeListener( new DisposeListener( ) {
-
-			public void widgetDisposed( DisposeEvent e )
-			{
-				FileUtil.restoreFile( FileConstants.unitFile, "patch.tmp" );
-			}
-
-		} );
 		createTitle( );
 		createPatchArea( );
 
@@ -144,7 +136,7 @@ public class GeneralUnitPage extends SimpleTabPage
 		WidgetUtil.getToolkit( ).createLabel( patchClient, "4.收买前的准备工作：" );
 
 		final Button readyApply = WidgetUtil.getToolkit( )
-				.createButton( patchClient, "应用(收买前请勿切换到修改器其它页面)", SWT.PUSH );
+				.createButton( patchClient, "应用", SWT.PUSH );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 2;
 		readyApply.setLayoutData( gd );
@@ -287,8 +279,10 @@ public class GeneralUnitPage extends SimpleTabPage
 
 			public void widgetSelected( SelectionEvent e )
 			{
-				super.widgetSelected( e );
+				restoreApply.setEnabled( false );
+				BakUtil.restoreCurrectVersionBakFile( );
 				refreshPage( );
+				restoreApply.setEnabled( true );
 			}
 		} );
 		patchSection.setClient( patchClient );
@@ -343,10 +337,4 @@ public class GeneralUnitPage extends SimpleTabPage
 		if ( factionMap.containsValue( faction ) )
 			factionCombo.setText( faction );
 	}
-
-	public void deActivate( )
-	{
-		FileUtil.restoreFile( FileConstants.unitFile, "patch.tmp" );
-	}
-
 }
