@@ -127,7 +127,9 @@ public class CustomUnitPage extends SimpleTabPage
 		createPatchArea( );
 
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
-				"注意：只有步兵兵营等级最高为5级，其他兵种兵营等级最高为4级。" );
+				"<form><p>注意：<br/>1、只有步兵兵营等级最高为5级，其他兵种兵营等级最高为4级。<br/>2、若新兵种为将军卫队并设置了兵营等级， 则其效果类似于点将台，会刷出新的武将，请慎重选择。</p></form>",
+				true,
+				true );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
 		data.maxWidth = 600;
 		noteText.setLayoutData( data );
