@@ -147,7 +147,7 @@ public class UnitPatchPage extends SimpleTabPage
 					Unit soldier = UnitParser.getUnit( soldierType );
 					try
 					{
-						if ( !soldier.getFactions( ).contains( factionCode ) )
+						if ( !soldier.getFactions( ).contains( factionCode.toLowerCase() ) )
 						{
 							UnitUtil.modifyUnitFile( factionCode,
 									soldier.getType( ) );

@@ -380,7 +380,7 @@ public class UnitUtil
 	{
 		Unit unit = UnitParser.getUnit( soldierType );
 		List factions = unit.getFactions( );
-		if ( !factions.contains( factionCode ) )
+		if ( !factions.contains( factionCode.toLowerCase( ) ) )
 			factions.add( factionCode );
 		UnitParser.saveSoldier( unit );
 	}

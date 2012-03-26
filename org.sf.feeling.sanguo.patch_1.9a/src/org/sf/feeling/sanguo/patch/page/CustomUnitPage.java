@@ -125,13 +125,13 @@ public class CustomUnitPage extends SimpleTabPage
 
 		createTitle( );
 		createPatchArea( );
-		
+
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
 				"注意：只有步兵兵营等级最高为5级，其他兵种兵营等级最高为4级。" );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
 		data.maxWidth = 600;
 		noteText.setLayoutData( data );
-		
+
 		initPage( );
 	}
 
@@ -656,7 +656,10 @@ public class CustomUnitPage extends SimpleTabPage
 				customUnit.setFaction( (String) factionMap.getKeyList( )
 						.get( factionCombo.getSelectionIndex( ) ) );
 				customUnit.setGeneralUnit( yesButton.getSelection( ) );
-				customUnit.setBuildingLevel( bingyingCombo.getSelectionIndex( ) );
+				if ( bingyingCombo.getSelectionIndex( ) >= 0 )
+				{
+					customUnit.setBuildingLevel( bingyingCombo.getSelectionIndex( ) );
+				}
 				if ( bingyingCombo.getSelectionIndex( ) == -1
 						&& yesButton.getSelection( ) )
 				{

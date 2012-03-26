@@ -17,7 +17,7 @@ import org.sf.feeling.swt.win32.extension.graphics.TgaLoader;
 public class CustomUnit
 {
 
-	private int buildingLevel;
+	private int buildingLevel = -1;
 
 	private String description = null;
 
@@ -36,13 +36,11 @@ public class CustomUnit
 	private String soldierDictionary;
 
 	private ImageData soldierImage;
-	
+
 	private String soldierType;
 
-	
 	private String unitFaction;
 
-	
 	public void createCustomUtil( )
 	{
 		generalCustomSoldier( );
@@ -245,7 +243,8 @@ public class CustomUnit
 				}
 				else
 				{
-					if ( !isGeneralUnit && buildingLevel == 0 )
+					if ( ( !isGeneralUnit && buildingLevel == -1 )
+							|| buildingLevel == 0 )
 					{
 						UnitUtil.addUnitToBuildings( soldierType,
 								unitFaction,
@@ -277,8 +276,8 @@ public class CustomUnit
 					false );
 			out.println( );
 
-			String short_description = isSpecialGeneralUnit ? displayName + "麾下的精銳親兵。"
-					: displayName;
+			String short_description = isSpecialGeneralUnit ? displayName
+					+ "麾下的精銳親兵。" : displayName;
 			String long_description = displayName + "麾下的精銳親兵。\\n\\n";
 			long_description += ( displayName + "的部下隨" + displayName + "征戰四方。\\n" );
 

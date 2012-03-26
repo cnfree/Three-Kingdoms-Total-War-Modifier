@@ -6,6 +6,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
 import org.eclipse.jface.dialogs.BaseDialog;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
@@ -104,6 +110,29 @@ public class CustomGeneralUnitDialog extends BaseDialog
 
 		nameText.addModifyListener( nameListener );
 
+		nameText.addFocusListener( new FocusAdapter( ) {
+
+			public void focusLost( FocusEvent e )
+			{
+				if ( idText.getText( ).trim( ).length( ) == 0 )
+				{
+					HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat( );
+					defaultFormat.setCaseType( HanyuPinyinCaseType.LOWERCASE );
+					defaultFormat.setToneType( HanyuPinyinToneType.WITHOUT_TONE );
+					try
+					{
+						idText.setText( PinyinHelper.toHanyuPinyinString( nameText.getText( )
+								.trim( ),
+								defaultFormat,
+								"" ) );
+					}
+					catch ( BadHanyuPinyinOutputFormatCombination e1 )
+					{
+						e1.printStackTrace( );
+					}
+				}
+			}
+		} );
 		imageCanvas = WidgetUtil.getToolkit( ).createImageCanvas( patchClient,
 				SWT.NONE );
 		gd = new GridData( GridData.FILL_VERTICAL );
