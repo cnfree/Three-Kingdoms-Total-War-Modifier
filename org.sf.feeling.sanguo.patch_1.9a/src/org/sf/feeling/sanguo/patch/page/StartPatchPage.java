@@ -92,6 +92,8 @@ public class StartPatchPage extends SimpleTabPage
 	private Button changeIdentityApply;
 	private CCombo identityCombo;
 	private Button zouTianXiaApply;
+	private CCombo generalAgeFactionCombo;
+	private Button generalAgeApply;
 
 	public void buildUI( Composite parent )
 	{
@@ -775,7 +777,8 @@ public class StartPatchPage extends SimpleTabPage
 							.get( generalMap.getValueList( )
 									.indexOf( generalChangeCombo.getText( ) ) );
 					String factionCode = (String) factionMap.getKeyList( )
-							.get( factionMap.getValueList( ).indexOf( generalChangeFactionCombo.getText( ) ) );
+							.get( factionMap.getValueList( )
+									.indexOf( generalChangeFactionCombo.getText( ) ) );
 					General model = (General) UnitUtil.getGeneralModels( )
 							.get( generalCode );
 
@@ -886,8 +889,6 @@ public class StartPatchPage extends SimpleTabPage
 					if ( generalIdentityFactionCombo.getSelectionIndex( ) == 0 )
 					{
 						String text = generalIdentityChangeCombo.getText( );
-						generalIdentityChangeCombo.removeAll( );
-						nonRelativeGeneralList = UnitUtil.getNonRelativeGenerals( );
 						generalIdentityChangeCombo.removeAll( );
 
 						for ( int i = 0; i < generalMap.size( ); i++ )
@@ -1031,11 +1032,62 @@ public class StartPatchPage extends SimpleTabPage
 		{
 			final Button generalAgeBtn = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "武将年龄设置", SWT.CHECK );
+
+			generalAgeFactionCombo = WidgetUtil.getToolkit( )
+					.createCCombo( patchClient, SWT.READ_ONLY );
+			GridData gd = new GridData( );
+			gd.widthHint = 80;
+			generalAgeFactionCombo.setLayoutData( gd );
+			generalAgeFactionCombo.setEnabled( false );
+			generalAgeFactionCombo.addSelectionListener( new SelectionAdapter( ) {
+
+				public void widgetSelected( SelectionEvent e )
+				{
+					if ( generalAgeFactionCombo.getSelectionIndex( ) == 0 )
+					{
+						String text = generalIdentityChangeCombo.getText( );
+						generalCombo.removeAll( );
+
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+							generalCombo.add( generalName );
+							if ( generalName.equals( text ) )
+								generalCombo.setText( text );
+						}
+					}
+					else if ( generalAgeFactionCombo.getSelectionIndex( ) > 0 )
+					{
+						String text = generalCombo.getText( );
+						generalCombo.removeAll( );
+						String faction = (String) factionMap.getKeyList( )
+								.get( generalAgeFactionCombo.getSelectionIndex( ) - 1 );
+						SortMap modelMap = UnitUtil.getGeneralModels( );
+						for ( int i = 0; i < generalMap.size( ); i++ )
+						{
+							String general = (String) generalMap.getKeyList( )
+									.get( i );
+							General model = (General) modelMap.get( general );
+							if ( faction.equals( model.getFaction( ).trim( ) ) )
+							{
+								String generalName = ChangeCode.toLong( (String) generalMap.get( i ) );
+								generalCombo.add( generalName );
+								if ( generalName.equals( text ) )
+									generalCombo.setText( text );
+							}
+						}
+					}
+					generalCombo.notifyListeners( SWT.Selection, new Event( ) );
+					generalAgeApply.setEnabled( generalAgeBtn.getSelection( )
+							&& generalCombo.getSelectionIndex( ) != -1
+							&& generalAgeCombo.getSelectionIndex( ) != -1 );
+				}
+			} );
+
 			generalCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 					SWT.READ_ONLY );
-			GridData gd = new GridData( GridData.FILL_HORIZONTAL );
-			gd.widthHint = 150;
-			gd.horizontalSpan = 2;
+			gd = new GridData( GridData.FILL_HORIZONTAL );
+			gd.widthHint = 80;
 			generalCombo.setLayoutData( gd );
 			generalCombo.setEnabled( false );
 			generalCombo.addSelectionListener( new SelectionAdapter( ) {
@@ -1045,9 +1097,15 @@ public class StartPatchPage extends SimpleTabPage
 					if ( generalCombo.getSelectionIndex( ) > -1 )
 					{
 						String generalCode = (String) generalMap.getKeyList( )
-								.get( generalCombo.getSelectionIndex( ) );
+								.get( generalMap.getValueList( )
+										.indexOf( generalCombo.getText( ) ) );
 						int[] age = computeGeneralAge( generalCode );
 						initAgeCombo( generalAgeCombo, age );
+					}
+					else
+					{
+						generalAgeCombo.setText( "" );
+						generalAgeCombo.deselectAll( );
 					}
 				}
 			} );
@@ -1059,7 +1117,7 @@ public class StartPatchPage extends SimpleTabPage
 			generalAgeCombo.setLayoutData( gd );
 			generalAgeCombo.setEnabled( false );
 
-			final Button generalAgeApply = WidgetUtil.getToolkit( )
+			generalAgeApply = WidgetUtil.getToolkit( )
 					.createButton( patchClient, "应用", SWT.PUSH );
 			generalAgeApply.setEnabled( false );
 
@@ -1099,7 +1157,8 @@ public class StartPatchPage extends SimpleTabPage
 								+ generalAgeCombo.getText( )
 								+ "岁" );
 						String generalCode = (String) generalMap.getKeyList( )
-								.get( generalCombo.getSelectionIndex( ) );
+								.get( generalMap.getValueList( )
+										.indexOf( generalCombo.getText( ) ) );
 						GeneralAgeUtil.saveGeneralAge( generalCode,
 								generalAgeCombo.getText( ) );
 					}
@@ -1116,6 +1175,7 @@ public class StartPatchPage extends SimpleTabPage
 				{
 					generalCombo.setEnabled( generalAgeBtn.getSelection( ) );
 					generalAgeCombo.setEnabled( generalAgeBtn.getSelection( ) );
+					generalAgeFactionCombo.setEnabled( generalAgeBtn.getSelection( ) );
 					generalAgeApply.setEnabled( generalAgeBtn.getSelection( )
 							&& generalCombo.getSelectionIndex( ) != -1
 							&& generalAgeCombo.getSelectionIndex( ) != -1 );
@@ -1133,6 +1193,7 @@ public class StartPatchPage extends SimpleTabPage
 			};
 			generalCombo.addSelectionListener( listener );
 			generalAgeCombo.addSelectionListener( listener );
+			generalAgeFactionCombo.addSelectionListener( listener );
 		}
 		{
 			final Button factionAgeBtn = WidgetUtil.getToolkit( )
@@ -1535,6 +1596,24 @@ public class StartPatchPage extends SimpleTabPage
 		}
 		generalSwitchOutFactionCombo.notifyListeners( SWT.Selection,
 				new Event( ) );
+
+		index = generalAgeFactionCombo.getSelectionIndex( );
+		faction = generalAgeFactionCombo.getText( );
+		generalAgeFactionCombo.removeAll( );
+		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
+		{
+			generalAgeFactionCombo.add( (String) factionMap.get( i ) );
+		}
+		generalAgeFactionCombo.add( "全部势力", 0 );
+		if ( factionMap.containsValue( faction ) )
+		{
+			generalAgeFactionCombo.setText( faction );
+		}
+		else if ( index == 0 )
+		{
+			generalAgeFactionCombo.select( 0 );
+		}
+		generalAgeFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		index = ageFactionCombo.getSelectionIndex( );
 		faction = ageFactionCombo.getText( );
