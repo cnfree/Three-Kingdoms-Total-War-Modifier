@@ -775,7 +775,7 @@ public class StartPatchPage extends SimpleTabPage
 							.get( generalMap.getValueList( )
 									.indexOf( generalChangeCombo.getText( ) ) );
 					String factionCode = (String) factionMap.getKeyList( )
-							.get( generalChangeFactionCombo.getSelectionIndex( ) );
+							.get( factionMap.getValueList( ).indexOf( generalChangeFactionCombo.getText( ) ) );
 					General model = (General) UnitUtil.getGeneralModels( )
 							.get( generalCode );
 
@@ -1468,14 +1468,17 @@ public class StartPatchPage extends SimpleTabPage
 		generalChangeFactionCombo.removeAll( );
 		for ( int i = 0; i < factionMap.getKeyList( ).size( ); i++ )
 		{
-			generalChangeFactionCombo.add( (String) factionMap.get( i ) );
+			String factionText = (String) factionMap.getKeyList( ).get( i );
+			if ( !"slave".equalsIgnoreCase( factionText ) )
+			{
+				generalChangeFactionCombo.add( (String) factionMap.get( factionText ) );
+			}
 		}
 		if ( factionMap.containsValue( faction ) )
 		{
 			generalChangeFactionCombo.setText( faction );
 		}
-		generalChangeFactionCombo.notifyListeners( SWT.Selection,
-				new Event( ) );
+		generalChangeFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		int index = generalChangeOutFactionCombo.getSelectionIndex( );
 		faction = generalChangeOutFactionCombo.getText( );
@@ -1512,8 +1515,7 @@ public class StartPatchPage extends SimpleTabPage
 		{
 			generalSwitchInFactionCombo.select( 0 );
 		}
-		generalSwitchInFactionCombo.notifyListeners( SWT.Selection,
-				new Event( ) );
+		generalSwitchInFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		index = generalSwitchOutFactionCombo.getSelectionIndex( );
 		faction = generalSwitchOutFactionCombo.getText( );
@@ -1568,8 +1570,7 @@ public class StartPatchPage extends SimpleTabPage
 		{
 			generalIdentityFactionCombo.select( 0 );
 		}
-		generalIdentityFactionCombo.notifyListeners( SWT.Selection,
-				new Event( ) );
+		generalIdentityFactionCombo.notifyListeners( SWT.Selection, new Event( ) );
 
 		if ( generalIn != null && generalInCombo.indexOf( generalIn ) != -1 )
 		{
@@ -1589,7 +1590,7 @@ public class StartPatchPage extends SimpleTabPage
 		}
 		if ( general != null && generalCombo.indexOf( general ) != -1 )
 		{
-			generalCombo.setText( general );	
+			generalCombo.setText( general );
 		}
 		generalCombo.notifyListeners( SWT.Selection, new Event( ) );
 
@@ -1605,8 +1606,7 @@ public class StartPatchPage extends SimpleTabPage
 		{
 			generalIdentityChangeCombo.setText( generalIdentity );
 		}
-		generalIdentityChangeCombo.notifyListeners( SWT.Selection,
-				new Event( ) );
+		generalIdentityChangeCombo.notifyListeners( SWT.Selection, new Event( ) );
 	}
 
 	private void removeComboItems( CCombo combo )

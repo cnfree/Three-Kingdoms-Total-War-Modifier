@@ -403,11 +403,6 @@ public class FileUtil
 				props.put( convert( key ), convert( value ) );
 			}
 
-			if ( "faction".equals( property ) )
-			{
-				props.remove( "乱军" );
-			}
-
 			return props;
 		}
 		catch ( Exception e )

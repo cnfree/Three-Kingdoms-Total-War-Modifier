@@ -193,13 +193,13 @@ public class FactionEditPage extends SimpleTabPage
 
 		createTitle( );
 		createPatchArea( );
-		
+
 		FormText noteText = WidgetUtil.createFormText( container.getBody( ),
 				"注意：部分玩家编辑势力后，会导致游戏势力选择界面花屏，但选择势力后不影响游戏。" );
 		TableWrapData data = new TableWrapData( TableWrapData.FILL );
 		data.maxWidth = 600;
 		noteText.setLayoutData( data );
-		
+
 		initPage( );
 		checkEnableStatus( );
 	}
@@ -235,6 +235,22 @@ public class FactionEditPage extends SimpleTabPage
 					idText.setText( (String) factionMap.getKeyList( )
 							.get( factionCombo.getSelectionIndex( ) ) );
 					nameText.setText( factionCombo.getText( ) );
+					if ( !"DACIA".equalsIgnoreCase( idText.getText( ) )
+							&& !"SPAIN".equalsIgnoreCase( idText.getText( ) ) )
+					{
+						if ( cultureCombo.indexOf( "外族入侵" ) != -1 )
+						{
+							cultureCombo.remove( "外族入侵" );
+						}
+					}
+					else
+					{
+						if ( cultureCombo.indexOf( "外族入侵" ) != -1 )
+						{
+							cultureCombo.remove( "外族入侵" );
+						}
+						cultureCombo.add( "外族入侵" );
+					}
 					FactionDescription desc = (FactionDescription) BattleUtil.getFactionDescriptionMap( )
 							.get( idText.getText( ) );
 					String culture = (String) cultureMap.get( desc.getCulture( ) );
@@ -1007,6 +1023,20 @@ public class FactionEditPage extends SimpleTabPage
 								(File[]) bakList.toArray( new File[0] ) );
 					}
 				}
+				else
+				{
+					if ( txtFiles.size( ) > 0 )
+					{
+						BakUtil.bakData( "编辑势力："
+								+ faction
+								+ "-->"
+								+ factionName );
+					}
+					else
+					{
+						BakUtil.bakData( "编辑势力：" + faction );
+					}
+				}
 
 				if ( !culture.equals( cultureCombo.getText( ) )
 						|| primaryColor != null )
@@ -1049,7 +1079,8 @@ public class FactionEditPage extends SimpleTabPage
 											{
 												printer.println( "culture						"
 														+ cultureMap.getKeyList( )
-																.get( cultureCombo.getSelectionIndex( ) ) );
+																.get( cultureMap.getValueList( )
+																		.indexOf( cultureCombo.getText( ) ) ) );
 												continue;
 											}
 										}
@@ -1223,7 +1254,9 @@ public class FactionEditPage extends SimpleTabPage
 									if ( matcher1.find( ) )
 									{
 										printer.println( "{HuangDi-"
-												+ idText.getText( ).trim( ).toLowerCase( )
+												+ idText.getText( )
+														.trim( )
+														.toLowerCase( )
 												+ "1101}[★皇太子]"
 												+ ChangeCode.toShort( guohao ) );
 										continue;
