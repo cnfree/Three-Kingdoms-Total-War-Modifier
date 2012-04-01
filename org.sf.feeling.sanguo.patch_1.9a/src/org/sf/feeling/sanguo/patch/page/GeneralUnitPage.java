@@ -109,7 +109,7 @@ public class GeneralUnitPage extends SimpleTabPage
 		gd.horizontalSpan = 2;
 		factionCombo.setLayoutData( gd );
 
-		WidgetUtil.getToolkit( ).createLabel( patchClient, "3.选择收买武将之将军卫队：" );
+		WidgetUtil.getToolkit( ).createLabel( patchClient, "3.选择被收买武将的将军卫队：" );
 		generalUnitCombo = WidgetUtil.getToolkit( ).createCCombo( patchClient,
 				SWT.READ_ONLY );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
