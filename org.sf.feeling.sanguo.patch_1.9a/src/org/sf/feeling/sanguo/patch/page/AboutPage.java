@@ -65,7 +65,7 @@ public class AboutPage extends SimpleTabPage
 			public void linkActivated( HyperlinkEvent e )
 			{
 				Patch.getInstance( ).select( Patch.getInstance( )
-						.getPageCount( ) - 3 );
+						.getPageCount( ) - 5 );
 			}
 
 		} );

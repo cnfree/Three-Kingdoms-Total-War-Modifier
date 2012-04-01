@@ -23,6 +23,7 @@ import org.sf.feeling.sanguo.patch.page.BuildingBonusPage;
 import org.sf.feeling.sanguo.patch.page.CodePage;
 import org.sf.feeling.sanguo.patch.page.CustomGeneralPage;
 import org.sf.feeling.sanguo.patch.page.CustomUnitPage;
+import org.sf.feeling.sanguo.patch.page.ExitPatchPage;
 import org.sf.feeling.sanguo.patch.page.FactionChangePage;
 import org.sf.feeling.sanguo.patch.page.FactionEditPage;
 import org.sf.feeling.sanguo.patch.page.FeedbackPage;
@@ -73,6 +74,7 @@ public class CategoryProviderFactory
 				"收买武将",
 				"编辑势力",
 				"切换游戏势力",
+				"防跳补丁",
 				"代码查找",
 				"备份与还原",
 				// "功能或Bug提交",
@@ -104,6 +106,7 @@ public class CategoryProviderFactory
 				GeneralUnitPage.class,
 				FactionEditPage.class,
 				FactionChangePage.class,
+				ExitPatchPage.class,
 				CodePage.class,
 				BakAndRestorePage.class,
 				// BugSubmitPage.class,
