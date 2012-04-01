@@ -1663,10 +1663,6 @@ public class StartPatchPage extends SimpleTabPage
 		}
 		generalOutCombo.notifyListeners( SWT.Selection, new Event( ) );
 
-		for ( int i = 0; i < generalMap.size( ); i++ )
-		{
-			generalCombo.add( (String) generalMap.get( i ) );
-		}
 		if ( general != null && generalCombo.indexOf( general ) != -1 )
 		{
 			generalCombo.setText( general );
