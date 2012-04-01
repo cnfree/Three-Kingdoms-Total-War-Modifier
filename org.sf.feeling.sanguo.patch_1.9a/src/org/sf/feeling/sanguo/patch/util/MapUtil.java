@@ -793,6 +793,11 @@ public class MapUtil
 												.replaceAll( "character", "" )
 												.split( "," )[0].trim( );
 									}
+									
+									if("J-0300-SunJian".equalsIgnoreCase( general ) || "J-1100-DongZhuo".equalsIgnoreCase( general ) ){
+										general = null;
+										continue;
+									}
 									( (List) factionGeneralMap.get( faction ) ).add( general );
 
 									General model = new General( );
