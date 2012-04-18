@@ -1252,6 +1252,12 @@ public class CustomGeneralPage extends SimpleTabPage
 		while ( iter.hasNext( ) )
 		{
 			General temp = (General) iter.next( );
+			if ( temp == null
+					|| temp.getPosX( ) == null
+					|| temp.getPosY( ) == null )
+			{
+				return reComputeGeneralPosition( point, x, y, xory );
+			}
 			if ( ( temp.getPosX( ).equals( Integer.toString( point.x ) ) && temp.getPosY( )
 					.equals( Integer.toString( point.y ) ) )
 					|| UnitUtil.getUnAvailableGeneralPoints( ).contains( point ) )
