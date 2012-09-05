@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Actuate BRDPro Development Environment Build">
+
+	<target name="init">
+		<property name="build.temp" value="$tempDir" />
+		<property name="build.path" value="$installPath" />
+		<property name="brdpro.zip" value="$brdproFile" />
+		 
+		<delete dir="${build.temp}" />
+		
+#if($clean)
+#if($existInstallPath)
+		<delete includeemptydirs="true">
+			<fileset dir="${build.path}">
+				<exclude name="\eclipse\configuration\.settings\**" />
+			</fileset>
+		</delete>
+#end
+#end
+
+	</target>
+</project>

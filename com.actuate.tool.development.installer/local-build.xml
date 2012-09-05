@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     Java Customization Builder Build
+     
+     cnfree
+     ====================================================================== -->
+<project name="Actuate BRDPro Development Environment Installer Build" default="all">
+
+	<!-- ================================= 
+          target: all              
+         ================================= -->
+	<target name="all" depends="clean">
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: init                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="init">
+		<tstamp />
+
+		<property name="build.dist" value="./../com.actuate.tool.development.installer/dist" />
+		<property name="dist.dir" value="dist" />
+		<property name="dist.version" value="${DSTAMP}" />
+		<property name="dist.src" value="${dist.dir}/com.actuate.tool.development.installer_1.0.0.v${dist.version}.src.zip" />
+		<property name="dist.jar" value="${dist.dir}/com.actuate.tool.development.installer_1.0.0.v${dist.version}.jar" />
+		<property name="dist.zip" value="${dist.dir}/com.actuate.tool.development.installer_1.0.0.v${dist.version}.zip" />
+		<property name="build.temp" value="temp" />
+		<delete dir="${build.temp}" />
+		<delete dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}" />
+
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: prepare                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="prepare" depends="init">
+		<copy todir="${build.temp}/src">
+			<fileset dir="src" />
+		</copy>
+		<copy todir="${build.temp}/src">
+			<fileset dir="resources" />
+		</copy>
+		<copy todir="${build.temp}/lib">
+			<fileset dir="lib" />
+		</copy>
+		<copy todir="${build.temp}/tool">
+			<fileset dir="tool" />
+		</copy>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-tool-development-installer-src                     
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-tool-development-installer-src" depends="prepare">
+		<delete file="${dist.src}" />
+		<zip destfile="${dist.src}">
+			<fileset dir="${build.temp}" />
+		</zip>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-tool-development-installer-jar                     
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-tool-development-installer-jar" depends="prepare">
+		<mkdir dir="${build.temp}/classes" />
+		<javac srcdir="${build.temp}/src" destdir="${build.temp}/classes" source="1.5" target="1.5" debug="true" debuglevel="source,lines" encoding="utf-8">
+			<classpath>
+				<fileset dir="lib" includes="*.jar" />
+			</classpath>
+		</javac>
+		<copy todir="${build.temp}/classes">
+			<fileset dir="${build.temp}/src" excludes="**/*.java" />
+		</copy>
+		<delete file="${dist.jar}" />
+		<jar destfile="${dist.jar}">
+			<fileset dir="${build.temp}/classes" includes="**/*.*" />
+			<fileset dir="${build.temp}/" includes="*.*" />
+		</jar>
+		<delete dir="${build.temp}/classes" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: dist-tool-development-installer-zip                    
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-tool-development-installer-zip" depends="prepare">
+		<mkdir dir="${build.temp}/builder-zip" />
+		<copy todir="${build.temp}/builder-zip">
+			<fileset dir="${build.temp}/lib" />
+		</copy>
+		<copy todir="${build.temp}/builder-zip/tool">
+			<fileset dir="${build.temp}/tool" />
+		</copy>
+		<copy tofile="${dist.dir}/com.actuate.tool.development.installer.jar">
+			<fileset file="${dist.jar}" />
+		</copy>
+		<rename dest="${build.temp}/builder-zip/com.actuate.tool.development.installer.jar" src="${dist.jar}" />
+		<zip destfile="${dist.zip}">
+			<fileset dir="${build.temp}/builder-zip" includes="**/*.*" />
+		</zip>
+		<delete dir="${build.temp}/builder-zip" />
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: clean                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="clean" depends="dist-tool-development-installer-src, dist-tool-development-installer-jar, dist-tool-development-installer-zip">
+		<delete dir="${build.temp}" />
+	</target>
+
+</project>
+
