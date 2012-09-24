@@ -13,13 +13,15 @@ public class Modules
 	private Map<String, Module> pluginMap = new LinkedHashMap<String, Module>( );
 	private Map<String, Module> extensionMap = new HashMap<String, Module>( );
 
+	private Map<String, String> iPortalViewMap = new HashMap<String, String>( );
+
 	private static class SingletonContainer
 	{
 
 		private final static Modules instance = new Modules( );
 		static
 		{
-			Module.init( );
+			Installer.init( );
 		}
 
 	}
@@ -99,6 +101,31 @@ public class Modules
 		if ( module == null )
 			module = extensionMap.get( moduleName );
 		return module;
+	}
+
+	public void addIPortalView( String project, String defaultView )
+	{
+		iPortalViewMap.put( project, defaultView );
+	}
+
+	public void removeIPortalView( String project )
+	{
+		iPortalViewMap.remove( project );
+	}
+
+	public boolean containsIPortalView( String project )
+	{
+		return iPortalViewMap.containsKey( project );
+	}
+
+	public String[] getIPortalViews( )
+	{
+		return iPortalViewMap.values( ).toArray( new String[0] );
+	}
+
+	public String getIPortalView( String project )
+	{
+		return iPortalViewMap.get( project );
 	}
 
 }

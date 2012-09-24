@@ -38,7 +38,7 @@ public class InstallTypePage extends WizardPage
 		composite.setLayout( gridLayout );
 
 		brdproButton = new Button( composite, SWT.RADIO );
-		brdproButton.setText( "&Install the BRDPro Development Environment" );
+		brdproButton.setText( "&Install the BRDPro development environment" );
 		brdproButton.setSelection( true );
 		GridData gd = new GridData( );
 		brdproButton.setLayoutData( gd );
@@ -56,25 +56,8 @@ public class InstallTypePage extends WizardPage
 			}
 		} );
 
-		workspaceCloneButton = new Button( composite, SWT.RADIO );
-		workspaceCloneButton.setText( "Clone &settings from an old workspace to a new workspace" );
-		gd = new GridData( );
-		workspaceCloneButton.setLayoutData( gd );
-		workspaceCloneButton.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent e )
-			{
-				if ( workspaceCloneButton.getSelection( ) )
-				{
-					brdproButton.setSelection( false );
-					iportalSyncButton.setSelection( false );
-				}
-				setPageComplete( isPageComplete( ) );
-			}
-		} );
-
 		iportalSyncButton = new Button( composite, SWT.RADIO );
-		iportalSyncButton.setText( "Synchronize the iportal viewer &workspace (For IV team)" );
+		iportalSyncButton.setText( "Synchronize the iPortal Viewer &workspace" );
 		gd = new GridData( );
 		iportalSyncButton.setLayoutData( gd );
 		iportalSyncButton.addSelectionListener( new SelectionAdapter( ) {
@@ -90,6 +73,23 @@ public class InstallTypePage extends WizardPage
 			}
 		} );
 
+		workspaceCloneButton = new Button( composite, SWT.RADIO );
+		workspaceCloneButton.setText( "Clone &settings from an old Workspace to a new Workspace" );
+		gd = new GridData( );
+		workspaceCloneButton.setLayoutData( gd );
+		workspaceCloneButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( workspaceCloneButton.getSelection( ) )
+				{
+					brdproButton.setSelection( false );
+					iportalSyncButton.setSelection( false );
+				}
+				setPageComplete( isPageComplete( ) );
+			}
+		} );
+		
 		checkInstallType( );
 		setControl( composite );
 	}

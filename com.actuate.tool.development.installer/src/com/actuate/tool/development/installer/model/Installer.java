@@ -4,10 +4,14 @@ package com.actuate.tool.development.installer.model;
 import java.io.File;
 import java.util.ArrayList;
 
+import java.util.List;
+
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
+
+import com.actuate.tool.development.installer.util.LogUtil;
 
 @Root
 public class Installer
@@ -70,6 +74,46 @@ public class Installer
 		catch ( Exception e )
 		{
 			e.printStackTrace( );
+		}
+	}
+
+	public static void init( )
+	{
+		String xmlpath = "\\\\GUI-VISTA\\shared\\plugins\\installer.xml";
+		Serializer serializer = new Persister( );
+		File source = new File( xmlpath );
+		try
+		{
+			Installer installer = serializer.read( Installer.class, source );
+			Plugins plugins = installer.getPlugins( );
+			List<Plugin> pluginList = plugins.getPlugins( );
+			for ( Plugin plugin : pluginList )
+			{
+				if ( plugin.getIcon( ) != null )
+				{
+					new Module( plugin.getName( ),
+							plugin.getLabel( ),
+							"\\\\GUI-VISTA\\shared\\plugins\\"
+									+ plugin.getIcon( ),
+							plugin.getFile( ) );
+				}
+				else
+				{
+					new Module( plugin.getName( ),
+							plugin.getLabel( ),
+							plugin.getFile( ) );
+				}
+			}
+			IPortalConfigs configList = installer.getIportalConfigs( );
+			for ( IPortalConfig config : configList.getIPortalConfigs( ) )
+			{
+				Modules.getInstance( ).addIPortalView( config.getProject( ),
+						config.getDefaultView( ) );
+			}
+		}
+		catch ( Exception e )
+		{
+			LogUtil.recordErrorMsg( e, true );
 		}
 	}
 }

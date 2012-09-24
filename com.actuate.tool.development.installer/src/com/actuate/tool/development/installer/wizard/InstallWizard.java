@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.tool.development.installer.model.IPortalViewerData;
 import com.actuate.tool.development.installer.model.InstallBRDProData;
 import com.actuate.tool.development.installer.model.InstallData;
 import com.actuate.tool.development.installer.model.InstallType;
@@ -71,6 +72,20 @@ public class InstallWizard extends Wizard
 			.getProperty( "user.home" )
 			+ File.separator
 			+ "\\.brdpro_installer\\userInfo.xml" ).getAbsolutePath( );
+
+	private static final String P4ROOT = "P4Root";
+
+	private static final String P4VIEW = "P4View";
+
+	private static final String FORCEOPERATION = "ForceOperation";
+
+	private static final String P4SERVER = "P4Server";
+
+	private static final String P4USER = "P4User";
+
+	private static final String P4PASSWORD = "P4Password";
+
+	private static final String P4CLIENT = "P4Client";
 
 	// the model object.
 	InstallData data = new InstallData( );
@@ -135,12 +150,48 @@ public class InstallWizard extends Wizard
 					installData.setNotCreateShortcut( setting.getBoolean( CREATESHORTCUT ) );
 				}
 
+				IPortalViewerData ivData = new IPortalViewerData( );
+				ivData.setProject( setting.getName( ) );
+				if ( setting.get( P4ROOT ) != null )
+				{
+					ivData.setRoot( setting.get( P4ROOT ) );
+				}
+				if ( setting.get( P4VIEW ) != null )
+				{
+					ivData.setView( setting.get( P4VIEW ) );
+				}
+				if ( setting.get( FORCEOPERATION ) != null )
+				{
+					ivData.setForceOperation( setting.getBoolean( FORCEOPERATION ) );
+				}
+				if ( setting.get( P4SERVER ) != null )
+				{
+					ivData.setServer( setting.get( P4SERVER ) );
+				}
+				if ( setting.get( P4USER ) != null )
+				{
+					ivData.setUser( setting.get( P4USER ) );
+				}
+				if ( setting.get( P4PASSWORD ) != null )
+				{
+					ivData.setPassword( setting.get( P4PASSWORD ) );
+				}
+				if ( setting.get( P4CLIENT ) != null )
+				{
+					ivData.setClient( setting.get( P4CLIENT ) );
+				}
+				data.addIPortalViewerData( ivData );
 			}
 		}
 
 		if ( getDialogSettings( ).get( CURRENT_BRDPRO_PROJECT ) != null )
 		{
 			data.setCurrentBRDProProject( getDialogSettings( ).get( CURRENT_BRDPRO_PROJECT ) );
+		}
+
+		if ( getDialogSettings( ).get( CURRENT_IV_PROJECT ) != null )
+		{
+			data.setCurrentIVProject( getDialogSettings( ).get( CURRENT_IV_PROJECT ) );
 		}
 
 	}
@@ -157,10 +208,9 @@ public class InstallWizard extends Wizard
 		addPage( new InstallTypePage( data ) );
 		addPage( new CloneWorkspaceSettingsPage( data ) );
 		addPage( new BRDProProjectPage( data ) );
-		addPage( new SettingPage( data ) );
-		addPage( new ShortcutPage( data ) );
+		addPage( new BRDProSettingPage( data ) );
+		addPage( new BRDProShortcutPage( data ) );
 		addPage( new IPortalViewerProjectPage( data ) );
-		addPage( new P4ConnectionSettingPage( data ) );
 	}
 
 	private void initShell( )
@@ -522,6 +572,33 @@ public class InstallWizard extends Wizard
 				projectSetting.put( MODULES, (String) null );
 			}
 		}
+
+		if ( data.getCurrentIVProject( ) != null )
+		{
+			getDialogSettings( ).put( CURRENT_IV_PROJECT,
+					data.getCurrentIVProject( ) );
+			IDialogSettings projectSetting = getDialogSettings( ).getSection( data.getCurrentIVProject( ) );
+			if ( projectSetting == null )
+			{
+				projectSetting = getDialogSettings( ).addNewSection( data.getCurrentIVProject( ) );
+			}
+
+			projectSetting.put( P4ROOT, data.getCurrentIportalViewerData( )
+					.getRoot( ) );
+			projectSetting.put( P4VIEW, data.getCurrentIportalViewerData( )
+					.getView( ) );
+			projectSetting.put( FORCEOPERATION,
+					data.getCurrentIportalViewerData( ).isForceOperation( ) );
+			projectSetting.put( P4SERVER, data.getCurrentIportalViewerData( )
+					.getServer( ) );
+			projectSetting.put( P4USER, data.getCurrentIportalViewerData( )
+					.getUser( ) );
+			projectSetting.put( P4PASSWORD, data.getCurrentIportalViewerData( )
+					.getPassword( ) );
+			projectSetting.put( P4CLIENT, data.getCurrentIportalViewerData( )
+					.getClient( ) );
+		}
+
 		saveDialogSettings( );
 	}
 }
