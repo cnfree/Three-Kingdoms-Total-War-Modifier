@@ -394,7 +394,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 			}
 		} );
 
-		setControl( connectionGroup );
+		setControl( composite );
 
 		if ( data != null && data.getCurrentIVProject( ) != null )
 		{

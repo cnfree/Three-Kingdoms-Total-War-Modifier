@@ -1,9 +1,12 @@
 
 package com.actuate.tool.development.installer.model;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Modules
@@ -13,7 +16,7 @@ public class Modules
 	private Map<String, Module> pluginMap = new LinkedHashMap<String, Module>( );
 	private Map<String, Module> extensionMap = new HashMap<String, Module>( );
 
-	private Map<String, String> iPortalViewMap = new HashMap<String, String>( );
+	private Map<String, IPortalConfig> iPortalConfigMap = new HashMap<String, IPortalConfig>( );
 
 	private static class SingletonContainer
 	{
@@ -103,29 +106,52 @@ public class Modules
 		return module;
 	}
 
-	public void addIPortalView( String project, String defaultView )
+	public void addIPortalConfig( String project, IPortalConfig config )
 	{
-		iPortalViewMap.put( project, defaultView );
+		iPortalConfigMap.put( project, config );
 	}
 
-	public void removeIPortalView( String project )
+	public void removeIPortalConfig( String project )
 	{
-		iPortalViewMap.remove( project );
+		iPortalConfigMap.remove( project );
 	}
 
-	public boolean containsIPortalView( String project )
+	public boolean containsIPortalConfig( String project )
 	{
-		return iPortalViewMap.containsKey( project );
+		return iPortalConfigMap.containsKey( project );
 	}
 
 	public String[] getIPortalViews( )
 	{
-		return iPortalViewMap.values( ).toArray( new String[0] );
+		List<String> views = new ArrayList<String>( );
+		IPortalConfig[] configs = iPortalConfigMap.values( )
+				.toArray( new IPortalConfig[0] );
+		for ( int i = 0; i < configs.length; i++ )
+		{
+			views.add( configs[i].getDefaultView( ) );
+		}
+		return views.toArray( new String[0] );
 	}
 
 	public String getIPortalView( String project )
 	{
-		return iPortalViewMap.get( project );
+		IPortalConfig config = iPortalConfigMap.get( project );
+		if ( config != null )
+			return config.getDefaultView( );
+		return null;
+	}
+
+	public File getIPortalRepalceFile( String project )
+	{
+		IPortalConfig config = iPortalConfigMap.get( project );
+		if ( config != null )
+		{
+			File file = new File( "\\\\GUI-VISTA\\shared\\plugins\\"
+					+ config.getReplaceFile( ) );
+			if ( file.exists( ) )
+				return file;
+		}
+		return null;
 	}
 
 }

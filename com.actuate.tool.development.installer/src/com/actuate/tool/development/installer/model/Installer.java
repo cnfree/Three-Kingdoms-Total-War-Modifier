@@ -107,8 +107,8 @@ public class Installer
 			IPortalConfigs configList = installer.getIportalConfigs( );
 			for ( IPortalConfig config : configList.getIPortalConfigs( ) )
 			{
-				Modules.getInstance( ).addIPortalView( config.getProject( ),
-						config.getDefaultView( ) );
+				Modules.getInstance( ).addIPortalConfig( config.getProject( ),
+						config );
 			}
 		}
 		catch ( Exception e )

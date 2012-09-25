@@ -4,7 +4,7 @@ package com.actuate.tool.development.installer.model;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
-@Root
+@Root(name="iportalConfig")
 public class IPortalConfig
 {
 
@@ -12,6 +12,18 @@ public class IPortalConfig
 	private String project;
 	@Attribute
 	private String defaultView;
+	@Attribute
+	private String replaceFile;
+
+	public String getReplaceFile( )
+	{
+		return replaceFile;
+	}
+
+	public void setReplaceFile( String replaceFile )
+	{
+		this.replaceFile = replaceFile;
+	}
 
 	public String getProject( )
 	{

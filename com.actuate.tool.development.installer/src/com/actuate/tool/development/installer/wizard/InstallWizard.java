@@ -24,6 +24,8 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.sf.feeling.swt.win32.extension.Win32;
+import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
 import com.actuate.tool.development.installer.model.IPortalViewerData;
@@ -34,6 +36,7 @@ import com.actuate.tool.development.installer.model.Module;
 import com.actuate.tool.development.installer.model.Modules;
 import com.actuate.tool.development.installer.task.CloneWorkspaceSettings;
 import com.actuate.tool.development.installer.task.InstallBRDPro;
+import com.actuate.tool.development.installer.task.SyncIPortalWorkspace;
 import com.actuate.tool.development.installer.util.LogUtil;
 import com.actuate.tool.development.installer.util.UIUtil;
 
@@ -216,6 +219,9 @@ public class InstallWizard extends Wizard
 	private void initShell( )
 	{
 		UIUtil.setShell( this.getShell( ) );
+		Windows.setWindowStyle( this.getShell( ).handle,
+				Windows.getWindowStyle( this.getShell( ).handle )
+						| Win32.WS_MINIMIZEBOX );
 		this.getShell( ).setImages( new Image[]{
 				ImageCache.getImage( "/icons/actuate_16.png" ),
 				ImageCache.getImage( "/icons/actuate_32.png" ),
@@ -309,7 +315,6 @@ public class InstallWizard extends Wizard
 									IProgressMonitor.UNKNOWN );
 							final String[][] fileNames = new String[1][];
 
-							// File file = new File( "E:\\zip" );
 							File file = new File( "\\\\qaant\\ActuateBuild" );
 							fileNames[0] = file.list( new FilenameFilter( ) {
 
@@ -321,11 +326,6 @@ public class InstallWizard extends Wizard
 									List<File> brdproFiles = new ArrayList<File>( );
 									List<File> iportalViewerFiles = new ArrayList<File>( );
 
-									// if ( !name.equalsIgnoreCase(
-									// "A11SP4" )
-									// && !name.equalsIgnoreCase(
-									// "BRDPRo_Bug_Fix" ) )
-									// return false;
 									checkActuateBuildFile( file,
 											brdproFiles,
 											iportalViewerFiles );
@@ -439,22 +439,6 @@ public class InstallWizard extends Wizard
 			return (IWizardPage) pages.get( index + 1 );
 	}
 
-	// public IWizardPage getPreviousPage( IWizardPage page )
-	// {
-	// int index = pages.indexOf( page );
-	// if ( index == 0 || index == -1 )
-	// {
-	// // first page or page not found
-	// return null;
-	// }
-	// return (IWizardPage) pages.get( index - 1 );
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
-	 */
 	public boolean performFinish( )
 	{
 		if ( getDialogSettings( ) != null )
@@ -480,6 +464,10 @@ public class InstallWizard extends Wizard
 						else if ( data.getInstallType( ) == InstallType.cloneWorkspaceSettings )
 						{
 							new CloneWorkspaceSettings( data ).execute( monitor );
+						}
+						else if ( data.getInstallType( ) == InstallType.synciPortalWorkspace )
+						{
+							new SyncIPortalWorkspace( data.getCurrentIportalViewerData( ) ).execute( monitor );
 						}
 					}
 					monitor.done( );

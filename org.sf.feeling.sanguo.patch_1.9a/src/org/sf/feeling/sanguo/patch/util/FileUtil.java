@@ -196,9 +196,9 @@ public class FileUtil
 					String key = (String) iter.next( );
 					Pattern pattern1 = Pattern.compile( key );
 					Matcher matcher1 = pattern1.matcher( group );
-					group = matcher1.replaceAll( (String) map.get( key ) );
+					group = matcher1.replaceAll( Matcher.quoteReplacement((String) map.get( key )) );
 				}
-				matcher.appendReplacement( sbr, group );
+				matcher.appendReplacement( sbr, Matcher.quoteReplacement(group) );
 			}
 			matcher.appendTail( sbr );
 			PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( file ),
