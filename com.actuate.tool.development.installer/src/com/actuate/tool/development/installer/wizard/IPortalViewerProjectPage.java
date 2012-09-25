@@ -204,7 +204,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		} );
 
 		Group connectionGroup = new Group( composite, SWT.NONE );
-		connectionGroup.setText( "P4 Connection Setting" );
+		connectionGroup.setText( "P4 Connection Settings" );
 		gridLayout = new GridLayout( 2, false );
 		gridLayout.marginWidth = 10;
 		connectionGroup.setLayout( gridLayout );

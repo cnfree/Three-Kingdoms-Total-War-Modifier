@@ -74,7 +74,7 @@ public class InstallTypePage extends WizardPage
 		} );
 
 		workspaceCloneButton = new Button( composite, SWT.RADIO );
-		workspaceCloneButton.setText( "Clone &settings from an old Workspace to a new Workspace" );
+		workspaceCloneButton.setText( "Clone &settings from an old workspace to a new workspace" );
 		gd = new GridData( );
 		workspaceCloneButton.setLayoutData( gd );
 		workspaceCloneButton.addSelectionListener( new SelectionAdapter( ) {
