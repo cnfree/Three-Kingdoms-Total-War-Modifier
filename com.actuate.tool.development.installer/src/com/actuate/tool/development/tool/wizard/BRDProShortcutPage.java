@@ -135,7 +135,7 @@ class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 
 	public void propertyChange( PropertyChangeEvent event )
 	{
-		if ( InstallWizard.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
+		if ( ToolkitWizard.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
 	}
 }

@@ -66,10 +66,10 @@ public class Tool
 			config.setDefaultView( "Actuate/11SP4/iPortalApp" );
 			configs.getIPortalConfigs( ).add( config );
 
-			Tool installer = new Tool( );
-			installer.setIportalConfigs( configs );
-			installer.setPlugins( plugins );
-			serializer.write( installer, new File( "C:\\1.xml" ) );
+			Tool tool = new Tool( );
+			tool.setIportalConfigs( configs );
+			tool.setPlugins( plugins );
+			serializer.write( tool, new File( "C:\\1.xml" ) );
 		}
 		catch ( Exception e )
 		{
@@ -84,8 +84,8 @@ public class Tool
 		File source = new File( xmlpath );
 		try
 		{
-			Tool installer = serializer.read( Tool.class, source );
-			Plugins plugins = installer.getPlugins( );
+			Tool tool = serializer.read( Tool.class, source );
+			Plugins plugins = tool.getPlugins( );
 			List<Plugin> pluginList = plugins.getPlugins( );
 			for ( Plugin plugin : pluginList )
 			{
@@ -104,7 +104,7 @@ public class Tool
 							plugin.getFile( ) );
 				}
 			}
-			IPortalConfigs configList = installer.getIportalConfigs( );
+			IPortalConfigs configList = tool.getIportalConfigs( );
 			for ( IPortalConfig config : configList.getIPortalConfigs( ) )
 			{
 				Modules.getInstance( ).addIPortalConfig( config.getProject( ),

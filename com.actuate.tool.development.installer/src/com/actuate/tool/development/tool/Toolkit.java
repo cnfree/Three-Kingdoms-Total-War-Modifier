@@ -10,7 +10,7 @@ import org.sf.feeling.swt.win32.extension.jna.win32.structure.SHELLEXECUTEINFO;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
 import com.actuate.tool.development.tool.util.LogUtil;
-import com.actuate.tool.development.tool.wizard.InstallWizard;
+import com.actuate.tool.development.tool.wizard.ToolkitWizard;
 
 public class Toolkit
 {
@@ -27,7 +27,7 @@ public class Toolkit
 					ImageCache.getImage( "/icons/actuate_32.png" ),
 					ImageCache.getImage( "/icons/actuate_48.png" )
 			} );
-			InstallWizard wizard = new InstallWizard( );
+			ToolkitWizard wizard = new ToolkitWizard( );
 			WizardDialog dialog = new WizardDialog( null, wizard );
 			dialog.open( );
 		}
