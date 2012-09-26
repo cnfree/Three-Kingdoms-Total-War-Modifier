@@ -30,8 +30,8 @@ import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
 import com.actuate.tool.development.tool.model.IPortalViewerData;
 import com.actuate.tool.development.tool.model.InstallBRDProData;
-import com.actuate.tool.development.tool.model.InstallData;
-import com.actuate.tool.development.tool.model.InstallType;
+import com.actuate.tool.development.tool.model.ToolFeatureData;
+import com.actuate.tool.development.tool.model.ToolFeature;
 import com.actuate.tool.development.tool.model.Module;
 import com.actuate.tool.development.tool.model.Modules;
 import com.actuate.tool.development.tool.task.CloneWorkspaceSettings;
@@ -91,7 +91,7 @@ public class InstallWizard extends Wizard
 	private static final String P4CLIENT = "P4Client";
 
 	// the model object.
-	InstallData data = new InstallData( );
+	ToolFeatureData data = new ToolFeatureData( );
 
 	public InstallWizard( )
 	{
@@ -208,7 +208,7 @@ public class InstallWizard extends Wizard
 	{
 		initShell( );
 
-		addPage( new InstallTypePage( data ) );
+		addPage( new ToolFeaturePage( data ) );
 		addPage( new CloneWorkspaceSettingsPage( data ) );
 		addPage( new BRDProProjectPage( data ) );
 		addPage( new BRDProSettingPage( data ) );
@@ -424,9 +424,9 @@ public class InstallWizard extends Wizard
 		}
 		if ( index == 0 )
 		{
-			if ( data.getInstallType( ) == InstallType.installBRDPro )
+			if ( data.getToolFeature( ) == ToolFeature.installBRDPro )
 				return pages.get( 2 );
-			else if ( data.getInstallType( ) == InstallType.synciPortalWorkspace )
+			else if ( data.getToolFeature( ) == ToolFeature.synciPortalWorkspace )
 				return pages.get( 5 );
 			else
 				return pages.get( 1 );
@@ -457,15 +457,15 @@ public class InstallWizard extends Wizard
 
 					if ( data != null )
 					{
-						if ( data.getInstallType( ) == InstallType.installBRDPro )
+						if ( data.getToolFeature( ) == ToolFeature.installBRDPro )
 						{
 							new InstallBRDPro( data.getCurrentInstallBRDProData( ) ).execute( monitor );
 						}
-						else if ( data.getInstallType( ) == InstallType.cloneWorkspaceSettings )
+						else if ( data.getToolFeature( ) == ToolFeature.cloneWorkspaceSettings )
 						{
 							new CloneWorkspaceSettings( data ).execute( monitor );
 						}
-						else if ( data.getInstallType( ) == InstallType.synciPortalWorkspace )
+						else if ( data.getToolFeature( ) == ToolFeature.synciPortalWorkspace )
 						{
 							new SyncIPortalWorkspace( data.getCurrentIportalViewerData( ) ).execute( monitor );
 						}

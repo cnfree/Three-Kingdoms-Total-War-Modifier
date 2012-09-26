@@ -105,7 +105,7 @@ public class SyncIPortalWorkspace
 
 			if ( originRoot[0] != null )
 			{
-				synciPortal( monitor, step );
+				//synciPortal( monitor, step );
 			}
 
 			monitor.subTask( "[Step "

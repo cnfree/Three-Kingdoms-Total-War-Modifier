@@ -17,17 +17,17 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.actuate.tool.development.tool.model.InstallData;
-import com.actuate.tool.development.tool.model.InstallType;
+import com.actuate.tool.development.tool.model.ToolFeatureData;
+import com.actuate.tool.development.tool.model.ToolFeature;
 
 public class CloneWorkspaceSettingsPage extends WizardPage
 {
 
-	private InstallData data;
+	private ToolFeatureData data;
 	private Text txtWorkspace;
 	private Text txtSource;
 
-	CloneWorkspaceSettingsPage( InstallData data )
+	CloneWorkspaceSettingsPage( ToolFeatureData data )
 	{
 		super( "CloneWorspaceSettingsPage" );
 		setTitle( "Clone Workspace Settings" );
@@ -115,7 +115,7 @@ public class CloneWorkspaceSettingsPage extends WizardPage
 	{
 		if ( data != null )
 		{
-			if ( data.getInstallType( ) != InstallType.cloneWorkspaceSettings )
+			if ( data.getToolFeature( ) != ToolFeature.cloneWorkspaceSettings )
 				return true;
 
 			checkStatus( );

@@ -24,8 +24,8 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.actuate.tool.development.tool.model.InstallData;
-import com.actuate.tool.development.tool.model.InstallType;
+import com.actuate.tool.development.tool.model.ToolFeatureData;
+import com.actuate.tool.development.tool.model.ToolFeature;
 import com.actuate.tool.development.tool.model.Module;
 import com.actuate.tool.development.tool.model.ModuleType;
 import com.actuate.tool.development.tool.provider.ModuleContentProvider;
@@ -36,7 +36,7 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 
 	private Text txtDirectory;
 
-	private InstallData data;
+	private ToolFeatureData data;
 
 	private Button closeButton;
 
@@ -48,7 +48,7 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 
 	private ModuleContentProvider provider;
 
-	BRDProSettingPage( InstallData data )
+	BRDProSettingPage( ToolFeatureData data )
 	{
 		super( "SettingPage" );
 		setTitle( "Config Installation Settings" );
@@ -253,7 +253,7 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 	{
 		if ( data != null )
 		{
-			if ( data.getInstallType( ) != InstallType.installBRDPro )
+			if ( data.getToolFeature( ) != ToolFeature.installBRDPro )
 				return true;
 			return txtDirectory != null
 					&& txtDirectory.getText( ).trim( ).length( ) > 0

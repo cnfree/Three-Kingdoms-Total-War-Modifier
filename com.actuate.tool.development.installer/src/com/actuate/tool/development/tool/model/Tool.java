@@ -79,7 +79,7 @@ public class Tool
 
 	public static void init( )
 	{
-		String xmlpath = "\\\\GUI-VISTA\\shared\\plugins\\installer.xml";
+		String xmlpath = "\\\\GUI-VISTA\\shared\\plugins\\toolkit.xml";
 		Serializer serializer = new Persister( );
 		File source = new File( xmlpath );
 		try

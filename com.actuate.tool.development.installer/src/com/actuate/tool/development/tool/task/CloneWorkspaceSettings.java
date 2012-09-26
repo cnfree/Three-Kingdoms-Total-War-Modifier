@@ -6,16 +6,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 
-import com.actuate.tool.development.tool.model.InstallData;
+import com.actuate.tool.development.tool.model.ToolFeatureData;
 import com.actuate.tool.development.tool.util.UIUtil;
 import com.actuate.tool.development.tool.util.WorkspaceUtil;
 
 public class CloneWorkspaceSettings
 {
 
-	private InstallData data;
+	private ToolFeatureData data;
 
-	public CloneWorkspaceSettings( InstallData data )
+	public CloneWorkspaceSettings( ToolFeatureData data )
 	{
 		this.data = data;
 	}

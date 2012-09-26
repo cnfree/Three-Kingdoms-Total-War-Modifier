@@ -14,8 +14,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import com.actuate.tool.development.tool.model.InstallData;
-import com.actuate.tool.development.tool.model.InstallType;
+import com.actuate.tool.development.tool.model.ToolFeatureData;
+import com.actuate.tool.development.tool.model.ToolFeature;
 import com.actuate.tool.development.tool.util.FileSorter;
 
 class BRDProProjectPage extends WizardPage
@@ -24,9 +24,9 @@ class BRDProProjectPage extends WizardPage
 	private Combo comboProjects;
 	private Combo comboFiles;
 
-	private InstallData data;
+	private ToolFeatureData data;
 
-	BRDProProjectPage( InstallData data )
+	BRDProProjectPage( ToolFeatureData data )
 	{
 		super( "ProjectPage" );
 		setTitle( "Select the BRDPro Project" );
@@ -101,7 +101,7 @@ class BRDProProjectPage extends WizardPage
 	{
 		if ( data != null )
 		{
-			if ( data.getInstallType( ) != InstallType.installBRDPro )
+			if ( data.getToolFeature( ) != ToolFeature.installBRDPro )
 				return true;
 			return comboProjects != null
 					&& comboProjects.getSelectionIndex( ) > -1

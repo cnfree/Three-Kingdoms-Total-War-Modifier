@@ -16,18 +16,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.actuate.tool.development.tool.model.InstallData;
+import com.actuate.tool.development.tool.model.ToolFeatureData;
 
 class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 {
 
 	private Text shortcutArgumentText;
 
-	private InstallData data;
+	private ToolFeatureData data;
 
 	private Button shortcutButton;
 
-	BRDProShortcutPage( InstallData data )
+	BRDProShortcutPage( ToolFeatureData data )
 	{
 		super( "ShortcutPage" );
 		setTitle( "Create the Executable Shortcut" );

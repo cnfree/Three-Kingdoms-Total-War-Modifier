@@ -32,8 +32,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.actuate.tool.development.tool.model.InstallData;
-import com.actuate.tool.development.tool.model.InstallType;
+import com.actuate.tool.development.tool.model.ToolFeatureData;
+import com.actuate.tool.development.tool.model.ToolFeature;
 import com.actuate.tool.development.tool.model.Modules;
 import com.actuate.tool.development.tool.util.FileSorter;
 import com.actuate.tool.development.tool.util.LogUtil;
@@ -46,7 +46,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Combo comboProjects;
 	private Combo comboFiles;
 
-	private InstallData data;
+	private ToolFeatureData data;
 	private Text txtRoot;
 	private Combo comboView;
 	private Button forceButton;
@@ -56,7 +56,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Text txtClient;
 	private Button btnTest;
 
-	IPortalViewerProjectPage( InstallData data )
+	IPortalViewerProjectPage( ToolFeatureData data )
 	{
 		super( "ProjectPage" );
 		setTitle( "Select the iPortal Viewer Project" );
@@ -524,7 +524,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 	{
 		if ( data != null )
 		{
-			if ( data.getInstallType( ) != InstallType.synciPortalWorkspace )
+			if ( data.getToolFeature( ) != ToolFeature.synciPortalWorkspace )
 				return true;
 
 			checkStatus( );
