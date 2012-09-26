@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +32,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
 import com.actuate.development.tool.model.Modules;
 import com.actuate.development.tool.model.ToolFeature;
@@ -53,8 +55,9 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Text txtServer;
 	private Text txtUser;
 	private Text txtPassword;
-	private Text txtClient;
+	private Combo comboClient;
 	private Button btnTest;
+	private Button btnSearch;
 
 	IPortalViewerProjectPage( ToolFeatureData data )
 	{
@@ -205,7 +208,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 		Group connectionGroup = new Group( composite, SWT.NONE );
 		connectionGroup.setText( "P4 Connection Settings" );
-		gridLayout = new GridLayout( 2, false );
+		gridLayout = new GridLayout( 3, false );
 		gridLayout.marginWidth = 10;
 		connectionGroup.setLayout( gridLayout );
 
@@ -217,6 +220,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		new Label( connectionGroup, SWT.NONE ).setText( "&Server: " );
 		txtServer = new Text( connectionGroup, SWT.BORDER );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 2;
 		txtServer.setLayoutData( gd );
 
 		txtServer.addModifyListener( new ModifyListener( ) {
@@ -234,6 +238,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		new Label( connectionGroup, SWT.NONE ).setText( "&User: " );
 		txtUser = new Text( connectionGroup, SWT.BORDER );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 2;
 		txtUser.setLayoutData( gd );
 
 		txtUser.addModifyListener( new ModifyListener( ) {
@@ -251,6 +256,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		new Label( connectionGroup, SWT.NONE ).setText( "P&assword: " );
 		txtPassword = new Text( connectionGroup, SWT.BORDER | SWT.PASSWORD );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 2;
 		txtPassword.setLayoutData( gd );
 
 		txtPassword.addModifyListener( new ModifyListener( ) {
@@ -266,27 +272,131 @@ class IPortalViewerProjectPage extends WizardPage implements
 		} );
 
 		new Label( connectionGroup, SWT.NONE ).setText( "&Client: " );
-		txtClient = new Text( connectionGroup, SWT.BORDER );
+		comboClient = new Combo( connectionGroup, SWT.BORDER );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		txtClient.setLayoutData( gd );
+		comboClient.setLayoutData( gd );
 
-		txtClient.addModifyListener( new ModifyListener( ) {
+		comboClient.addModifyListener( new ModifyListener( ) {
 
 			public void modifyText( ModifyEvent e )
 			{
 				if ( data != null )
 					data.getCurrentIportalViewerData( )
-							.setClient( txtClient.getText( ) );
+							.setClient( comboClient.getText( ) );
 				setPageComplete( isPageComplete( ) );
 			}
 
+		} );
+
+		btnSearch = new Button( connectionGroup, SWT.PUSH );
+		gd = new GridData( );
+		int height = comboClient.computeSize( SWT.DEFAULT, SWT.DEFAULT ).y;
+		gd.widthHint = gd.heightHint = height + comboClient.getBorderWidth( );
+		btnSearch.setLayoutData( gd );
+		btnSearch.setImage( ImageCache.getImage( "/icons/search.png" ) );
+		btnSearch.setEnabled( false );
+		btnSearch.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent selectionevent )
+			{
+				try
+				{
+					final boolean[] error = new boolean[1];
+					final Process p4Process = Runtime.getRuntime( )
+							.exec( "p4 -p "
+									+ txtServer.getText( )
+									+ " -u "
+									+ txtUser.getText( )
+									+ " -P "
+									+ txtPassword.getText( )
+									+ " clients -u "
+									+ txtUser.getText( ) );
+
+					Thread thread = new Thread( ) {
+
+						public void run( )
+						{
+							try
+							{
+								BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
+								final String[] line = new String[1];
+								final StringBuffer buffer = new StringBuffer( );
+								while ( ( line[0] = input.readLine( ) ) != null )
+								{
+									buffer.append( line[0] + "\r\n" );
+								}
+								input.close( );
+
+								if ( buffer.length( ) > 0 )
+								{
+									error[0] = true;
+									Display.getDefault( )
+											.syncExec( new Runnable( ) {
+
+												public void run( )
+												{
+													MessageDialog.openError( UIUtil.getShell( ),
+															"Error",
+															buffer.toString( ) );
+												}
+											} );
+								}
+							}
+							catch ( Exception e )
+							{
+								Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
+										.log( Level.WARNING,
+												"Get error stream failed.", e ); //$NON-NLS-1$
+							}
+						}
+					};
+					thread.setDaemon( true );
+					thread.start( );
+
+					StringWriter output = new StringWriter( );
+					IOUtils.copy( p4Process.getInputStream( ), output );
+					p4Process.waitFor( );
+
+					Thread.sleep( 100 );
+
+					if ( !error[0] )
+					{
+						List<String> clients = new ArrayList<String>( );
+						Pattern pattern = Pattern.compile( "(?i)Client\\s+\\S+",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( output.toString( ) );
+
+						while ( matcher.find( ) )
+						{
+							String client = matcher.group( )
+									.replaceAll( "(?i)Client\\s+", "" );
+							clients.add( client.trim( ) );
+						}
+
+						String client = comboClient.getText( );
+						comboClient.removeAll( );
+						comboClient.setItems( clients.toArray( new String[0] ) );
+						if ( client == null || client.trim( ).length( ) == 0 )
+						{
+							if ( comboClient.getItemCount( ) > 0 )
+								comboClient.select( 0 );
+						}
+						else
+							comboClient.setText( client );
+					}
+				}
+				catch ( Exception e )
+				{
+					LogUtil.recordErrorMsg( e, false );
+				}
+			}
 		} );
 
 		btnTest = new Button( connectionGroup, SWT.PUSH );
 		btnTest.setText( "&Test Connection" );
 		gd = new GridData( );
 		gd.horizontalAlignment = SWT.RIGHT;
-		gd.horizontalSpan = 2;
+		gd.horizontalSpan = 3;
 		btnTest.setLayoutData( gd );
 		btnTest.setEnabled( false );
 		btnTest.addSelectionListener( new SelectionAdapter( ) {
@@ -362,7 +472,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 					{
 						String client = matcher.group( )
 								.replaceAll( "(?i)Client\\s+", "" );
-						if ( client.equalsIgnoreCase( txtClient.getText( )
+						if ( client.equalsIgnoreCase( comboClient.getText( )
 								.trim( ) ) )
 						{
 							exist = true;
@@ -376,7 +486,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 							MessageDialog.openError( UIUtil.getShell( ),
 									"Error",
 									"The client "
-											+ txtClient.getText( ).trim( )
+											+ comboClient.getText( ).trim( )
 											+ " is unavailable." );
 						}
 						else
@@ -500,13 +610,13 @@ class IPortalViewerProjectPage extends WizardPage implements
 						.trim( )
 						.length( ) > 0 )
 		{
-			txtClient.setText( data.getCurrentIportalViewerData( )
+			comboClient.setText( data.getCurrentIportalViewerData( )
 					.getClient( )
 					.trim( ) );
 		}
 		else
 		{
-			txtClient.setText( "" );
+			comboClient.setText( "" );
 		}
 
 		if ( data != null )
@@ -589,7 +699,11 @@ class IPortalViewerProjectPage extends WizardPage implements
 		btnTest.setEnabled( txtServer.getText( ).trim( ).length( ) > 0
 				&& txtUser.getText( ).trim( ).length( ) > 0
 				&& txtPassword.getText( ).trim( ).length( ) > 0
-				&& txtClient.getText( ).trim( ).length( ) > 0 );
+				&& comboClient.getText( ).trim( ).length( ) > 0 );
+
+		btnSearch.setEnabled( txtServer.getText( ).trim( ).length( ) > 0
+				&& txtUser.getText( ).trim( ).length( ) > 0
+				&& txtPassword.getText( ).trim( ).length( ) > 0 );
 
 		if ( txtRoot.getText( ).trim( ).length( ) == 0 )
 		{
@@ -628,7 +742,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 			return;
 		}
 
-		if ( txtClient.getText( ).trim( ).length( ) == 0 )
+		if ( comboClient.getText( ).trim( ).length( ) == 0 )
 		{
 			setErrorMessage( "Must specify client." );
 			return;
