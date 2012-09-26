@@ -11,7 +11,7 @@
 		<property name="p4.replace.file" value="$replaceFile" />
 		<property name="runtime" value="$runtime" />
 		<property name="p4.temp" value="${p4.root}/temp" />
-		<delete dir="p4.temp" />
+		<delete dir="${p4.temp}" />
 	</target>
 	
 </project>
