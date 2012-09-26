@@ -2,12 +2,18 @@
 package com.actuate.development.tool.task;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +55,7 @@ public class SyncIPortalWorkspace
 		if ( data == null )
 			return;
 
-		monitor.beginTask( "Total 9 steps", IProgressMonitor.UNKNOWN );
+		monitor.beginTask( "Total 10 steps", IProgressMonitor.UNKNOWN );
 
 		final int[] step = new int[1];
 		final String[] stepDetail = new String[1];
@@ -136,7 +142,7 @@ public class SyncIPortalWorkspace
 			monitor.subTask( "[Step "
 					+ ++step[0]
 					+ "] Initializing the iPortal Viewer workspace replacement task..." );
-			stepDetail[0] = "Initializing the iPortal Viewer workspace replacement task";
+			stepDetail[0] = "Initialize the iPortal Viewer workspace replacement task";
 
 			File initFile = getAntFile( "/templates/Init_IV.xml" );
 			p.fireBuildStarted( );
@@ -161,7 +167,7 @@ public class SyncIPortalWorkspace
 						+ "] Extracting the iPortal Viewer archive file..."
 			};
 			monitor.subTask( subtaskName[0] );
-			stepDetail[0] = "Extracting the iPortal Viewer archive file";
+			stepDetail[0] = "Extract the iPortal Viewer archive file";
 			File extractFile = getAntFile( "/templates/Extract_IV.xml" );
 			helper.parse( p, extractFile );
 
@@ -180,10 +186,22 @@ public class SyncIPortalWorkspace
 			monitor.subTask( "[Step "
 					+ ++step[0]
 					+ "] Replacing the iPortal Viewer workspace files..." );
-			stepDetail[0] = "Replacing the iPortal Viewer workspace files";
+			stepDetail[0] = "Replace the iPortal Viewer workspace files";
 			File reaplceFile = getAntFile( "/templates/Replace_IV.xml" );
 			helper.parse( p, reaplceFile );
 			p.executeTarget( "replace" );
+
+			monitor.subTask( "[Step "
+					+ ++step[0]
+					+ "] Updating the iPortal Viewer workspace class path..." );
+			stepDetail[0] = "Update the iPortal Viewer workspace class path";
+			File classPathFile = new File( data.getRoot( )
+					+ File.separatorChar
+					+ data.getView( ), ".classpath" );
+			if ( classPathFile.exists( ) )
+			{
+				updateClassPath( classPathFile );
+			}
 
 			monitor.subTask( "[Step "
 					+ ++step[0]
@@ -233,6 +251,70 @@ public class SyncIPortalWorkspace
 			} );
 		}
 
+	}
+
+	private void updateClassPath( File classPathFile ) throws IOException
+	{
+		int sizeL = (int) classPathFile.length( );
+		int chars_read = 0;
+		BufferedReader in = new BufferedReader( new InputStreamReader( new FileInputStream( classPathFile ) ) );
+		char[] data = new char[sizeL];
+		while ( in.ready( ) )
+		{
+			chars_read += in.read( data, chars_read, sizeL - chars_read );
+		}
+		in.close( );
+		char[] v = new char[chars_read];
+		System.arraycopy( data, 0, v, 0, chars_read );
+		String temp = new String( v );
+		Pattern pattern = Pattern.compile( "\\{.*?\\}" );
+		Matcher matcher = pattern.matcher( temp );
+		StringBuffer sbr = new StringBuffer( );
+		while ( matcher.find( ) )
+		{
+			String group = matcher.group( );
+			String path = group.substring( 1, group.length( ) - 1 );
+
+			File root = new File( this.data.getRoot( )
+					+ File.separatorChar
+					+ this.data.getView( ) );
+			File file = new File( root, path );
+			final String filePattern = "(?i)" + file.getName( );
+			File parent = file.getParentFile( );
+			File[] children = null;
+			if ( parent.exists( ) )
+			{
+				children = parent.listFiles( new FileFilter( ) {
+
+					public boolean accept( File file )
+					{
+						String fileName = file.getName( );
+						if ( fileName.matches( filePattern ) )
+						{
+							return true;
+						}
+						return false;
+					}
+				} );
+			}
+			if ( children != null && children.length > 0 )
+			{
+				File availableFile = new File( parent, children[0].getName( ) );
+				String filePath = availableFile.getCanonicalPath( )
+						.substring( root.getCanonicalPath( ).length( ) + 1 )
+						.replace( '\\', '/' );
+				matcher.appendReplacement( sbr, filePath );
+			}
+			else
+			{
+				matcher.appendReplacement( sbr, group );
+			}
+		}
+		matcher.appendTail( sbr );
+		PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( classPathFile ) ) ),
+				false );
+		out.print( sbr );
+		out.close( );
 	}
 
 	private void interruptOutput( final IProgressMonitor monitor,
