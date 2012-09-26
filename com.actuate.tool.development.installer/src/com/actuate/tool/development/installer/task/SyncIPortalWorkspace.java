@@ -3,20 +3,33 @@ package com.actuate.tool.development.installer.task;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.tools.ant.DefaultLogger;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectHelper;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.sf.feeling.swt.win32.extension.io.FileSystem;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 
 import com.actuate.tool.development.installer.model.IPortalViewerData;
+import com.actuate.tool.development.installer.model.Modules;
 import com.actuate.tool.development.installer.util.FileUtil;
 import com.actuate.tool.development.installer.util.LogUtil;
 import com.actuate.tool.development.installer.util.UIUtil;
@@ -36,7 +49,7 @@ public class SyncIPortalWorkspace
 		if ( data == null )
 			return;
 
-		monitor.beginTask( "", IProgressMonitor.UNKNOWN );
+		monitor.beginTask( "Total 9 steps", IProgressMonitor.UNKNOWN );
 
 		final int[] step = new int[1];
 		final String[] stepDetail = new String[1];
@@ -70,8 +83,7 @@ public class SyncIPortalWorkspace
 			stepDetail[0] = "Update the perforce client workspace specification from "
 					+ data.getServer( );
 
-			originRoot[0] = updateClientSpecification( getTempFile( "specification",
-					".txt" ),
+			originRoot[0] = updateClientSpecification( getTempFile( "specification.txt" ),
 					data.getRoot( ) );
 
 			if ( originRoot[0] == null )
@@ -105,16 +117,105 @@ public class SyncIPortalWorkspace
 
 			if ( originRoot[0] != null )
 			{
-				updateClientSpecification( getTempFile( "specification", ".txt" ),
+				updateClientSpecification( getTempFile( "specification.txt",
+						".txt" ),
 						originRoot[0] );
+
+				originRoot[0] = null;
 			}
+
+			Project p = new Project( );
+			p.setBasedir( FileSystem.getCurrentDirectory( ) );
+
+			final DefaultLogger consoleLogger = new DefaultLogger( );
+			consoleLogger.setErrorPrintStream( System.err );
+			consoleLogger.setOutputPrintStream( System.out );
+			consoleLogger.setMessageOutputLevel( Project.MSG_INFO );
+			p.addBuildListener( consoleLogger );
+
+			monitor.subTask( "[Step "
+					+ ++step[0]
+					+ "] Initializing the iPortal Viewer workspace replacement task..." );
+			stepDetail[0] = "Initializing the iPortal Viewer workspace replacement task";
+
+			File initFile = getAntFile( "/templates/Init_IV.xml" );
+			p.fireBuildStarted( );
+			p.init( );
+			ProjectHelper helper = ProjectHelper.getProjectHelper( );
+			helper.parse( p, initFile );
+			p.executeTarget( "init" );
+
+			monitor.subTask( "[Step "
+					+ ++step[0]
+					+ "] Downloading the iPortal Viewer archive file...\t[Size: "
+					+ FileUtils.byteCountToDisplaySize( new File( data.getBirtViewerFile( ) ).length( ) )
+					+ "] " );
+			stepDetail[0] = "Download the BRDPro archive file";
+			File downloadFile = getAntFile( "/templates/Download_IV.xml" );
+			helper.parse( p, downloadFile );
+			p.executeTarget( "download" );
+
+			String[] subtaskName = new String[]{
+				"[Step "
+						+ ++step[0]
+						+ "] Extracting the iPortal Viewer archive file..."
+			};
+			monitor.subTask( subtaskName[0] );
+			stepDetail[0] = "Extracting the iPortal Viewer archive file";
+			File extractFile = getAntFile( "/templates/Extract_IV.xml" );
+			helper.parse( p, extractFile );
+
+			final boolean[] flag = new boolean[]{
+				false
+			};
+
+			interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
+
+			p.executeTarget( "unzip_webviewer" );
+
+			flag[0] = true;
+
+			Thread.sleep( 100 );
+
+			monitor.subTask( "[Step "
+					+ ++step[0]
+					+ "] Replacing the iPortal Viewer workspace files..." );
+			stepDetail[0] = "Replacing the iPortal Viewer workspace files";
+			File reaplceFile = getAntFile( "/templates/Replace_IV.xml" );
+			helper.parse( p, reaplceFile );
+			p.executeTarget( "replace" );
+
+			monitor.subTask( "[Step "
+					+ ++step[0]
+					+ "] Cleaning the temporary files..." );
+			stepDetail[0] = "Clean the temporary files";
+			File cleanFile = getAntFile( "/templates/Clean_IV.xml" );
+			helper.parse( p, cleanFile );
+			p.executeTarget( "clean" );
+
+			p.fireBuildFinished( null );
+
+			Display.getDefault( ).syncExec( new Runnable( ) {
+
+				public void run( )
+				{
+					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+					StringBuffer buffer = new StringBuffer( );
+					buffer.append( "Synchronize the iPortal Viewer workspace sucessfully." );
+					MessageDialog.openInformation( null,
+							"Information",
+							buffer.toString( ) );
+					Windows.flashWindow( UIUtil.getShell( ).handle, false );
+				}
+			} );
 
 		}
 		catch ( final Exception e )
 		{
 			if ( originRoot[0] != null )
 			{
-				updateClientSpecification( getTempFile( "specification", ".txt" ),
+				updateClientSpecification( getTempFile( "specification.txt",
+						".txt" ),
 						originRoot[0] );
 			}
 			Display.getDefault( ).syncExec( new Runnable( ) {
@@ -132,6 +233,94 @@ public class SyncIPortalWorkspace
 			} );
 		}
 
+	}
+
+	private void interruptOutput( final IProgressMonitor monitor,
+			final int[] step, final DefaultLogger consoleLogger,
+			final boolean[] flag, final String[] defaultTaskName )
+	{
+
+		Thread outputThread = new Thread( ) {
+
+			public void run( )
+			{
+				try
+				{
+					PipedInputStream pipedIS = new PipedInputStream( );
+					PipedOutputStream pipedOS = new PipedOutputStream( );
+					pipedOS.connect( pipedIS );
+					BufferedReader input = new BufferedReader( new InputStreamReader( pipedIS ) );
+					PrintStream ps = new PrintStream( pipedOS );
+					consoleLogger.setOutputPrintStream( ps );
+					final String[] line = new String[1];
+					String extactingStr = "[exec] Extracting";
+					int length = "[exec]".length( );
+					while ( ( line[0] = input.readLine( ) ) != null )
+					{
+						if ( !flag[0] )
+						{
+							int index = line[0].indexOf( extactingStr );
+							if ( index != -1 )
+							{
+								String file = line[0].substring( index + length );
+								monitor.subTask( "[Step "
+										+ step[0]
+										+ "]"
+										+ file );
+							}
+							else
+							{
+								monitor.subTask( defaultTaskName[0] );
+							}
+							System.out.println( line[0] );
+						}
+					}
+					input.close( );
+					pipedIS.close( );
+					consoleLogger.setOutputPrintStream( System.out );
+				}
+				catch ( IOException e )
+				{
+				}
+			}
+		};
+		outputThread.start( );
+
+	}
+
+	private File getAntFile( String fileName )
+	{
+		File templateFile = getTempFile( fileName );
+		FileUtil.writeToBinarayFile( templateFile, this.getClass( )
+				.getResourceAsStream( fileName ), true );
+
+		VelocityEngine velocityEngine = new VelocityEngine( );
+		velocityEngine.setProperty( VelocityEngine.FILE_RESOURCE_LOADER_PATH,
+				templateFile.getAbsoluteFile( )
+						.getParentFile( )
+						.getAbsolutePath( ) );
+		velocityEngine.init( );
+
+		VelocityContext context = new VelocityContext( );
+		context.put( "p4Root", data.getRoot( ) );
+		context.put( "p4View", data.getView( ) );
+		File file = new File( data.getBirtViewerFile( ) );
+		context.put( "buildPath", file.getParentFile( ).getAbsolutePath( ) );
+		context.put( "buildFile", file.getName( ) );
+		file = Modules.getInstance( )
+				.getIPortalRepalceFile( data.getProject( ) );
+		context.put( "replacePath", file.getParentFile( ).getAbsolutePath( ) );
+		context.put( "replaceFile", file.getName( ) );
+		context.put( "runtime", FileSystem.getCurrentDirectory( ) );
+
+		Template template = velocityEngine.getTemplate( templateFile.getName( ) );
+		StringWriter sw = new StringWriter( );
+		template.merge( context, sw );
+
+		File tempFile = getTempFile( fileName );
+		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
+
+		return tempFile;
 	}
 
 	private void synciPortal( final IProgressMonitor monitor, final int[] step )
@@ -208,11 +397,14 @@ public class SyncIPortalWorkspace
 						final String[] line = new String[1];
 						while ( ( line[0] = input.readLine( ) ) != null )
 						{
-							monitor.subTask( "[Step " + step[0] + "] Synchronizing: " + line[0] );
+							monitor.subTask( "[Step "
+									+ step[0]
+									+ "] Synchronizing: "
+									+ line[0] );
 						}
 						input.close( );
 					}
-					catch (final Exception e )
+					catch ( final Exception e )
 					{
 						Display.getDefault( ).syncExec( new Runnable( ) {
 
@@ -245,7 +437,7 @@ public class SyncIPortalWorkspace
 			}
 
 		}
-		catch (final Exception e )
+		catch ( final Exception e )
 		{
 			Display.getDefault( ).syncExec( new Runnable( ) {
 
@@ -433,12 +625,18 @@ public class SyncIPortalWorkspace
 		return originRoot[0];
 	}
 
+	private File getTempFile( String config )
+	{
+		return getTempFile( config, ".xml" );
+	}
+
 	private File getTempFile( String config, String suffix )
 	{
 		String filePath = System.getProperty( "java.io.tmpdir" )
 				+ System.currentTimeMillis( )
 				+ "\\"
-				+ config
+				+ config.substring( config.lastIndexOf( '/' ) + 1,
+						config.lastIndexOf( '.' ) )
 				+ suffix;
 		File configFile = new File( filePath );
 		if ( !configFile.exists( ) )

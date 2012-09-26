@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Replace">
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: replace                     
+	         - - - - - - - - - - - - - - - - - -->
+	<target name="replace">
+	    <exec dir="tool" executable="${runtime}\tool\7z.exe" failonerror="true">
+			<arg line="x &quot;${p4.temp}/${p4.replace.file}&quot; -o&quot;${p4.root}/${p4.view}&quot; -aoa" />
+		</exec>
+	</target>
+	
+</project>

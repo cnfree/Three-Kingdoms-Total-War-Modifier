@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Download">
+	<target name="download">
+		<copy file="${build.path}/${build.file}" todir="${p4.temp}" />
+	</target>
+</project>
