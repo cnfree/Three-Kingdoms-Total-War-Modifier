@@ -1,5 +1,5 @@
 
-package com.actuate.tool.development.installer.wizard;
+package com.actuate.tool.development.installer.provider;
 
 import java.util.ArrayList;
 import java.util.Arrays;

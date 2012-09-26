@@ -132,6 +132,18 @@ public class Modules
 		}
 		return views.toArray( new String[0] );
 	}
+	
+	public List<String> getIPortalProjects( )
+	{
+		List<String> projects = new ArrayList<String>( );
+		IPortalConfig[] configs = iPortalConfigMap.values( )
+				.toArray( new IPortalConfig[0] );
+		for ( int i = 0; i < configs.length; i++ )
+		{
+			projects.add( configs[i].getProject( ) );
+		}
+		return projects;
+	}
 
 	public String getIPortalView( String project )
 	{

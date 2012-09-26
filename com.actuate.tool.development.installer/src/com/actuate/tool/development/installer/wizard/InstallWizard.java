@@ -340,7 +340,7 @@ public class InstallWizard extends Wizard
 												.get( name )
 												.addAll( brdproFiles );
 									}
-									if ( iportalViewerFiles.size( ) > 0 )
+									if ( iportalViewerFiles.size( ) > 0 && Modules.getInstance( ).getIPortalProjects( ).contains( name ))
 									{
 										if ( !data.getIportalViewMap( )
 												.containsKey( name ) )

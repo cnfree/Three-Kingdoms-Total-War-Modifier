@@ -1,5 +1,5 @@
 
-package com.actuate.tool.development.installer.wizard;
+package com.actuate.tool.development.installer.provider;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;

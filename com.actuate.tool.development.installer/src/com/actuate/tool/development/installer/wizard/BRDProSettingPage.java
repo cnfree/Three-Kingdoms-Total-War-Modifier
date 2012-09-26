@@ -28,6 +28,8 @@ import com.actuate.tool.development.installer.model.InstallData;
 import com.actuate.tool.development.installer.model.InstallType;
 import com.actuate.tool.development.installer.model.Module;
 import com.actuate.tool.development.installer.model.ModuleType;
+import com.actuate.tool.development.installer.provider.ModuleContentProvider;
+import com.actuate.tool.development.installer.provider.ModuleLabelProvider;
 
 class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 {
