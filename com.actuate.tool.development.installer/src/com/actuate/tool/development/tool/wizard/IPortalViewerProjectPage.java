@@ -189,7 +189,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		} );
 
 		forceButton = new Button( p4ConfigGroup, SWT.CHECK );
-		forceButton.setText( "&Force Operation" );
+		forceButton.setText( "Forc&e Operation" );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 3;
 		forceButton.setLayoutData( gd );

@@ -95,7 +95,7 @@ public class ToolkitWizard extends Wizard
 
 	public ToolkitWizard( )
 	{
-		setWindowTitle( "Actuate BRDPro Development Environment Toolkit" );
+		setWindowTitle( "Actuate BRDPro Development Toolkit" );
 		setNeedsProgressMonitor( true );
 
 		final DialogSettings dialogSettings = new DialogSettings( "userInfo" );
@@ -233,7 +233,7 @@ public class ToolkitWizard extends Wizard
 					getDialogSettings( ).getInt( HEIGHT ) );
 		else
 		{
-			this.getShell( ).setSize( 600, 550 );
+			this.getShell( ).setSize( 700, 600 );
 		}
 		if ( getDialogSettings( ).get( POS_X ) != null
 				&& getDialogSettings( ).get( POS_Y ) != null )
