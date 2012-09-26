@@ -568,7 +568,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		}
 		else
 		{
-			txtServer.setText( "p4:1666" );
+			txtServer.setText( "p4.actuate.com:1666" );
 		}
 
 		if ( data != null
