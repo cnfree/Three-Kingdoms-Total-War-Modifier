@@ -79,6 +79,7 @@ public class SyncIPortalWorkspace
 							Windows.flashWindow( UIUtil.getShell( ).handle,
 									true );
 						MessageDialog.openError( null, "Error", result );
+						Windows.flashWindow( UIUtil.getShell( ).handle, false );
 					}
 				} );
 				return;
@@ -96,15 +97,6 @@ public class SyncIPortalWorkspace
 
 			if ( originRoot[0] == null )
 			{
-				Display.getDefault( ).syncExec( new Runnable( ) {
-
-					public void run( )
-					{
-						if ( UIUtil.getShell( ).getMinimized( ) )
-							Windows.flashWindow( UIUtil.getShell( ).handle,
-									true );
-					}
-				} );
 				return;
 			}
 
