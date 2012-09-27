@@ -478,6 +478,7 @@ public class InstallBRDPro
 
 				public void run( )
 				{
+					if ( UIUtil.getShell( ).getMinimized( ) )
 					Windows.flashWindow( UIUtil.getShell( ).handle, true );
 					StringBuffer buffer = new StringBuffer( );
 					buffer.append( "Install the Actuate BRDPro Development Environment sucessfully." );
@@ -531,7 +532,8 @@ public class InstallBRDPro
 
 				public void run( )
 				{
-					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+					if ( UIUtil.getShell( ).getMinimized( ) )
+						Windows.flashWindow( UIUtil.getShell( ).handle, true );
 					LogUtil.recordErrorMsg( "Step "
 							+ step[0]
 							+ ": "

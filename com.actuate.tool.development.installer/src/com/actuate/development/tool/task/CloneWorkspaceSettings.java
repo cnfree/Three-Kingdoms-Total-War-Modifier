@@ -35,7 +35,8 @@ public class CloneWorkspaceSettings
 
 			public void run( )
 			{
-				Windows.flashWindow( UIUtil.getShell( ).handle, true );
+				if ( UIUtil.getShell( ).getMinimized( ) )
+					Windows.flashWindow( UIUtil.getShell( ).handle, true );
 				if ( result )
 				{
 					MessageDialog.openInformation( null,

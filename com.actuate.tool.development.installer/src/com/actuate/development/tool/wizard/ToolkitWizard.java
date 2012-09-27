@@ -22,6 +22,8 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.sf.feeling.swt.win32.extension.Win32;
@@ -301,6 +303,20 @@ public class ToolkitWizard extends Wizard
 
 		} );
 
+		this.getShell( ).addShellListener( new ShellAdapter( ) {
+
+			public void shellActivated( ShellEvent e )
+			{
+				Windows.flashWindow( getShell( ).handle, false );
+			}
+
+			public void shellDeiconified( ShellEvent e )
+			{
+				Windows.flashWindow( getShell( ).handle, false );
+			}
+
+		} );
+
 		try
 		{
 			new ProgressMonitorDialog( getShell( ) ).run( true,
@@ -340,7 +356,10 @@ public class ToolkitWizard extends Wizard
 												.get( name )
 												.addAll( brdproFiles );
 									}
-									if ( iportalViewerFiles.size( ) > 0 && Modules.getInstance( ).getIPortalProjects( ).contains( name ))
+									if ( iportalViewerFiles.size( ) > 0
+											&& Modules.getInstance( )
+													.getIPortalProjects( )
+													.contains( name ) )
 									{
 										if ( !data.getIportalViewMap( )
 												.containsKey( name ) )

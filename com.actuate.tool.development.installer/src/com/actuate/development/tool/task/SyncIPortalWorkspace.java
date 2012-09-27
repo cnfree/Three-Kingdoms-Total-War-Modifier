@@ -75,8 +75,10 @@ public class SyncIPortalWorkspace
 
 					public void run( )
 					{
+						if ( UIUtil.getShell( ).getMinimized( ) )
+							Windows.flashWindow( UIUtil.getShell( ).handle,
+									true );
 						MessageDialog.openError( null, "Error", result );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
 					}
 				} );
 				return;
@@ -98,7 +100,9 @@ public class SyncIPortalWorkspace
 
 					public void run( )
 					{
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+						if ( UIUtil.getShell( ).getMinimized( ) )
+							Windows.flashWindow( UIUtil.getShell( ).handle,
+									true );
 					}
 				} );
 				return;
@@ -217,7 +221,8 @@ public class SyncIPortalWorkspace
 
 				public void run( )
 				{
-					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+					if ( UIUtil.getShell( ).getMinimized( ) )
+						Windows.flashWindow( UIUtil.getShell( ).handle, true );
 					StringBuffer buffer = new StringBuffer( );
 					buffer.append( "Synchronize the iPortal Viewer workspace sucessfully." );
 					MessageDialog.openInformation( null,
@@ -240,7 +245,8 @@ public class SyncIPortalWorkspace
 
 				public void run( )
 				{
-					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+					if ( UIUtil.getShell( ).getMinimized( ) )
+						Windows.flashWindow( UIUtil.getShell( ).handle, true );
 					LogUtil.recordErrorMsg( "Step "
 							+ step[0]
 							+ ": "
