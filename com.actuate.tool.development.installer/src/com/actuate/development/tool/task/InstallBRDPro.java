@@ -13,6 +13,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -335,6 +336,9 @@ public class InstallBRDPro
 					}
 					else if ( module == Module.emf )
 					{
+						if ( Arrays.asList( data.getModules( ) )
+								.contains( Module.emfsdk ) )
+							continue;
 						String pattern = "(?i)emf.+SDK.+\\.zip";
 						File file = getSDKFile( eclipseOutputDir, pattern );
 						// file = new File(
@@ -475,6 +479,36 @@ public class InstallBRDPro
 									file );
 							handlePlugin( p, helper, file, Module.git );
 							continue;
+						}
+					}
+					else if ( module == Module.emfsdk )
+					{
+						String pattern = "(?i)emf.+SDK.+\\.zip";
+						File file = getSDKFile( eclipseOutputDir, pattern );
+						// file = new File(
+						// "E:\\zip\\3.7\\emf-xsd-SDK-M201201231045.zip" );
+						if ( data.getModuleVersion( ).emf != null
+								&& data.getModuleVersion( ).emf.indexOf( '.' ) != -1 )
+						{
+							if ( file != null && file.exists( ) )
+							{
+								downloadMonitor( monitor,
+										downloadFlag,
+										subtaskName[0],
+										new File( data.getTempDir( )
+												+ "\\"
+												+ module.getName( )
+												+ "_sdk", file.getName( ) ),
+										file.length( ) );
+								initSubtask( monitor,
+										step,
+										consoleLogger,
+										subtaskName,
+										flag,
+										file );
+								handlePlugin( p, helper, file, Module.emfsdk );
+								continue;
+							}
 						}
 					}
 					else if ( module.getType( ) == ModuleType.extension )
@@ -1398,7 +1432,7 @@ public class InstallBRDPro
 							.toLowerCase( )
 							.trim( )
 							.replace( ECLIPSE_FEATURES, "" )
-							.replace( ORG_ECLIPSE_EMF, "" );;;
+							.replace( ORG_ECLIPSE_EMF, "" );
 					return;
 				}
 			}
