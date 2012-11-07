@@ -84,6 +84,8 @@ public class ToolkitWizard extends Wizard
 
 	private static final String FORCEOPERATION = "ForceOperation";
 
+	private static final String REVERTFILES = "RevertFiles";
+
 	private static final String P4SERVER = "P4Server";
 
 	private static final String P4USER = "P4User";
@@ -168,6 +170,10 @@ public class ToolkitWizard extends Wizard
 				if ( setting.get( FORCEOPERATION ) != null )
 				{
 					ivData.setForceOperation( setting.getBoolean( FORCEOPERATION ) );
+				}
+				if ( setting.get( REVERTFILES ) != null )
+				{
+					ivData.setRevertFiles( setting.getBoolean( REVERTFILES ) );
 				}
 				if ( setting.get( P4SERVER ) != null )
 				{
@@ -596,6 +602,8 @@ public class ToolkitWizard extends Wizard
 					.getView( ) );
 			projectSetting.put( FORCEOPERATION,
 					data.getCurrentIportalViewerData( ).isForceOperation( ) );
+			projectSetting.put( REVERTFILES,
+					data.getCurrentIportalViewerData( ).isRevertFiles( ) );
 			projectSetting.put( P4SERVER, data.getCurrentIportalViewerData( )
 					.getServer( ) );
 			projectSetting.put( P4USER, data.getCurrentIportalViewerData( )

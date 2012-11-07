@@ -54,8 +54,11 @@ public class SyncIPortalWorkspace
 	{
 		if ( data == null )
 			return;
-
-		monitor.beginTask( "Total 10 steps", IProgressMonitor.UNKNOWN );
+		int total = 10;
+		if ( data.isRevertFiles( ) )
+			total++;
+		monitor.beginTask( "Total " + total + " steps",
+				IProgressMonitor.UNKNOWN );
 
 		final int[] step = new int[1];
 		final String[] stepDetail = new String[1];
@@ -92,12 +95,25 @@ public class SyncIPortalWorkspace
 			stepDetail[0] = "Update the perforce client workspace specification from "
 					+ data.getServer( );
 
-			originRoot[0] = updateClientSpecification( getTempFile( "specification.txt" ),
+			originRoot[0] = updateClientSpecification( FileUtil.getTempFile( "specification.txt" ),
 					data.getRoot( ) );
 
 			if ( originRoot[0] == null )
 			{
 				return;
+			}
+
+			if ( data.isRevertFiles( ) )
+			{
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Reverting the iPortal Viewer workspace..." );
+				stepDetail[0] = "Revert the iPortal Viewer workspace";
+
+				if ( originRoot[0] != null )
+				{
+					revertiPortal( monitor, step );
+				}
 			}
 
 			monitor.subTask( "[Step "
@@ -119,7 +135,7 @@ public class SyncIPortalWorkspace
 
 			if ( originRoot[0] != null )
 			{
-				updateClientSpecification( getTempFile( "specification.txt",
+				updateClientSpecification( FileUtil.getTempFile( "specification.txt",
 						".txt" ),
 						originRoot[0] );
 
@@ -229,7 +245,7 @@ public class SyncIPortalWorkspace
 		{
 			if ( originRoot[0] != null )
 			{
-				updateClientSpecification( getTempFile( "specification.txt",
+				updateClientSpecification( FileUtil.getTempFile( "specification.txt",
 						".txt" ),
 						originRoot[0] );
 			}
@@ -370,7 +386,7 @@ public class SyncIPortalWorkspace
 
 	private File getAntFile( String fileName )
 	{
-		File templateFile = getTempFile( fileName );
+		File templateFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToBinarayFile( templateFile, this.getClass( )
 				.getResourceAsStream( fileName ), true );
 
@@ -397,7 +413,7 @@ public class SyncIPortalWorkspace
 		StringWriter sw = new StringWriter( );
 		template.merge( context, sw );
 
-		File tempFile = getTempFile( fileName );
+		File tempFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
 
 		return tempFile;
@@ -528,6 +544,130 @@ public class SyncIPortalWorkspace
 			} );
 		}
 
+	}
+
+	private void revertiPortal( final IProgressMonitor monitor, final int[] step )
+	{
+
+		final boolean[] error = new boolean[1];
+		final String[] errorMessage = new String[1];
+		try
+		{
+			final Process revertProcess = Runtime.getRuntime( )
+					.exec( new String[]{
+							"cmd",
+							"/c",
+							"p4 -p "
+									+ data.getServer( )
+									+ " -u "
+									+ data.getUser( )
+									+ " -P "
+									+ data.getPassword( )
+									+ " -c "
+									+ data.getClient( )
+									+ " revert //"
+									+ data.getView( )
+									+ "/..."
+					} );
+
+			Thread errThread = new Thread( ) {
+
+				public void run( )
+				{
+					try
+					{
+						BufferedReader input = new BufferedReader( new InputStreamReader( revertProcess.getErrorStream( ) ) );
+						final String[] line = new String[1];
+						final StringBuffer buffer = new StringBuffer( );
+						while ( ( line[0] = input.readLine( ) ) != null )
+						{
+							buffer.append( line[0] + "\r\n" );
+						}
+						input.close( );
+
+						if ( buffer.length( ) > 0 )
+						{
+							error[0] = true;
+							errorMessage[0] = buffer.toString( );
+						}
+					}
+					catch ( final Exception e )
+					{
+						Display.getDefault( ).syncExec( new Runnable( ) {
+
+							public void run( )
+							{
+								Logger.getLogger( SyncIPortalWorkspace.class.getName( ) )
+										.log( Level.WARNING,
+												"Get error stream failed.", e ); //$NON-NLS-1$
+							}
+						} );
+					}
+				}
+			};
+			errThread.setDaemon( true );
+			errThread.start( );
+
+			Thread inThread = new Thread( ) {
+
+				public void run( )
+				{
+					try
+					{
+						BufferedReader input = new BufferedReader( new InputStreamReader( revertProcess.getInputStream( ) ) );
+						final String[] line = new String[1];
+						while ( ( line[0] = input.readLine( ) ) != null )
+						{
+							monitor.subTask( "[Step "
+									+ step[0]
+									+ "] Reverting: "
+									+ line[0] );
+						}
+						input.close( );
+					}
+					catch ( final Exception e )
+					{
+						Display.getDefault( ).syncExec( new Runnable( ) {
+
+							public void run( )
+							{
+								Logger.getLogger( SyncIPortalWorkspace.class.getName( ) )
+										.log( Level.WARNING,
+												"Get error stream failed.", e ); //$NON-NLS-1$
+							}
+						} );
+					}
+				}
+			};
+			inThread.setDaemon( true );
+			inThread.start( );
+
+			revertProcess.waitFor( );
+
+			Thread.sleep( 100 );
+
+			if ( errorMessage[0] != null )
+			{
+				Display.getDefault( ).syncExec( new Runnable( ) {
+
+					public void run( )
+					{
+						MessageDialog.openError( null, "Error", errorMessage[0] );
+					}
+				} );
+			}
+
+		}
+		catch ( final Exception e )
+		{
+			Display.getDefault( ).syncExec( new Runnable( ) {
+
+				public void run( )
+				{
+					MessageDialog.openError( null, "Error", e.getMessage( ) );
+				}
+			} );
+		}
 	}
 
 	private String updateClientSpecification( final File specFile,
@@ -703,30 +843,6 @@ public class SyncIPortalWorkspace
 		} );
 
 		return originRoot[0];
-	}
-
-	private File getTempFile( String config )
-	{
-		return getTempFile( config, ".xml" );
-	}
-
-	private File getTempFile( String config, String suffix )
-	{
-		String filePath = System.getProperty( "java.io.tmpdir" )
-				+ System.currentTimeMillis( )
-				+ "\\"
-				+ config.substring( config.lastIndexOf( '/' ) + 1,
-						config.lastIndexOf( '.' ) )
-				+ suffix;
-		File configFile = new File( filePath );
-		if ( !configFile.exists( ) )
-		{
-			if ( !configFile.getParentFile( ).exists( ) )
-			{
-				configFile.getParentFile( ).mkdirs( );
-			}
-		}
-		return configFile;
 	}
 
 	private String checkP4ConnectionSettings( )

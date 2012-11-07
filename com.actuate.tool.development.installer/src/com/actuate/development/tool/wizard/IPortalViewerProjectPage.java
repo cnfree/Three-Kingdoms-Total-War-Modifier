@@ -6,18 +6,22 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -34,10 +38,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.development.tool.dialog.CreateClientDialog;
 import com.actuate.development.tool.model.Modules;
 import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
+import com.actuate.development.tool.task.SyncIPortalWorkspace;
 import com.actuate.development.tool.util.FileSorter;
+import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.util.UIUtil;
 
@@ -57,7 +64,11 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Text txtPassword;
 	private Combo comboClient;
 	private Button btnTest;
+	private Button btnCreate;
 	private Button btnSearch;
+	private Map<String, String> rootMap = new HashMap<String, String>( );
+	private Button btnDelete;
+	private Button revertButton;
 
 	IPortalViewerProjectPage( ToolFeatureData data )
 	{
@@ -129,86 +140,9 @@ class IPortalViewerProjectPage extends WizardPage implements
 					.toArray( new String[0] ) );
 		comboProjects.getParent( ).layout( );
 
-		Group p4ConfigGroup = new Group( composite, SWT.NONE );
-		p4ConfigGroup.setText( "P4 Workspace Sync Settings" );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.minimumWidth = 0;
-		gd.verticalIndent = 10;
-		p4ConfigGroup.setLayoutData( gd );
-
-		p4ConfigGroup.setLayout( new GridLayout( 3, false ) );
-
-		new Label( p4ConfigGroup, SWT.NONE ).setText( "Wor&kspace: " );
-		txtRoot = new Text( p4ConfigGroup, SWT.BORDER );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
-		txtRoot.setLayoutData( gd );
-
-		txtRoot.addModifyListener( new ModifyListener( ) {
-
-			public void modifyText( ModifyEvent e )
-			{
-				if ( data != null )
-					data.getCurrentIportalViewerData( )
-							.setRoot( txtRoot.getText( ) );
-				setPageComplete( isPageComplete( ) );
-			}
-
-		} );
-
-		Button rootDirectoryButton = new Button( p4ConfigGroup, SWT.PUSH );
-		rootDirectoryButton.setText( "Br&owse..." );
-		rootDirectoryButton.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent e )
-			{
-				DirectoryDialog dialog = new DirectoryDialog( getShell( ) );
-				dialog.setMessage( "Select Directory" );
-				String path = dialog.open( );
-				if ( path != null )
-				{
-					txtRoot.setText( path );
-				}
-			}
-
-		} );
-
-		new Label( p4ConfigGroup, SWT.NONE ).setText( "P4 V&iew: " );
-		comboView = new Combo( p4ConfigGroup, SWT.BORDER );
-		comboView.setItems( Modules.getInstance( ).getIPortalViews( ) );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.horizontalSpan = 2;
-		comboView.setLayoutData( gd );
-
-		comboView.addModifyListener( new ModifyListener( ) {
-
-			public void modifyText( ModifyEvent e )
-			{
-				if ( data != null )
-					data.getCurrentIportalViewerData( )
-							.setView( comboView.getText( ) );
-				setPageComplete( isPageComplete( ) );
-			}
-
-		} );
-
-		forceButton = new Button( p4ConfigGroup, SWT.CHECK );
-		forceButton.setText( "Forc&e Operation" );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.horizontalSpan = 3;
-		forceButton.setLayoutData( gd );
-		forceButton.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent e )
-			{
-				if ( data != null )
-					data.getCurrentIportalViewerData( )
-							.setForceOperation( forceButton.getSelection( ) );
-			}
-		} );
-
 		Group connectionGroup = new Group( composite, SWT.NONE );
 		connectionGroup.setText( "P4 Connection Settings" );
-		gridLayout = new GridLayout( 3, false );
+		gridLayout = new GridLayout( 5, false );
 		gridLayout.marginWidth = 10;
 		connectionGroup.setLayout( gridLayout );
 
@@ -220,7 +154,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		new Label( connectionGroup, SWT.NONE ).setText( "&Server: " );
 		txtServer = new Text( connectionGroup, SWT.BORDER );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.horizontalSpan = 2;
+		gd.horizontalSpan = 4;
 		txtServer.setLayoutData( gd );
 
 		txtServer.addModifyListener( new ModifyListener( ) {
@@ -238,7 +172,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		new Label( connectionGroup, SWT.NONE ).setText( "&User: " );
 		txtUser = new Text( connectionGroup, SWT.BORDER );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.horizontalSpan = 2;
+		gd.horizontalSpan = 4;
 		txtUser.setLayoutData( gd );
 
 		txtUser.addModifyListener( new ModifyListener( ) {
@@ -256,7 +190,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		new Label( connectionGroup, SWT.NONE ).setText( "P&assword: " );
 		txtPassword = new Text( connectionGroup, SWT.BORDER | SWT.PASSWORD );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
-		gd.horizontalSpan = 2;
+		gd.horizontalSpan = 4;
 		txtPassword.setLayoutData( gd );
 
 		txtPassword.addModifyListener( new ModifyListener( ) {
@@ -288,114 +222,317 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 		} );
 
+		comboClient.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				handleClientSelectionEvent( );
+			}
+		} );
+
 		btnSearch = new Button( connectionGroup, SWT.PUSH );
 		gd = new GridData( );
 		int height = comboClient.computeSize( SWT.DEFAULT, SWT.DEFAULT ).y;
 		gd.widthHint = gd.heightHint = height + comboClient.getBorderWidth( );
 		btnSearch.setLayoutData( gd );
+		btnSearch.setToolTipText( "Find all clients" );
 		btnSearch.setImage( ImageCache.getImage( "/icons/search.png" ) );
 		btnSearch.setEnabled( false );
 		btnSearch.addSelectionListener( new SelectionAdapter( ) {
 
 			public void widgetSelected( SelectionEvent selectionevent )
 			{
+				BusyIndicator.showWhile( Display.getDefault( ),
+						new Runnable( ) {
+
+							public void run( )
+							{
+								try
+								{
+									final boolean[] error = new boolean[1];
+									final Process p4Process = Runtime.getRuntime( )
+											.exec( "p4 -p "
+													+ txtServer.getText( )
+													+ " -u "
+													+ txtUser.getText( )
+													+ " -P "
+													+ txtPassword.getText( )
+													+ " clients -u "
+													+ txtUser.getText( ) );
+
+									Thread thread = new Thread( ) {
+
+										public void run( )
+										{
+											try
+											{
+												BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
+												final String[] line = new String[1];
+												final StringBuffer buffer = new StringBuffer( );
+												while ( ( line[0] = input.readLine( ) ) != null )
+												{
+													buffer.append( line[0]
+															+ "\r\n" );
+												}
+												input.close( );
+
+												if ( buffer.length( ) > 0 )
+												{
+													error[0] = true;
+													Display.getDefault( )
+															.syncExec( new Runnable( ) {
+
+																public void run( )
+																{
+																	MessageDialog.openError( UIUtil.getShell( ),
+																			"Error",
+																			buffer.toString( ) );
+																}
+															} );
+												}
+											}
+											catch ( Exception e )
+											{
+												Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
+														.log( Level.WARNING,
+																"Get error stream failed.", e ); //$NON-NLS-1$
+											}
+										}
+									};
+									thread.setDaemon( true );
+									thread.start( );
+
+									StringWriter output = new StringWriter( );
+									IOUtils.copy( p4Process.getInputStream( ),
+											output );
+									p4Process.waitFor( );
+
+									Thread.sleep( 100 );
+
+									if ( !error[0] )
+									{
+										List<String> clients = new ArrayList<String>( );
+										Pattern pattern = Pattern.compile( "(?i)Client\\s+\\S+",
+												Pattern.CASE_INSENSITIVE );
+										Matcher matcher = pattern.matcher( output.toString( ) );
+
+										while ( matcher.find( ) )
+										{
+											String client = matcher.group( )
+													.replaceAll( "(?i)Client\\s+",
+															"" );
+											clients.add( client.trim( ) );
+										}
+
+										String client = comboClient.getText( );
+										comboClient.removeAll( );
+										comboClient.setItems( clients.toArray( new String[0] ) );
+										if ( client == null
+												|| client.trim( ).length( ) == 0 )
+										{
+											if ( comboClient.getItemCount( ) > 0 )
+											{
+												comboClient.select( 0 );
+											}
+										}
+										else
+										{
+											comboClient.setText( client );
+										}
+										handleClientSelectionEvent( );
+									}
+								}
+								catch ( Exception e )
+								{
+									LogUtil.recordErrorMsg( e, false );
+								}
+								setPageComplete( isPageComplete( ) );
+							}
+						} );
+			}
+		} );
+
+		btnDelete = new Button( connectionGroup, SWT.PUSH );
+		gd = new GridData( );
+		gd.widthHint = gd.heightHint = height + comboClient.getBorderWidth( );
+		btnDelete.setLayoutData( gd );
+		btnDelete.setToolTipText( "Delete the specify client" );
+		btnDelete.setImage( ImageCache.getImage( "/icons/delete.gif" ) );
+		btnDelete.setEnabled( false );
+		btnDelete.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent selectionevent )
+			{
+				boolean confirm = MessageDialog.openConfirm( IPortalViewerProjectPage.this.getShell( ),
+						"Confirm",
+						"Are you sure you want to delete this client "
+								+ comboClient.getText( )
+								+ "?" );
+				if ( !confirm )
+					return;
+				BusyIndicator.showWhile( Display.getDefault( ),
+						new Runnable( ) {
+
+							public void run( )
+							{
+								try
+								{
+									final boolean[] error = new boolean[1];
+									final Process p4Process = Runtime.getRuntime( )
+											.exec( "p4 -p "
+													+ txtServer.getText( )
+													+ " -u "
+													+ txtUser.getText( )
+													+ " -P "
+													+ txtPassword.getText( )
+													+ " client -d "
+													+ comboClient.getText( ) );
+
+									Thread thread = new Thread( ) {
+
+										public void run( )
+										{
+											try
+											{
+												BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
+												final String[] line = new String[1];
+												final StringBuffer buffer = new StringBuffer( );
+												while ( ( line[0] = input.readLine( ) ) != null )
+												{
+													buffer.append( line[0]
+															+ "\r\n" );
+												}
+												input.close( );
+
+												if ( buffer.length( ) > 0 )
+												{
+													error[0] = true;
+													Display.getDefault( )
+															.syncExec( new Runnable( ) {
+
+																public void run( )
+																{
+																	MessageDialog.openError( UIUtil.getShell( ),
+																			"Error",
+																			buffer.toString( ) );
+																}
+															} );
+												}
+											}
+											catch ( Exception e )
+											{
+												Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
+														.log( Level.WARNING,
+																"Get error stream failed.", e ); //$NON-NLS-1$
+											}
+										}
+									};
+									thread.setDaemon( true );
+									thread.start( );
+
+									StringWriter output = new StringWriter( );
+									IOUtils.copy( p4Process.getInputStream( ),
+											output );
+									p4Process.waitFor( );
+
+									Thread.sleep( 100 );
+
+									if ( !error[0] )
+									{
+										List<String> clients = new ArrayList<String>( );
+										getClients( clients, error );
+										comboClient.setItems( clients.toArray( new String[0] ) );
+										if ( comboClient.getItemCount( ) > 0 )
+										{
+											comboClient.select( 0 );
+										}
+										handleClientSelectionEvent( );
+									}
+								}
+								catch ( Exception e )
+								{
+									LogUtil.recordErrorMsg( e, false );
+								}
+								setPageComplete( isPageComplete( ) );
+							}
+						} );
+			}
+		} );
+
+		btnCreate = new Button( connectionGroup, SWT.PUSH );
+		gd = new GridData( );
+		gd.heightHint = height + comboClient.getBorderWidth( );
+		btnCreate.setLayoutData( gd );
+		btnCreate.setText( "Create &New..." );
+		btnCreate.setEnabled( false );
+		btnCreate.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent selectionevent )
+			{
 				try
 				{
-					final boolean[] error = new boolean[1];
-					final Process p4Process = Runtime.getRuntime( )
-							.exec( "p4 -p "
-									+ txtServer.getText( )
-									+ " -u "
-									+ txtUser.getText( )
-									+ " -P "
-									+ txtPassword.getText( )
-									+ " clients -u "
-									+ txtUser.getText( ) );
+					List<String> clients = new ArrayList<String>( );
+					boolean[] error = new boolean[1];
 
-					Thread thread = new Thread( ) {
+					getClients( clients, error );
 
-						public void run( )
-						{
-							try
-							{
-								BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
-								final String[] line = new String[1];
-								final StringBuffer buffer = new StringBuffer( );
-								while ( ( line[0] = input.readLine( ) ) != null )
-								{
-									buffer.append( line[0] + "\r\n" );
-								}
-								input.close( );
+					if ( error[0] )
+						return;
 
-								if ( buffer.length( ) > 0 )
-								{
-									error[0] = true;
-									Display.getDefault( )
-											.syncExec( new Runnable( ) {
-
-												public void run( )
-												{
-													MessageDialog.openError( UIUtil.getShell( ),
-															"Error",
-															buffer.toString( ) );
-												}
-											} );
-								}
-							}
-							catch ( Exception e )
-							{
-								Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
-										.log( Level.WARNING,
-												"Get error stream failed.", e ); //$NON-NLS-1$
-							}
-						}
-					};
-					thread.setDaemon( true );
-					thread.start( );
-
-					StringWriter output = new StringWriter( );
-					IOUtils.copy( p4Process.getInputStream( ), output );
-					p4Process.waitFor( );
-
-					Thread.sleep( 100 );
-
-					if ( !error[0] )
+					CreateClientDialog dialog = new CreateClientDialog( null );
+					dialog.setExistClients( clients );
+					if ( dialog.open( ) == Dialog.OK )
 					{
-						List<String> clients = new ArrayList<String>( );
-						Pattern pattern = Pattern.compile( "(?i)Client\\s+\\S+",
-								Pattern.CASE_INSENSITIVE );
-						Matcher matcher = pattern.matcher( output.toString( ) );
-
-						while ( matcher.find( ) )
+						String[] result = dialog.getResult( );
+						if ( result != null && result.length == 2 )
 						{
-							String client = matcher.group( )
-									.replaceAll( "(?i)Client\\s+", "" );
-							clients.add( client.trim( ) );
+							updateClientSpecification( FileUtil.getTempFile( "specification.txt" ),
+									result[0],
+									result[1] );
+							clients.clear( );
+							getClients( clients, error );
+							String client = comboClient.getText( );
+							comboClient.removeAll( );
+							comboClient.setItems( clients.toArray( new String[0] ) );
+							if ( comboClient.indexOf( result[0] ) != -1 )
+							{
+								comboClient.setText( result[0] );
+								txtRoot.setText( result[1] );
+							}
+							else
+							{
+								if ( client == null
+										|| client.trim( ).length( ) == 0 )
+								{
+									if ( comboClient.getItemCount( ) > 0 )
+										comboClient.select( 0 );
+								}
+								else
+									comboClient.setText( client );
+								handleClientSelectionEvent( );
+							}
 						}
-
-						String client = comboClient.getText( );
-						comboClient.removeAll( );
-						comboClient.setItems( clients.toArray( new String[0] ) );
-						if ( client == null || client.trim( ).length( ) == 0 )
-						{
-							if ( comboClient.getItemCount( ) > 0 )
-								comboClient.select( 0 );
-						}
-						else
-							comboClient.setText( client );
 					}
 				}
 				catch ( Exception e )
 				{
 					LogUtil.recordErrorMsg( e, false );
 				}
+				setPageComplete( isPageComplete( ) );
 			}
 		} );
+
+		Label span = new Label( connectionGroup, SWT.NONE );
+		gd = new GridData( );
+		gd.horizontalAlignment = SWT.RIGHT;
+		gd.horizontalSpan = 2;
+		span.setLayoutData( gd );
 
 		btnTest = new Button( connectionGroup, SWT.PUSH );
 		btnTest.setText( "&Test Connection" );
 		gd = new GridData( );
-		gd.horizontalAlignment = SWT.RIGHT;
+		gd.heightHint = height + comboClient.getBorderWidth( );
+		gd.horizontalAlignment = SWT.FILL;
 		gd.horizontalSpan = 3;
 		btnTest.setLayoutData( gd );
 		btnTest.setEnabled( false );
@@ -501,6 +638,106 @@ class IPortalViewerProjectPage extends WizardPage implements
 				{
 					LogUtil.recordErrorMsg( e, false );
 				}
+			}
+		} );
+
+		Group p4ConfigGroup = new Group( composite, SWT.NONE );
+		p4ConfigGroup.setText( "P4 Workspace Sync Settings" );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.minimumWidth = 0;
+		gd.verticalIndent = 10;
+		p4ConfigGroup.setLayoutData( gd );
+
+		p4ConfigGroup.setLayout( new GridLayout( 3, false ) );
+
+		new Label( p4ConfigGroup, SWT.NONE ).setText( "Wor&kspace: " );
+		txtRoot = new Text( p4ConfigGroup, SWT.BORDER );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		txtRoot.setLayoutData( gd );
+
+		txtRoot.addModifyListener( new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				if ( data != null )
+					data.getCurrentIportalViewerData( )
+							.setRoot( txtRoot.getText( ) );
+				setPageComplete( isPageComplete( ) );
+			}
+
+		} );
+
+		Button rootDirectoryButton = new Button( p4ConfigGroup, SWT.PUSH );
+		rootDirectoryButton.setText( "Br&owse..." );
+		rootDirectoryButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				DirectoryDialog dialog = new DirectoryDialog( getShell( ) );
+				dialog.setMessage( "Select Directory" );
+				String path = dialog.open( );
+				if ( path != null )
+				{
+					txtRoot.setText( path );
+				}
+			}
+
+		} );
+
+		new Label( p4ConfigGroup, SWT.NONE ).setText( "P4 V&iew: " );
+		comboView = new Combo( p4ConfigGroup, SWT.BORDER );
+		comboView.setItems( Modules.getInstance( ).getIPortalViews( ) );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 2;
+		comboView.setLayoutData( gd );
+
+		comboView.addModifyListener( new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				if ( data != null )
+					data.getCurrentIportalViewerData( )
+							.setView( comboView.getText( ) );
+				setPageComplete( isPageComplete( ) );
+			}
+
+		} );
+
+		Composite checkGroup = new Composite( p4ConfigGroup, SWT.CHECK );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 3;
+		checkGroup.setLayoutData( gd );
+
+		GridLayout layout = new GridLayout( );
+		layout.numColumns = 2;
+		layout.marginWidth = layout.marginHeight = 0;
+		checkGroup.setLayout( layout );
+
+		forceButton = new Button( checkGroup, SWT.CHECK );
+		forceButton.setText( "Forc&e Operation" );
+		gd = new GridData( );
+		forceButton.setLayoutData( gd );
+		forceButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( data != null )
+					data.getCurrentIportalViewerData( )
+							.setForceOperation( forceButton.getSelection( ) );
+			}
+		} );
+
+		revertButton = new Button( checkGroup, SWT.CHECK );
+		revertButton.setText( "&Revert Files" );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		revertButton.setLayoutData( gd );
+		revertButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( data != null )
+					data.getCurrentIportalViewerData( )
+							.setRevertFiles( revertButton.getSelection( ) );
 			}
 		} );
 
@@ -623,10 +860,13 @@ class IPortalViewerProjectPage extends WizardPage implements
 		{
 			forceButton.setSelection( data.getCurrentIportalViewerData( )
 					.isForceOperation( ) );
+			revertButton.setSelection( data.getCurrentIportalViewerData( )
+					.isRevertFiles( ) );
 		}
 		else
 		{
 			forceButton.setSelection( false );
+			revertButton.setSelection( false );
 		}
 	}
 
@@ -705,6 +945,12 @@ class IPortalViewerProjectPage extends WizardPage implements
 				&& txtUser.getText( ).trim( ).length( ) > 0
 				&& txtPassword.getText( ).trim( ).length( ) > 0 );
 
+		btnCreate.setEnabled( txtServer.getText( ).trim( ).length( ) > 0
+				&& txtUser.getText( ).trim( ).length( ) > 0
+				&& txtPassword.getText( ).trim( ).length( ) > 0 );
+
+		btnDelete.setEnabled( btnTest.isEnabled( ) );
+
 		if ( txtRoot.getText( ).trim( ).length( ) == 0 )
 		{
 			setErrorMessage( "Must specify P4 workspace." );
@@ -756,5 +1002,426 @@ class IPortalViewerProjectPage extends WizardPage implements
 	{
 		if ( ToolkitWizard.CURRENT_IV_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
+	}
+
+	private void getClients( final List<String> clients, final boolean[] error )
+	{
+		BusyIndicator.showWhile( Display.getDefault( ), new Runnable( ) {
+
+			public void run( )
+			{
+				try
+				{
+					final Process p4Process = Runtime.getRuntime( )
+							.exec( "p4 -p "
+									+ txtServer.getText( )
+									+ " -u "
+									+ txtUser.getText( )
+									+ " -P "
+									+ txtPassword.getText( )
+									+ " clients -u "
+									+ txtUser.getText( ) );
+
+					Thread thread = new Thread( ) {
+
+						public void run( )
+						{
+							try
+							{
+								BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
+								final String[] line = new String[1];
+								final StringBuffer buffer = new StringBuffer( );
+								while ( ( line[0] = input.readLine( ) ) != null )
+								{
+									buffer.append( line[0] + "\r\n" );
+								}
+								input.close( );
+
+								if ( buffer.length( ) > 0 )
+								{
+									error[0] = true;
+									Display.getDefault( )
+											.syncExec( new Runnable( ) {
+
+												public void run( )
+												{
+													MessageDialog.openError( UIUtil.getShell( ),
+															"Error",
+															buffer.toString( ) );
+												}
+											} );
+								}
+							}
+							catch ( Exception e )
+							{
+								Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
+										.log( Level.WARNING,
+												"Get error stream failed.", e ); //$NON-NLS-1$
+							}
+						}
+					};
+					thread.setDaemon( true );
+					thread.start( );
+
+					StringWriter output = new StringWriter( );
+					IOUtils.copy( p4Process.getInputStream( ), output );
+					p4Process.waitFor( );
+
+					Thread.sleep( 100 );
+
+					if ( !error[0] )
+					{
+
+						Pattern pattern = Pattern.compile( "(?i)Client\\s+\\S+",
+								Pattern.CASE_INSENSITIVE );
+						Matcher matcher = pattern.matcher( output.toString( ) );
+
+						while ( matcher.find( ) )
+						{
+							String client = matcher.group( )
+									.replaceAll( "(?i)Client\\s+", "" );
+							clients.add( client.trim( ) );
+						}
+					}
+				}
+				catch ( Exception e )
+				{
+					MessageDialog.openError( null, "Error", e.getMessage( ) );
+				}
+			}
+		} );
+	}
+
+	private void updateClientSpecification( final File specFile,
+			final String client, final String root )
+	{
+		BusyIndicator.showWhile( Display.getDefault( ), new Runnable( ) {
+
+			public void run( )
+			{
+				final String[] originRoot = new String[1];
+				final String[] originClient = new String[1];
+
+				final boolean[] error = new boolean[1];
+				final String[] errorMessage = new String[1];
+				try
+				{
+					final Process downloadProcess = Runtime.getRuntime( )
+							.exec( new String[]{
+									"cmd",
+									"/c",
+									"p4 -p "
+											+ txtServer.getText( )
+											+ " -u "
+											+ txtUser.getText( )
+											+ " -P "
+											+ txtPassword.getText( )
+											+ " client -o "
+											+ ">"
+											+ "\""
+											+ specFile.getAbsolutePath( )
+											+ "\""
+							} );
+
+					Thread thread = new Thread( ) {
+
+						public void run( )
+						{
+							try
+							{
+								BufferedReader input = new BufferedReader( new InputStreamReader( downloadProcess.getErrorStream( ) ) );
+								final String[] line = new String[1];
+								final StringBuffer buffer = new StringBuffer( );
+								while ( ( line[0] = input.readLine( ) ) != null )
+								{
+									buffer.append( line[0] + "\r\n" );
+								}
+								input.close( );
+
+								if ( buffer.length( ) > 0 )
+								{
+									error[0] = true;
+									errorMessage[0] = buffer.toString( );
+								}
+							}
+							catch ( Exception e )
+							{
+								Logger.getLogger( SyncIPortalWorkspace.class.getName( ) )
+										.log( Level.WARNING,
+												"Get error stream failed.", e ); //$NON-NLS-1$
+							}
+						}
+					};
+					thread.setDaemon( true );
+					thread.start( );
+
+					downloadProcess.waitFor( );
+
+					Thread.sleep( 100 );
+
+					if ( errorMessage[0] != null )
+					{
+						MessageDialog.openError( null, "Error", errorMessage[0] );
+					}
+					else
+					{
+						if ( specFile.exists( ) )
+						{
+							Pattern pattern = Pattern.compile( "(?i)\n\\s*Client:\\s+\\S+" );
+							Matcher matcher = pattern.matcher( FileUtil.getContent( specFile ) );
+							if ( matcher.find( ) )
+							{
+								originClient[0] = matcher.group( )
+										.trim( )
+										.split( "\\s+" )[1];
+							}
+
+							if ( originClient[0] != null )
+							{
+								FileUtil.replaceFile( specFile,
+										"(?i)Client:\\s+\\S+",
+										"Client:	" + client );
+							}
+
+							pattern = Pattern.compile( "(?i)\n\\s*Root:\\s+\\S+" );
+							matcher = pattern.matcher( FileUtil.getContent( specFile ) );
+							if ( matcher.find( ) )
+							{
+								originRoot[0] = matcher.group( )
+										.trim( )
+										.split( "\\s+" )[1];
+							}
+
+							if ( originRoot[0] != null
+									&& originClient[0] != null )
+							{
+								FileUtil.replaceFile( specFile,
+										"(?i)Root:\\s+\\S+",
+										"Root:	" + root );
+								FileUtil.replaceFile( specFile,
+										"(?i)Client:\\s+\\S+",
+										"Client:	" + client );
+								FileUtil.replaceFile( specFile, "(?i)//"
+										+ Pattern.quote( originClient[0] )
+										+ "/", "//" + client + "/" );
+							}
+							else
+							{
+								MessageDialog.openError( null,
+										"Error",
+										"Parse the client workspace specification file failed." );
+								return;
+							}
+
+							final Process uploadProcess = Runtime.getRuntime( )
+									.exec( new String[]{
+											"cmd",
+											"/c",
+											"p4 -p "
+													+ txtServer.getText( )
+													+ " -u "
+													+ txtUser.getText( )
+													+ " -P "
+													+ txtPassword.getText( )
+													+ " client -i "
+													+ "<"
+													+ "\""
+													+ specFile.getAbsolutePath( )
+													+ "\""
+									} );
+
+							thread = new Thread( ) {
+
+								public void run( )
+								{
+									try
+									{
+										BufferedReader input = new BufferedReader( new InputStreamReader( uploadProcess.getErrorStream( ) ) );
+										final String[] line = new String[1];
+										final StringBuffer buffer = new StringBuffer( );
+										while ( ( line[0] = input.readLine( ) ) != null )
+										{
+											buffer.append( line[0] + "\r\n" );
+										}
+										input.close( );
+
+										if ( buffer.length( ) > 0 )
+										{
+											error[0] = true;
+											errorMessage[0] = buffer.toString( );
+										}
+									}
+									catch ( Exception e )
+									{
+										Logger.getLogger( SyncIPortalWorkspace.class.getName( ) )
+												.log( Level.WARNING,
+														"Get error stream failed.", e ); //$NON-NLS-1$
+									}
+								}
+							};
+							thread.setDaemon( true );
+							thread.start( );
+							uploadProcess.waitFor( );
+							Thread.sleep( 100 );
+							if ( errorMessage[0] != null )
+							{
+								MessageDialog.openError( null,
+										"Error",
+										errorMessage[0] );
+							}
+						}
+						else
+						{
+							MessageDialog.openError( null,
+									"Error",
+									"Get the client workspace specification file failed." );
+						}
+					}
+				}
+				catch ( Exception e )
+				{
+					MessageDialog.openError( null, "Error", e.getMessage( ) );
+				}
+			}
+		} );
+	}
+
+	private String getClientRoot( final File specFile, final String client )
+	{
+		final String[] originRoot = new String[1];
+
+		final boolean[] error = new boolean[1];
+		final String[] errorMessage = new String[1];
+		try
+		{
+			final Process downloadProcess = Runtime.getRuntime( )
+					.exec( new String[]{
+							"cmd",
+							"/c",
+							"p4 -p "
+									+ txtServer.getText( )
+									+ " -u "
+									+ txtUser.getText( )
+									+ " -P "
+									+ txtPassword.getText( )
+									+ " client "
+									+ " -o "
+									+ client
+									+ ">"
+									+ "\""
+									+ specFile.getAbsolutePath( )
+									+ "\""
+					} );
+
+			Thread thread = new Thread( ) {
+
+				public void run( )
+				{
+					try
+					{
+						BufferedReader input = new BufferedReader( new InputStreamReader( downloadProcess.getErrorStream( ) ) );
+						final String[] line = new String[1];
+						final StringBuffer buffer = new StringBuffer( );
+						while ( ( line[0] = input.readLine( ) ) != null )
+						{
+							buffer.append( line[0] + "\r\n" );
+						}
+						input.close( );
+
+						if ( buffer.length( ) > 0 )
+						{
+							error[0] = true;
+							errorMessage[0] = buffer.toString( );
+						}
+					}
+					catch ( Exception e )
+					{
+						Logger.getLogger( SyncIPortalWorkspace.class.getName( ) )
+								.log( Level.WARNING,
+										"Get error stream failed.", e ); //$NON-NLS-1$
+					}
+				}
+			};
+			thread.setDaemon( true );
+			thread.start( );
+
+			downloadProcess.waitFor( );
+
+			Thread.sleep( 100 );
+
+			if ( errorMessage[0] != null )
+			{
+				MessageDialog.openError( null, "Error", errorMessage[0] );
+			}
+			else
+			{
+				if ( specFile.exists( ) )
+				{
+
+					Pattern pattern = Pattern.compile( "(?i)\n\\s*Root:\\s+\\S+" );
+					Matcher matcher = pattern.matcher( FileUtil.getContent( specFile ) );
+					if ( matcher.find( ) )
+					{
+						originRoot[0] = matcher.group( ).trim( ).split( "\\s+" )[1];
+					}
+
+					if ( originRoot[0] != null )
+					{
+						return originRoot[0];
+					}
+					else
+					{
+						MessageDialog.openError( null,
+								"Error",
+								"Parse the client workspace specification file failed." );
+					}
+				}
+				else
+				{
+					MessageDialog.openError( null,
+							"Error",
+							"Get the client workspace specification file failed." );
+				}
+			}
+		}
+		catch ( Exception e )
+		{
+			MessageDialog.openError( null, "Error", e.getMessage( ) );
+		}
+		return null;
+	}
+
+	private void handleClientSelectionEvent( )
+	{
+		BusyIndicator.showWhile( Display.getDefault( ), new Runnable( ) {
+
+			public void run( )
+			{
+				String project = comboClient.getText( );
+				if ( comboClient.getSelectionIndex( ) != -1 )
+					project = comboClient.getItem( comboClient.getSelectionIndex( ) );
+				if ( project == null || project.trim( ).length( ) == 0 )
+					return;
+				if ( rootMap.containsKey( project ) )
+				{
+					txtRoot.setText( rootMap.get( project ) );
+				}
+				else
+				{
+					String root = getClientRoot( FileUtil.getTempFile( "specification.txt" ),
+							project );
+					if ( root != null )
+					{
+						rootMap.put( project, root );
+						txtRoot.setText( root );
+					}
+					else
+					{
+						txtRoot.setText( "" );
+					}
+				}
+				setPageComplete( isPageComplete( ) );
+			}
+		} );
 	}
 }

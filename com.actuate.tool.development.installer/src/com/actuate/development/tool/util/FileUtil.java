@@ -56,7 +56,7 @@ public class FileUtil
 			return format.format( totalNumberOfFreeBytes ) + " GB";
 		return null;
 	}
-	
+
 	public static void writeToFile( File file, String string )
 	{
 		try
@@ -467,6 +467,30 @@ public class FileUtil
 			e.printStackTrace( );
 		}
 		return null;
+	}
+
+	public static File getTempFile( String config )
+	{
+		return getTempFile( config, ".xml" );
+	}
+
+	public static File getTempFile( String config, String suffix )
+	{
+		String filePath = System.getProperty( "java.io.tmpdir" )
+				+ System.currentTimeMillis( )
+				+ "\\"
+				+ config.substring( config.lastIndexOf( '/' ) + 1,
+						config.lastIndexOf( '.' ) )
+				+ suffix;
+		File configFile = new File( filePath );
+		if ( !configFile.exists( ) )
+		{
+			if ( !configFile.getParentFile( ).exists( ) )
+			{
+				configFile.getParentFile( ).mkdirs( );
+			}
+		}
+		return configFile;
 	}
 
 }

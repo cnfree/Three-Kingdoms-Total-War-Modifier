@@ -13,6 +13,8 @@ public class IPortalViewerData
 	private String view;
 
 	private boolean forceOperation;
+	
+	private boolean revertFiles;
 
 	private String server;
 
@@ -20,34 +22,16 @@ public class IPortalViewerData
 
 	private String password;
 
-	public String getRoot( )
+	private String client;
+
+	public String getBirtViewerFile( )
 	{
-		return root;
+		return birtViewerFile;
 	}
 
-	public void setRoot( String root )
+	public String getClient( )
 	{
-		this.root = root;
-	}
-
-	public String getServer( )
-	{
-		return server;
-	}
-
-	public void setServer( String server )
-	{
-		this.server = server;
-	}
-
-	public String getUser( )
-	{
-		return user;
-	}
-
-	public void setUser( String user )
-	{
-		this.user = user;
+		return client;
 	}
 
 	public String getPassword( )
@@ -55,31 +39,24 @@ public class IPortalViewerData
 		return password;
 	}
 
-	public void setPassword( String password )
-	{
-		this.password = password;
-	}
-
-	private String client;
-
-	public String getClient( )
-	{
-		return client;
-	}
-
-	public void setClient( String client )
-	{
-		this.client = client;
-	}
-
-	public String getBirtViewerFile( )
-	{
-		return birtViewerFile;
-	}
-
 	public String getProject( )
 	{
 		return project;
+	}
+
+	public String getRoot( )
+	{
+		return root;
+	}
+
+	public String getServer( )
+	{
+		return server;
+	}
+
+	public String getUser( )
+	{
+		return user;
 	}
 
 	public String getView( )
@@ -92,9 +69,19 @@ public class IPortalViewerData
 		return forceOperation;
 	}
 
+	public boolean isRevertFiles( )
+	{
+		return revertFiles;
+	}
+
 	public void setBirtViewerFile( String birtViewerFile )
 	{
 		this.birtViewerFile = birtViewerFile;
+	}
+
+	public void setClient( String client )
+	{
+		this.client = client;
 	}
 
 	public void setForceOperation( boolean forceOperation )
@@ -102,9 +89,34 @@ public class IPortalViewerData
 		this.forceOperation = forceOperation;
 	}
 
+	public void setPassword( String password )
+	{
+		this.password = password;
+	}
+
 	public void setProject( String project )
 	{
 		this.project = project;
+	}
+
+	public void setRevertFiles( boolean revertFiles )
+	{
+		this.revertFiles = revertFiles;
+	}
+
+	public void setRoot( String root )
+	{
+		this.root = root;
+	}
+
+	public void setServer( String server )
+	{
+		this.server = server;
+	}
+
+	public void setUser( String user )
+	{
+		this.user = user;
 	}
 
 	public void setView( String view )
