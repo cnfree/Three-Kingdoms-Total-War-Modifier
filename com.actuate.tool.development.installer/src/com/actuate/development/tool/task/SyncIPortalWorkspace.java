@@ -15,6 +15,8 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -125,7 +127,7 @@ public class SyncIPortalWorkspace
 
 			if ( originRoot[0] != null )
 			{
-				// synciPortal( monitor, step );
+				synciPortal( monitor, step );
 			}
 
 			monitor.subTask( "[Step "
@@ -303,53 +305,77 @@ public class SyncIPortalWorkspace
 		char[] v = new char[chars_read];
 		System.arraycopy( data, 0, v, 0, chars_read );
 		String temp = new String( v );
+		String[] entries = temp.replaceAll( "\r\n", "\n" ).split( "\n" );
+		List<String> list = new ArrayList<String>( );
 		Pattern pattern = Pattern.compile( "\\{.*?\\}" );
-		Matcher matcher = pattern.matcher( temp );
-		StringBuffer sbr = new StringBuffer( );
-		while ( matcher.find( ) )
+		for ( int i = 0; i < entries.length; i++ )
 		{
-			String group = matcher.group( );
-			String path = group.substring( 1, group.length( ) - 1 );
-
-			File root = new File( this.data.getRoot( )
-					+ File.separatorChar
-					+ this.data.getView( ) );
-			File file = new File( root, path );
-			final String filePattern = "(?i)" + file.getName( );
-			File parent = file.getParentFile( );
-			File[] children = null;
-			if ( parent.exists( ) )
+			Matcher matcher = pattern.matcher( entries[i] );
+			if ( matcher.find( ) )
 			{
-				children = parent.listFiles( new FileFilter( ) {
+				String group = matcher.group( );
+				String path = group.substring( 1, group.length( ) - 1 );
+				File root = new File( this.data.getRoot( )
+						+ File.separatorChar
+						+ this.data.getView( ) );
+				File file = new File( root, path );
+				final String filePattern = "(?i)" + file.getName( );
+				File parent = file.getParentFile( );
+				File[] children = null;
+				if ( parent.exists( ) )
+				{
+					children = parent.listFiles( new FileFilter( ) {
 
-					public boolean accept( File file )
-					{
-						String fileName = file.getName( );
-						if ( fileName.matches( filePattern ) )
+						public boolean accept( File file )
 						{
-							return true;
+							String fileName = file.getName( );
+							if ( fileName.matches( filePattern ) )
+							{
+								return true;
+							}
+							return false;
 						}
-						return false;
+					} );
+				}
+				if ( children != null && children.length > 0 )
+				{
+					for ( int j = 0; j < children.length; j++ )
+					{
+						File availableFile = new File( parent,
+								children[j].getName( ) );
+						String filePath = availableFile.getCanonicalPath( )
+								.substring( root.getCanonicalPath( ).length( ) + 1 )
+								.replace( '\\', '/' );
+						String classPath = entries[i].replace( group, filePath );
+						if ( !list.contains( classPath ) )
+							list.add( classPath );
+						else
+						{
+							System.out.println( "Duplicate Class Path:"
+									+ classPath );
+						}
 					}
-				} );
-			}
-			if ( children != null && children.length > 0 )
-			{
-				File availableFile = new File( parent, children[0].getName( ) );
-				String filePath = availableFile.getCanonicalPath( )
-						.substring( root.getCanonicalPath( ).length( ) + 1 )
-						.replace( '\\', '/' );
-				matcher.appendReplacement( sbr, filePath );
+				}
 			}
 			else
 			{
-				matcher.appendReplacement( sbr, group );
+				if ( !list.contains( entries[i] ) )
+					list.add( entries[i] );
+				else
+				{
+					System.out.println( "Duplicate Class Path:" + entries[i] );
+				}
 			}
 		}
-		matcher.appendTail( sbr );
+		StringBuffer buffer = new StringBuffer( );
+		for ( int i = 0; i < list.size( ); i++ )
+		{
+			buffer.append( list.get( i ) ).append( "\r\n" );
+		}
+
 		PrintWriter out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( new FileOutputStream( classPathFile ) ) ),
 				false );
-		out.print( sbr );
+		out.print( buffer.toString( ) );
 		out.close( );
 	}
 

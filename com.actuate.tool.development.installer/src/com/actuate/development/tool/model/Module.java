@@ -15,7 +15,10 @@ public class Module
 			perforce = new Module( "perforce",
 					"Perforce",
 					ModuleType.plugin,
-					"/icons/p4.png" );
+					"/icons/p4.png" ), emfsdk = new Module( "emfsdk",
+					"EMF SDK",
+					ModuleType.plugin,
+					"/icons/emf.gif" );
 
 	private String value;
 	private ModuleType type;

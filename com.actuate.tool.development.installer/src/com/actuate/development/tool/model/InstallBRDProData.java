@@ -22,7 +22,7 @@ public class InstallBRDProData
 	private boolean notClearDirectory = false;
 	private boolean notCloseBRDPro = false;
 	private boolean notCreateShortcut = false;
-	private String shortcutArguments = "-showlocation -nl en_us -vmargs -server -Xms256m -Xmx512m -XX:PermSize=64M -XX:MaxPermSize=256M";
+	private String shortcutArguments = "-showlocation -nl en_us -vmargs -server -Xms256m -Xmx1024m -XX:PermSize=64M -XX:MaxPermSize=256M";
 	private String brdproFile;
 	private boolean isInstallShield;
 	private ModuleVersion moduleVersion;
