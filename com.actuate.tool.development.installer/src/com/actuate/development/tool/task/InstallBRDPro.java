@@ -770,6 +770,29 @@ public class InstallBRDPro
 		deleteDirectory( new File( data.getDirectory( ), "eclipse\\links" ) );
 		deleteDirectory( new File( data.getDirectory( ), "links" ) );
 
+		File[] tempDirs = new File( data.getDirectory( ) ).listFiles( new FileFilter( ) {
+
+			public boolean accept( File file )
+			{
+				if ( file.getName( ).startsWith( "temp" )
+						&& file.getName( ).length( ) == new File( data.getTempDir( ) ).getName( )
+								.length( )
+						&& file.isDirectory( ) )
+				{
+					return true;
+				}
+				return false;
+			}
+
+		} );
+
+		if ( tempDirs != null )
+		{
+			for ( int i = 0; i < tempDirs.length; i++ )
+			{
+				FileUtil.deleteDirectory( tempDirs[i] );
+			}
+		}
 		// FileUtil.deleteFile( uninstallFile );
 	}
 

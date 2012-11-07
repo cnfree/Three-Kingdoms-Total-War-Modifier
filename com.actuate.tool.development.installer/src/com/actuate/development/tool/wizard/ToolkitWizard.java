@@ -404,16 +404,18 @@ public class ToolkitWizard extends Wizard
 				String fileName = file.getName( ).toLowerCase( );
 				if ( file.isFile( ) )
 				{
-					if ( fileName.startsWith( "actuatebirtdesignerprofessional" )
-							|| fileName.startsWith( "brdpro" ) )
+					if ( ( fileName.startsWith( "actuatebirtdesignerprofessional" ) || fileName.startsWith( "brdpro" ) )
+							&& fileName.endsWith( ".zip" ) )
 					{
 						brdproFiles.add( file );
 					}
-					if ( fileName.startsWith( "actuatebirtviewer" ) )
+					if ( fileName.startsWith( "actuatebirtviewer" )
+							&& fileName.endsWith( ".zip" ) )
 					{
 						iportalViewerFiles.add( file );
 					}
-					if ( fileName.startsWith( "wl_tomcat_actuatebirtjavacomponent" ) )
+					if ( fileName.startsWith( "wl_tomcat_actuatebirtjavacomponent" )
+							&& fileName.endsWith( ".war" ) )
 					{
 						iportalViewerFiles.add( file );
 					}
@@ -606,8 +608,8 @@ public class ToolkitWizard extends Wizard
 					.getView( ) );
 			projectSetting.put( FORCEOPERATION,
 					data.getCurrentIportalViewerData( ).isForceOperation( ) );
-			projectSetting.put( REVERTFILES,
-					data.getCurrentIportalViewerData( ).isRevertFiles( ) );
+			projectSetting.put( REVERTFILES, data.getCurrentIportalViewerData( )
+					.isRevertFiles( ) );
 			projectSetting.put( P4SERVER, data.getCurrentIportalViewerData( )
 					.getServer( ) );
 			projectSetting.put( P4USER, data.getCurrentIportalViewerData( )
