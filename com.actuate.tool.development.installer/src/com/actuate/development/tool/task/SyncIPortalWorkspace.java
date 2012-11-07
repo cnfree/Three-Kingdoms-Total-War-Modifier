@@ -425,19 +425,18 @@ public class SyncIPortalWorkspace
 		File file = new File( data.getBirtViewerFile( ) );
 		context.put( "buildPath", file.getParentFile( ).getAbsolutePath( ) );
 		context.put( "buildFile", file.getName( ) );
+		if ( file.getName( ).toLowerCase( ).endsWith( ".zip" ) )
+			context.put( "warFile", "WL_TOMCAT_ActuateBIRTJavaComponent.war" );
+		else
+			context.put( "warFile", file.getName( ) );
 		file = Modules.getInstance( )
 				.getIPortalRepalceFile( data.getProject( ) );
 		context.put( "replacePath", file.getParentFile( ).getAbsolutePath( ) );
 		context.put( "replaceFile", file.getName( ) );
 		context.put( "runtime", FileSystem.getCurrentDirectory( ) );
-		if ( file.getName( ).toLowerCase( ).endsWith( ".zip" ) )
-			context.put( "warFile", "WL_TOMCAT_ActuateBIRTJavaComponent.war" );
-		else
-			context.put( "warFile", file.getName( ) );
 		Template template = velocityEngine.getTemplate( templateFile.getName( ) );
 		StringWriter sw = new StringWriter( );
 		template.merge( context, sw );
-
 		File tempFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
 
