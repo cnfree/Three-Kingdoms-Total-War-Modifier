@@ -29,6 +29,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
@@ -652,7 +653,17 @@ public class SyncIPortalWorkspace
 
 					public void run( )
 					{
-						MessageDialog.openError( null, "Error", errorMessage[0] );
+						MessageDialog dialog = new MessageDialog( null,
+								"Error",
+								null,
+								errorMessage[0],
+								1,
+								new String[]{
+									IDialogConstants.OK_LABEL
+								},
+								0 );
+						dialog.setBlockOnOpen( false );
+						dialog.open( );
 					}
 				} );
 			}
