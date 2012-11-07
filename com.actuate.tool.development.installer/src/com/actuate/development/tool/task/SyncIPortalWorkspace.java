@@ -45,6 +45,7 @@ public class SyncIPortalWorkspace
 {
 
 	private IPortalViewerData data;
+	private Thread downloadThread;
 
 	public SyncIPortalWorkspace( IPortalViewerData data )
 	{
@@ -124,7 +125,7 @@ public class SyncIPortalWorkspace
 
 			if ( originRoot[0] != null )
 			{
-				synciPortal( monitor, step );
+				// synciPortal( monitor, step );
 			}
 
 			monitor.subTask( "[Step "
@@ -164,15 +165,32 @@ public class SyncIPortalWorkspace
 			helper.parse( p, initFile );
 			p.executeTarget( "init" );
 
-			monitor.subTask( "[Step "
+			String defaultTaskName = "[Step "
 					+ ++step[0]
-					+ "] Downloading the iPortal Viewer archive file...\t[Size: "
-					+ FileUtils.byteCountToDisplaySize( new File( data.getBirtViewerFile( ) ).length( ) )
-					+ "] " );
-			stepDetail[0] = "Download the BRDPro archive file";
+					+ "] Downloading the iPortal Viewer archive file...";
+
+			boolean[] downloadFlag = new boolean[]{
+				false
+			};
+
+			File warFile = new File( data.getBirtViewerFile( ) );
+			long fileLength = warFile.length( );
+			downloadMonitor( monitor,
+					downloadFlag,
+					defaultTaskName,
+					new File( data.getRoot( ) + "\\temp", warFile.getName( ) ),
+					fileLength );
+
+			monitor.subTask( defaultTaskName
+					+ "\t[ Size: "
+					+ FileUtils.byteCountToDisplaySize( fileLength )
+					+ " ] " );
+			stepDetail[0] = "Download the iPortal Viewer archive file";
 			File downloadFile = getAntFile( "/templates/Download_IV.xml" );
 			helper.parse( p, downloadFile );
 			p.executeTarget( "download" );
+
+			downloadFlag[0] = true;
 
 			String[] subtaskName = new String[]{
 				"[Step "
@@ -181,7 +199,10 @@ public class SyncIPortalWorkspace
 			};
 			monitor.subTask( subtaskName[0] );
 			stepDetail[0] = "Extract the iPortal Viewer archive file";
-			File extractFile = getAntFile( "/templates/Extract_IV.xml" );
+			String extractXML = "/templates/Extract_IV.xml";
+			if ( !warFile.getName( ).toLowerCase( ).endsWith( ".zip" ) )
+				extractXML = "/templates/Extract_IV_II.xml";
+			File extractFile = getAntFile( extractXML );
 			helper.parse( p, extractFile );
 
 			final boolean[] flag = new boolean[]{
@@ -409,7 +430,10 @@ public class SyncIPortalWorkspace
 		context.put( "replacePath", file.getParentFile( ).getAbsolutePath( ) );
 		context.put( "replaceFile", file.getName( ) );
 		context.put( "runtime", FileSystem.getCurrentDirectory( ) );
-
+		if ( file.getName( ).toLowerCase( ).endsWith( ".zip" ) )
+			context.put( "warFile", "WL_TOMCAT_ActuateBIRTJavaComponent.war" );
+		else
+			context.put( "warFile", file.getName( ) );
 		Template template = velocityEngine.getTemplate( templateFile.getName( ) );
 		StringWriter sw = new StringWriter( );
 		template.merge( context, sw );
@@ -940,5 +964,55 @@ public class SyncIPortalWorkspace
 			errorMessage[0] = e.getMessage( );
 		}
 		return errorMessage[0];
+	}
+
+	private void downloadMonitor( final IProgressMonitor monitor,
+			final boolean[] flag, final String defaultTaskName,
+			final File file, final long size )
+	{
+
+		if ( downloadThread != null && downloadThread.isAlive( ) )
+			return;
+
+		downloadThread = new Thread( ) {
+
+			public void run( )
+			{
+				long donwloadSize = file.length( );
+				long time = System.currentTimeMillis( );
+				while ( !flag[0] )
+				{
+
+					if ( file.exists( ) )
+					{
+						if ( file.length( ) != donwloadSize )
+						{
+							String speed = FileUtil.format( ( (float) ( file.length( ) - donwloadSize ) )
+									/ ( ( (float) ( System.currentTimeMillis( ) - time ) ) / 1000 ) )
+									+ "/s";
+							donwloadSize = file.length( );
+							time = System.currentTimeMillis( );
+							monitor.subTask( defaultTaskName
+									+ "\t[ "
+									+ ( donwloadSize * 100 / size )
+									+ "% , Speed: "
+									+ speed
+									+ " , Size: "
+									+ FileUtils.byteCountToDisplaySize( size )
+									+ " ]" );
+						}
+					}
+					try
+					{
+						Thread.sleep( 1000 );
+					}
+					catch ( InterruptedException e )
+					{
+					}
+				}
+			}
+		};
+		downloadThread.start( );
+
 	}
 }

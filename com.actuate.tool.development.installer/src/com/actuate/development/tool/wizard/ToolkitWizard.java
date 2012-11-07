@@ -413,6 +413,10 @@ public class ToolkitWizard extends Wizard
 					{
 						iportalViewerFiles.add( file );
 					}
+					if ( fileName.startsWith( "wl_tomcat_actuatebirtjavacomponent" ) )
+					{
+						iportalViewerFiles.add( file );
+					}
 				}
 				else if ( file.getName( ).equalsIgnoreCase( "BRDPro" ) )
 				{

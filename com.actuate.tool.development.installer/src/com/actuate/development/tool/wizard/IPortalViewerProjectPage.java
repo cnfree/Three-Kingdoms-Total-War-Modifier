@@ -540,104 +540,115 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 			public void widgetSelected( SelectionEvent selectionevent )
 			{
-				try
-				{
-					final boolean[] error = new boolean[1];
-					final Process p4Process = Runtime.getRuntime( )
-							.exec( "p4 -p "
-									+ txtServer.getText( )
-									+ " -u "
-									+ txtUser.getText( )
-									+ " -P "
-									+ txtPassword.getText( )
-									+ " clients -u "
-									+ txtUser.getText( ) );
+				BusyIndicator.showWhile( Display.getDefault( ),
+						new Runnable( ) {
 
-					Thread thread = new Thread( ) {
-
-						public void run( )
-						{
-							try
+							public void run( )
 							{
-								BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
-								final String[] line = new String[1];
-								final StringBuffer buffer = new StringBuffer( );
-								while ( ( line[0] = input.readLine( ) ) != null )
+								try
 								{
-									buffer.append( line[0] + "\r\n" );
-								}
-								input.close( );
+									final boolean[] error = new boolean[1];
+									final Process p4Process = Runtime.getRuntime( )
+											.exec( "p4 -p "
+													+ txtServer.getText( )
+													+ " -u "
+													+ txtUser.getText( )
+													+ " -P "
+													+ txtPassword.getText( )
+													+ " clients -u "
+													+ txtUser.getText( ) );
 
-								if ( buffer.length( ) > 0 )
-								{
-									error[0] = true;
-									Display.getDefault( )
-											.syncExec( new Runnable( ) {
+									Thread thread = new Thread( ) {
 
-												public void run( )
+										public void run( )
+										{
+											try
+											{
+												BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
+												final String[] line = new String[1];
+												final StringBuffer buffer = new StringBuffer( );
+												while ( ( line[0] = input.readLine( ) ) != null )
 												{
-													MessageDialog.openError( UIUtil.getShell( ),
-															"Error",
-															buffer.toString( ) );
+													buffer.append( line[0]
+															+ "\r\n" );
 												}
-											} );
+												input.close( );
+
+												if ( buffer.length( ) > 0 )
+												{
+													error[0] = true;
+													Display.getDefault( )
+															.syncExec( new Runnable( ) {
+
+																public void run( )
+																{
+																	MessageDialog.openError( UIUtil.getShell( ),
+																			"Error",
+																			buffer.toString( ) );
+																}
+															} );
+												}
+											}
+											catch ( Exception e )
+											{
+												Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
+														.log( Level.WARNING,
+																"Get error stream failed.", e ); //$NON-NLS-1$
+											}
+										}
+									};
+									thread.setDaemon( true );
+									thread.start( );
+
+									StringWriter output = new StringWriter( );
+									IOUtils.copy( p4Process.getInputStream( ),
+											output );
+									p4Process.waitFor( );
+
+									Thread.sleep( 100 );
+
+									Pattern pattern = Pattern.compile( "(?i)Client\\s+\\S+",
+											Pattern.CASE_INSENSITIVE );
+									Matcher matcher = pattern.matcher( output.toString( ) );
+
+									boolean exist = false;
+									while ( matcher.find( ) )
+									{
+										String client = matcher.group( )
+												.replaceAll( "(?i)Client\\s+",
+														"" );
+										if ( client.equalsIgnoreCase( comboClient.getText( )
+												.trim( ) ) )
+										{
+											exist = true;
+											break;
+										}
+									}
+									if ( !error[0] )
+									{
+										if ( !exist )
+										{
+											MessageDialog.openError( UIUtil.getShell( ),
+													"Error",
+													"The client "
+															+ comboClient.getText( )
+																	.trim( )
+															+ " is unavailable." );
+										}
+										else
+										{
+											MessageDialog.openInformation( UIUtil.getShell( ),
+													"Success",
+													"Ping succeeded!" );
+										}
+									}
+								}
+								catch ( Exception e )
+								{
+									LogUtil.recordErrorMsg( e, false );
 								}
 							}
-							catch ( Exception e )
-							{
-								Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
-										.log( Level.WARNING,
-												"Get error stream failed.", e ); //$NON-NLS-1$
-							}
-						}
-					};
-					thread.setDaemon( true );
-					thread.start( );
-
-					StringWriter output = new StringWriter( );
-					IOUtils.copy( p4Process.getInputStream( ), output );
-					p4Process.waitFor( );
-
-					Thread.sleep( 100 );
-
-					Pattern pattern = Pattern.compile( "(?i)Client\\s+\\S+",
-							Pattern.CASE_INSENSITIVE );
-					Matcher matcher = pattern.matcher( output.toString( ) );
-
-					boolean exist = false;
-					while ( matcher.find( ) )
-					{
-						String client = matcher.group( )
-								.replaceAll( "(?i)Client\\s+", "" );
-						if ( client.equalsIgnoreCase( comboClient.getText( )
-								.trim( ) ) )
-						{
-							exist = true;
-							break;
-						}
-					}
-					if ( !error[0] )
-					{
-						if ( !exist )
-						{
-							MessageDialog.openError( UIUtil.getShell( ),
-									"Error",
-									"The client "
-											+ comboClient.getText( ).trim( )
-											+ " is unavailable." );
-						}
-						else
-						{
-							MessageDialog.openInformation( UIUtil.getShell( ),
-									"Success",
-									"Ping succeeded!" );
-						}
-					}
-				}
-				catch ( Exception e )
-				{
-					LogUtil.recordErrorMsg( e, false );
-				}
+						} );
 			}
 		} );
 

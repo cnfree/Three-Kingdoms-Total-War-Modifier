@@ -476,6 +476,13 @@ public class FileUtil
 
 	public static File getTempFile( String config, String suffix )
 	{
+		try
+		{
+			Thread.sleep( 10 );
+		}
+		catch ( InterruptedException e )
+		{
+		}
 		String filePath = System.getProperty( "java.io.tmpdir" )
 				+ System.currentTimeMillis( )
 				+ "\\"

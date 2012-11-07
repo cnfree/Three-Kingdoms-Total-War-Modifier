@@ -256,7 +256,7 @@ public class InstallBRDPro
 					flag[0] = true;
 					downloadFlag[0] = true;
 					Thread.sleep( 1000 );
-					
+
 					current[0] = module;
 					subtaskName[0] = "[Step "
 							+ ++step[0]
@@ -472,7 +472,7 @@ public class InstallBRDPro
 									consoleLogger,
 									subtaskName,
 									flag,
-									file );							
+									file );
 							handlePlugin( p, helper, file, Module.git );
 							continue;
 						}
@@ -495,7 +495,7 @@ public class InstallBRDPro
 									consoleLogger,
 									subtaskName,
 									flag,
-									file );							
+									file );
 							handlePlugin( p, helper, file, module );
 							continue;
 						}
@@ -503,10 +503,10 @@ public class InstallBRDPro
 					failedList.add( module );
 				}
 			}
-			
+
 			flag[0] = true;
 			downloadFlag[0] = true;
-			
+
 			monitor.subTask( "[Step "
 					+ ++step[0]
 					+ "] Cleaning the temporary files..." );
@@ -874,20 +874,19 @@ public class InstallBRDPro
 			public void run( )
 			{
 				long donwloadSize = file.length( );
-				int i = 0;
+				long time = System.currentTimeMillis( );
 				while ( !flag[0] )
 				{
 
 					if ( file.exists( ) )
 					{
-						i++;
 						if ( file.length( ) != donwloadSize )
 						{
 							String speed = FileUtil.format( ( (float) ( file.length( ) - donwloadSize ) )
-									/ i )
+									/ ( ( (float) ( System.currentTimeMillis( ) - time ) ) / 1000 ) )
 									+ "/s";
 							donwloadSize = file.length( );
-							i = 0;
+							time = System.currentTimeMillis( );
 							monitor.subTask( defaultTaskName
 									+ "\t[ "
 									+ ( donwloadSize * 100 / size )
@@ -909,7 +908,6 @@ public class InstallBRDPro
 			}
 		};
 		downloadThread.start( );
-
 	}
 
 	private File getPluginFile( String pluginOutputDir, final String pattern )
@@ -1015,7 +1013,7 @@ public class InstallBRDPro
 			Module module, final String validateFile )
 	{
 		String fileName = "/templates/Source.xml";
-		File templateFile = getTempFile( fileName );
+		File templateFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToBinarayFile( templateFile, this.getClass( )
 				.getResourceAsStream( fileName ), true );
 
@@ -1035,7 +1033,7 @@ public class InstallBRDPro
 		StringWriter sw = new StringWriter( );
 		template.merge( context, sw );
 
-		File tempFile = getTempFile( fileName );
+		File tempFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
 
 		helper.parse( p, tempFile );
@@ -1068,7 +1066,7 @@ public class InstallBRDPro
 			Module module )
 	{
 		String fileName = "/templates/Plugin.xml";
-		File templateFile = getTempFile( fileName );
+		File templateFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToBinarayFile( templateFile, this.getClass( )
 				.getResourceAsStream( fileName ), true );
 
@@ -1088,13 +1086,13 @@ public class InstallBRDPro
 		StringWriter sw = new StringWriter( );
 		template.merge( context, sw );
 
-		File tempFile = getTempFile( fileName );
+		File tempFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
 
 		helper.parse( p, tempFile );
 		p.executeTarget( module.getName( ) + "_install" );
 
-		File linkTemplateFile = getTempFile( "/templates/extension.link" );
+		File linkTemplateFile = FileUtil.getTempFile( "/templates/extension.link" );
 		FileUtil.writeToBinarayFile( linkTemplateFile, this.getClass( )
 				.getResourceAsStream( "/templates/extension.link" ), true );
 
@@ -1200,7 +1198,7 @@ public class InstallBRDPro
 	private File getAntFile( String fileName, boolean useAntClean )
 	{
 
-		File templateFile = getTempFile( fileName );
+		File templateFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToBinarayFile( templateFile, this.getClass( )
 				.getResourceAsStream( fileName ), true );
 
@@ -1223,7 +1221,7 @@ public class InstallBRDPro
 		StringWriter sw = new StringWriter( );
 		template.merge( context, sw );
 
-		File tempFile = getTempFile( fileName );
+		File tempFile = FileUtil.getTempFile( fileName );
 		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
 
 		return tempFile;
@@ -1231,7 +1229,7 @@ public class InstallBRDPro
 
 	private File getConfigFile( String config, String ant, String link )
 	{
-		File configTemplateFile = getTempFile( config );
+		File configTemplateFile = FileUtil.getTempFile( config );
 		FileUtil.writeToBinarayFile( configTemplateFile, this.getClass( )
 				.getResourceAsStream( config ), true );
 
@@ -1249,14 +1247,14 @@ public class InstallBRDPro
 		StringWriter sw = new StringWriter( );
 		template.merge( context, sw );
 
-		File configFile = getTempFile( config );
+		File configFile = FileUtil.getTempFile( config );
 		FileUtil.writeToFile( configFile, sw.toString( ).trim( ) );
 
-		File linkFile = getTempFile( link, ".link" );
+		File linkFile = FileUtil.getTempFile( link, ".link" );
 		FileUtil.writeToBinarayFile( linkFile, this.getClass( )
 				.getResourceAsStream( link ), true );
 
-		File antTemplateFile = getTempFile( ant );
+		File antTemplateFile = FileUtil.getTempFile( ant );
 		FileUtil.writeToBinarayFile( antTemplateFile, this.getClass( )
 				.getResourceAsStream( ant ), true );
 
@@ -1276,34 +1274,10 @@ public class InstallBRDPro
 		sw = new StringWriter( );
 		template.merge( context, sw );
 
-		File antFile = getTempFile( ant );
+		File antFile = FileUtil.getTempFile( ant );
 		FileUtil.writeToFile( antFile, sw.toString( ).trim( ) );
 
 		return antFile;
-	}
-
-	private File getTempFile( String config )
-	{
-		return getTempFile( config, ".xml" );
-	}
-
-	private File getTempFile( String config, String suffix )
-	{
-		String filePath = System.getProperty( "java.io.tmpdir" )
-				+ System.currentTimeMillis( )
-				+ "\\"
-				+ config.substring( config.lastIndexOf( '/' ) + 1,
-						config.lastIndexOf( '.' ) )
-				+ suffix;
-		File configFile = new File( filePath );
-		if ( !configFile.exists( ) )
-		{
-			if ( !configFile.getParentFile( ).exists( ) )
-			{
-				configFile.getParentFile( ).mkdirs( );
-			}
-		}
-		return configFile;
 	}
 
 	private void checkBRDProVersion( IProgressMonitor monitor )
