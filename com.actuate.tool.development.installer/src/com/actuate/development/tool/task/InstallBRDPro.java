@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DefaultLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
@@ -95,6 +96,8 @@ public class InstallBRDPro
 	private Module[] current = new Module[1];
 
 	private Thread outputThread;
+
+	private Thread downloadThread;
 
 	public InstallBRDPro( InstallBRDProData data )
 	{
@@ -181,15 +184,33 @@ public class InstallBRDPro
 			helper.parse( p, initFile );
 			p.executeTarget( "init" );
 
-			monitor.subTask( "[Step "
+			File brdproFile = new File( data.getBrdproFile( ) );
+			long fileLength = brdproFile.length( );
+			String defaultTaskName = "[Step "
 					+ ++step[0]
-					+ "] Downloading the BRDPro archive file...\t[Size: "
-					+ FileUtils.byteCountToDisplaySize( new File( data.getBrdproFile( ) ).length( ) )
-					+ "] " );
+					+ "] Downloading the BRDPro archive file...";
+
+			boolean[] downloadFlag = new boolean[]{
+				false
+			};
+
+			downloadMonitor( monitor,
+					downloadFlag,
+					defaultTaskName,
+					new File( data.getTempDir( ) + "\\brdpro\\zip",
+							brdproFile.getName( ) ),
+					fileLength );
+
+			monitor.subTask( defaultTaskName
+					+ "\t[ Size: "
+					+ FileUtils.byteCountToDisplaySize( fileLength )
+					+ " ] " );
 			stepDetail[0] = "Download the BRDPro archive file";
 			File downloadFile = getAntFile( "/templates/Download.xml", true );
 			helper.parse( p, downloadFile );
 			p.executeTarget( "download" );
+
+			downloadFlag[0] = true;
 
 			checkBRDProVersion( monitor );
 
@@ -233,7 +254,10 @@ public class InstallBRDPro
 
 				for ( Module module : data.getModules( ) )
 				{
+					flag[0] = true;
+					downloadFlag[0] = true;
 					Thread.sleep( 1000 );
+					
 					current[0] = module;
 					subtaskName[0] = "[Step "
 							+ ++step[0]
@@ -245,6 +269,7 @@ public class InstallBRDPro
 					monitor.subTask( subtaskName[0] );
 
 					flag[0] = false;
+					downloadFlag[0] = false;
 
 					stepDetail[0] = "Download and extract the "
 							+ module.getValue( )
@@ -261,6 +286,14 @@ public class InstallBRDPro
 						// );
 						if ( file != null && file.exists( ) )
 						{
+							downloadMonitor( monitor,
+									downloadFlag,
+									subtaskName[0],
+									new File( data.getTempDir( )
+											+ "\\"
+											+ module.getName( )
+											+ "_sdk", file.getName( ) ),
+									file.length( ) );
 							initSubtask( monitor,
 									step,
 									consoleLogger,
@@ -282,6 +315,14 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
+								downloadMonitor( monitor,
+										downloadFlag,
+										subtaskName[0],
+										new File( data.getTempDir( )
+												+ "\\"
+												+ module.getName( )
+												+ "_sdk", file.getName( ) ),
+										file.length( ) );
 								initSubtask( monitor,
 										step,
 										consoleLogger,
@@ -304,6 +345,14 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
+								downloadMonitor( monitor,
+										downloadFlag,
+										subtaskName[0],
+										new File( data.getTempDir( )
+												+ "\\"
+												+ module.getName( )
+												+ "_sdk", file.getName( ) ),
+										file.length( ) );
 								initSubtask( monitor,
 										step,
 										consoleLogger,
@@ -327,6 +376,14 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
+								downloadMonitor( monitor,
+										downloadFlag,
+										subtaskName[0],
+										new File( data.getTempDir( )
+												+ "\\"
+												+ module.getName( )
+												+ "_sdk", file.getName( ) ),
+										file.length( ) );
 								initSubtask( monitor,
 										step,
 										consoleLogger,
@@ -350,6 +407,14 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
+								downloadMonitor( monitor,
+										downloadFlag,
+										subtaskName[0],
+										new File( data.getTempDir( )
+												+ "\\"
+												+ module.getName( )
+												+ "_sdk", file.getName( ) ),
+										file.length( ) );
 								initSubtask( monitor,
 										step,
 										consoleLogger,
@@ -370,6 +435,13 @@ public class InstallBRDPro
 						// );
 						if ( file != null && file.exists( ) )
 						{
+							downloadMonitor( monitor,
+									downloadFlag,
+									subtaskName[0],
+									new File( data.getTempDir( )
+											+ "\\"
+											+ module.getName( ), file.getName( ) ),
+									file.length( ) );
 							initSubtask( monitor,
 									step,
 									consoleLogger,
@@ -389,12 +461,19 @@ public class InstallBRDPro
 						// );
 						if ( file != null && file.exists( ) )
 						{
+							downloadMonitor( monitor,
+									downloadFlag,
+									subtaskName[0],
+									new File( data.getTempDir( )
+											+ "\\"
+											+ module.getName( ), file.getName( ) ),
+									file.length( ) );
 							initSubtask( monitor,
 									step,
 									consoleLogger,
 									subtaskName,
 									flag,
-									file );
+									file );							
 							handlePlugin( p, helper, file, Module.git );
 							continue;
 						}
@@ -405,21 +484,30 @@ public class InstallBRDPro
 						File file = getPluginFile( pluginOutputDir, pattern );
 						if ( file != null && file.exists( ) )
 						{
+							downloadMonitor( monitor,
+									downloadFlag,
+									subtaskName[0],
+									new File( data.getTempDir( )
+											+ "\\"
+											+ module.getName( ), file.getName( ) ),
+									file.length( ) );
 							initSubtask( monitor,
 									step,
 									consoleLogger,
 									subtaskName,
 									flag,
-									file );
+									file );							
 							handlePlugin( p, helper, file, module );
 							continue;
 						}
 					}
 					failedList.add( module );
 				}
-				flag[0] = true;
 			}
-
+			
+			flag[0] = true;
+			downloadFlag[0] = true;
+			
 			monitor.subTask( "[Step "
 					+ ++step[0]
 					+ "] Cleaning the temporary files..." );
@@ -479,7 +567,7 @@ public class InstallBRDPro
 				public void run( )
 				{
 					if ( UIUtil.getShell( ).getMinimized( ) )
-					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+						Windows.flashWindow( UIUtil.getShell( ).handle, true );
 					StringBuffer buffer = new StringBuffer( );
 					buffer.append( "Install the Actuate BRDPro Development Environment sucessfully." );
 
@@ -672,9 +760,9 @@ public class InstallBRDPro
 			final DefaultLogger consoleLogger, String subtaskName[],
 			final boolean[] flag, File file )
 	{
-		subtaskName[0] += "\t[Size: "
+		subtaskName[0] += "\t[ Size: "
 				+ FileUtils.byteCountToDisplaySize( file.length( ) )
-				+ "] ";
+				+ " ] ";
 		interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
 		monitor.subTask( subtaskName[0] );
 	}
@@ -771,6 +859,57 @@ public class InstallBRDPro
 			}
 		};
 		outputThread.start( );
+
+	}
+
+	private void downloadMonitor( final IProgressMonitor monitor,
+			final boolean[] flag, final String defaultTaskName,
+			final File file, final long size )
+	{
+
+		if ( downloadThread != null && downloadThread.isAlive( ) )
+			return;
+
+		downloadThread = new Thread( ) {
+
+			public void run( )
+			{
+				long donwloadSize = file.length( );
+				int i = 0;
+				while ( !flag[0] )
+				{
+
+					if ( file.exists( ) )
+					{
+						i++;
+						if ( file.length( ) != donwloadSize )
+						{
+							String speed = FileUtil.format( ( (float) ( file.length( ) - donwloadSize ) )
+									/ i )
+									+ "/s";
+							donwloadSize = file.length( );
+							i = 0;
+							monitor.subTask( defaultTaskName
+									+ "\t[ "
+									+ ( donwloadSize * 100 / size )
+									+ "% , Speed: "
+									+ speed
+									+ " , Size: "
+									+ FileUtils.byteCountToDisplaySize( size )
+									+ " ]" );
+						}
+					}
+					try
+					{
+						Thread.sleep( 1000 );
+					}
+					catch ( InterruptedException e )
+					{
+					}
+				}
+			}
+		};
+		downloadThread.start( );
 
 	}
 

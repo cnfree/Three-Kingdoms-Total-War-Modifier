@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,6 +38,25 @@ import java.util.regex.Pattern;
 public class FileUtil
 {
 
+	public static String format( float totalNumberOfFreeBytes )
+	{
+		NumberFormat format = NumberFormat.getInstance( );
+		format.setMaximumFractionDigits( 1 );
+		format.setMinimumFractionDigits( 0 );
+		if ( totalNumberOfFreeBytes < 1024 )
+			return format.format( totalNumberOfFreeBytes ) + " Bytes";
+		totalNumberOfFreeBytes = totalNumberOfFreeBytes / 1024;
+		if ( totalNumberOfFreeBytes < 1024 )
+			return format.format( totalNumberOfFreeBytes ) + " KB";
+		totalNumberOfFreeBytes = totalNumberOfFreeBytes / 1024;
+		if ( totalNumberOfFreeBytes < 1024 )
+			return format.format( totalNumberOfFreeBytes ) + " MB";
+		totalNumberOfFreeBytes = totalNumberOfFreeBytes / 1024;
+		if ( totalNumberOfFreeBytes < 1024 )
+			return format.format( totalNumberOfFreeBytes ) + " GB";
+		return null;
+	}
+	
 	public static void writeToFile( File file, String string )
 	{
 		try
