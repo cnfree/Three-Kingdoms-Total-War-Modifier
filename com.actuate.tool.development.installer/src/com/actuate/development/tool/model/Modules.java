@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.actuate.development.tool.Toolkit;
+
 public class Modules
 {
 
@@ -132,7 +134,7 @@ public class Modules
 		}
 		return views.toArray( new String[0] );
 	}
-	
+
 	public List<String> getIPortalProjects( )
 	{
 		List<String> projects = new ArrayList<String>( );
@@ -158,8 +160,7 @@ public class Modules
 		IPortalConfig config = iPortalConfigMap.get( project );
 		if ( config != null )
 		{
-			File file = new File( "\\\\GUI-VISTA\\shared\\plugins\\"
-					+ config.getReplaceFile( ) );
+			File file = new File( Toolkit.HOST + config.getReplaceFile( ) );
 			if ( file.exists( ) )
 				return file;
 		}

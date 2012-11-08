@@ -11,6 +11,7 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import com.actuate.development.tool.Toolkit;
 import com.actuate.development.tool.util.LogUtil;
 
 @Root
@@ -79,7 +80,7 @@ public class Tool
 
 	public static void init( )
 	{
-		String xmlpath = "\\\\GUI-VISTA\\shared\\plugins\\toolkit.xml";
+		String xmlpath = Toolkit.HOST + "toolkit.xml";
 		Serializer serializer = new Persister( );
 		File source = new File( xmlpath );
 		try
@@ -93,8 +94,7 @@ public class Tool
 				{
 					new Module( plugin.getName( ),
 							plugin.getLabel( ),
-							"\\\\GUI-VISTA\\shared\\plugins\\"
-									+ plugin.getIcon( ),
+							Toolkit.HOST + plugin.getIcon( ),
 							plugin.getFile( ).trim( ) );
 				}
 				else

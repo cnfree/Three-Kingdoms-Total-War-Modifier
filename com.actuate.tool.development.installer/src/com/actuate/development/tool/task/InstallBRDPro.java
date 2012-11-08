@@ -38,6 +38,7 @@ import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.extension.system.Kernel;
 import org.sf.feeling.swt.win32.extension.system.ProcessEntry;
 
+import com.actuate.development.tool.Toolkit;
 import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.ModuleType;
@@ -247,7 +248,7 @@ public class InstallBRDPro
 				String eclipseOutputDir = "\\\\qa-build\\BIRTOutput\\platform\\"
 						+ eclipseVersion
 						+ "_Release_platform";
-				String pluginOutputDir = "\\\\GUI-VISTA\\shared\\plugins\\"
+				String pluginOutputDir = Toolkit.HOST
 						+ eclipseBigVersion
 						+ "\\"
 						+ eclipseVersion;
