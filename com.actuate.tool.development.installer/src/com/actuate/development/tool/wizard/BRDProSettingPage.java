@@ -177,7 +177,7 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 		} );
 
 		closeButton = new Button( composite, SWT.CHECK );
-		closeButton.setText( "Force to close the opened BRDPro and folder processes under the installation directory" );
+		closeButton.setText( "F&orce to close the opened BRDPro and folder processes under the installation directory" );
 		closeButton.setSelection( true );
 		gd = new GridData( );
 		gd.horizontalSpan = 3;

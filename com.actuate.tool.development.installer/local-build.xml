@@ -20,9 +20,9 @@
 		<tstamp />
 		<property name="dist.dir" value="dist" />
 		<property name="dist.version" value="${DSTAMP}" />
-		<property name="dist.src" value="${dist.dir}/com.actuate.development.toolkit_1.0.0.v${dist.version}.src.zip" />
-		<property name="dist.jar" value="${dist.dir}/com.actuate.development.toolkit_1.0.0.v${dist.version}.jar" />
-		<property name="dist.zip" value="${dist.dir}/com.actuate.development.toolkit_1.0.0.v${dist.version}.zip" />
+		<property name="dist.src" value="${dist.dir}/com.actuate.development.toolkit_4.0.0.v${dist.version}.src.zip" />
+		<property name="dist.jar" value="${dist.dir}/com.actuate.development.toolkit_4.0.0.v${dist.version}.jar" />
+		<property name="dist.zip" value="${dist.dir}/com.actuate.development.toolkit_4.0.0.v${dist.version}.zip" />
 		<property name="build.temp" value="temp" />
 		<delete dir="${build.temp}" />
 		<delete dir="${dist.dir}" />
