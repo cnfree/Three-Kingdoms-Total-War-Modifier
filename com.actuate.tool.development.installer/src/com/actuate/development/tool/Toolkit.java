@@ -1,6 +1,8 @@
 
 package com.actuate.development.tool;
 
+import java.io.File;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
@@ -34,7 +36,8 @@ public class Toolkit
 			{
 				if ( Network.ping( "Qaant", 32 ) != -1 )
 				{
-					if ( HOST == null )
+					if ( HOST == null
+							&& new File( "\\\\Qaant\\qa\\Toolkit\\plugins\\" ).exists( ) )
 					{
 						HOST = "\\\\Qaant\\qa\\Toolkit\\plugins\\";
 						synchronized ( Toolkit.this )
@@ -53,7 +56,8 @@ public class Toolkit
 			{
 				if ( Network.ping( "GUI-VISTA", 32 ) != -1 )
 				{
-					if ( HOST == null )
+					if ( HOST == null
+							&& new File( "\\\\GUI-VISTA\\shared\\plugins\\" ).exists( ) )
 					{
 						HOST = "\\\\GUI-VISTA\\shared\\plugins\\";
 						synchronized ( Toolkit.this )
