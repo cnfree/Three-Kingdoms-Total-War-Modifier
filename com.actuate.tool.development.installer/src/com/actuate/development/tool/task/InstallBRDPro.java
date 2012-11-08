@@ -548,7 +548,7 @@ public class InstallBRDPro
 							}
 						}
 					}
-					else if ( module == Module.emfsdk )
+					else if ( module == Module.wtpsdk )
 					{
 						String pattern = "(?i)wtp.+sdk.+\\.zip";
 						File file = getSDKFile( eclipseOutputDir, pattern );

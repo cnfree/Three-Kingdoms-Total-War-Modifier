@@ -21,13 +21,13 @@ public class Module
 			"Perforce",
 			ModuleType.plugin,
 			"/icons/p4.png" ), emfsdk = new Module( "emfsdk",
-			"EMF SDK",
+			"EMF",
 			ModuleType.sdk,
 			"/icons/emf.gif" ), gefsdk = new Module( "gefsdk",
-			"GEF SDK",
+			"GEF",
 			ModuleType.sdk,
 			"/icons/gef.gif" ), wtpsdk = new Module( "wtpsdk",
-			"WTP SDK",
+			"WTP",
 			ModuleType.sdk,
 			"/icons/wtp.gif" );
 
