@@ -888,7 +888,7 @@ public class InstallBRDPro
 									}
 
 								}
-								else if ( current[0].getType( ) == ModuleType.sdk
+								else if ( current[0].getType( ) == ModuleType.source
 										&& file.indexOf( "eclipse\\plugins" ) > -1
 										&& file.indexOf( "source" ) > -1 )
 								{

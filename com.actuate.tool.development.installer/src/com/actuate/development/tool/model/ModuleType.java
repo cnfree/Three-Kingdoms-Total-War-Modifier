@@ -2,8 +2,8 @@
 package com.actuate.development.tool.model;
 
 public enum ModuleType {
-	sdk("Source", "/icons/resource_obj.gif"), plugin("Plugin",
-			"/icons/plugin_obj.gif"), extension("Extension",
+	sdk("SDK", "/icons/sdk_obj.gif"), plugin("Plugin", "/icons/plugin_obj.gif"), source(
+			"Source", "/icons/resource_obj.gif"), extension("Extension",
 			"/icons/extension_obj.gif");
 
 	private String value;

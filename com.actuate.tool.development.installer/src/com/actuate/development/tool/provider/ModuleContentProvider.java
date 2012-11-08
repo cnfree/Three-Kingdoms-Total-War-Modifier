@@ -28,7 +28,7 @@ public class ModuleContentProvider implements ITreeContentProvider
 	public Object[] getElements( Object inputElement )
 	{
 		List<ModuleType> list = new ArrayList<ModuleType>( );
-		list.addAll( Arrays.asList( ModuleType.values( ) ));
+		list.addAll( Arrays.asList( ModuleType.values( ) ) );
 		if ( Modules.getInstance( ).getExtensions( ).length == 0 )
 			list.remove( ModuleType.extension );
 		return list.toArray( );
@@ -43,6 +43,8 @@ public class ModuleContentProvider implements ITreeContentProvider
 			{
 				case sdk :
 					return Modules.getInstance( ).getSDKs( );
+				case source :
+					return Modules.getInstance( ).getSources( );
 				case plugin :
 					return Modules.getInstance( ).getPlugins( );
 				case extension :

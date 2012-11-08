@@ -15,6 +15,7 @@ public class Modules
 {
 
 	private Map<String, Module> sdkMap = new LinkedHashMap<String, Module>( );
+	private Map<String, Module> soruceMap = new LinkedHashMap<String, Module>( );
 	private Map<String, Module> pluginMap = new LinkedHashMap<String, Module>( );
 	private Map<String, Module> extensionMap = new HashMap<String, Module>( );
 
@@ -43,6 +44,9 @@ public class Modules
 			case sdk :
 				sdkMap.put( module.getName( ), module );
 				break;
+			case source :
+				soruceMap.put( module.getName( ), module );
+				break;
 			case plugin :
 				pluginMap.put( module.getName( ), module );
 				break;
@@ -50,6 +54,17 @@ public class Modules
 				extensionMap.put( module.getName( ), module );
 				break;
 		}
+	}
+
+	public Module getSource( String sourceName )
+	{
+		return soruceMap.get( sourceName );
+	}
+
+	public Module[] getSources( )
+	{
+		Module[] modules = getModules( soruceMap, false );
+		return modules;
 	}
 
 	public Module getSDK( String sdkName )
@@ -101,6 +116,8 @@ public class Modules
 	public Module valueOf( String moduleName )
 	{
 		Module module = sdkMap.get( moduleName );
+		if ( module == null )
+			module = soruceMap.get( moduleName );
 		if ( module == null )
 			module = pluginMap.get( moduleName );
 		if ( module == null )
