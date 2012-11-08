@@ -83,6 +83,7 @@ public class Toolkit
 			MessageDialog.openError( shell,
 					"Error",
 					"Can't connect to server Qaant or GUI-Vista on network. Please try it later or contact with cchen@actuate.com." );
+			shell.dispose( );
 			System.exit( 1 );
 		}
 
