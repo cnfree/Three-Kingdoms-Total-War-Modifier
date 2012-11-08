@@ -227,7 +227,7 @@ public class InstallBRDPro
 					"/links/comOda.link" );
 			helper.parse( p, extractFile );
 
-			final boolean[] flag = new boolean[]{
+			boolean[] flag = new boolean[]{
 				false
 			};
 
@@ -255,9 +255,12 @@ public class InstallBRDPro
 
 				for ( Module module : data.getModules( ) )
 				{
-					flag[0] = true;
-					downloadFlag[0] = true;
-					Thread.sleep( 1000 );
+					flag = new boolean[]{
+						false
+					};
+					downloadFlag = new boolean[]{
+						false
+					};
 
 					current[0] = module;
 					subtaskName[0] = "[Step "
@@ -268,9 +271,6 @@ public class InstallBRDPro
 							+ module.getType( ).getValue( )
 							+ "...";
 					monitor.subTask( subtaskName[0] );
-
-					flag[0] = false;
-					downloadFlag[0] = false;
 
 					stepDetail[0] = "Download and extract the "
 							+ module.getValue( )
@@ -504,8 +504,8 @@ public class InstallBRDPro
 										subtaskName[0],
 										new File( data.getTempDir( )
 												+ "\\"
-												+ module.getName( )
-												+ "_sdk", file.getName( ) ),
+												+ module.getName( ),
+												file.getName( ) ),
 										file.length( ) );
 								initSubtask( monitor,
 										step,
@@ -534,8 +534,8 @@ public class InstallBRDPro
 										subtaskName[0],
 										new File( data.getTempDir( )
 												+ "\\"
-												+ module.getName( )
-												+ "_sdk", file.getName( ) ),
+												+ module.getName( ),
+												file.getName( ) ),
 										file.length( ) );
 								initSubtask( monitor,
 										step,
@@ -564,8 +564,8 @@ public class InstallBRDPro
 										subtaskName[0],
 										new File( data.getTempDir( )
 												+ "\\"
-												+ module.getName( )
-												+ "_sdk", file.getName( ) ),
+												+ module.getName( ),
+												file.getName( ) ),
 										file.length( ) );
 								initSubtask( monitor,
 										step,
@@ -891,7 +891,7 @@ public class InstallBRDPro
 	}
 
 	private void interruptOutput( final IProgressMonitor monitor,
-			final int[] step, final DefaultLogger consoleLogger,
+			final int[] currentStep, final DefaultLogger consoleLogger,
 			final boolean[] flag, final String[] defaultTaskName )
 	{
 
@@ -900,15 +900,14 @@ public class InstallBRDPro
 			linkBuffer.append( current[0].getName( ) ).append( "\n" );
 		}
 
-		if ( outputThread != null && outputThread.isAlive( ) )
-			return;
-
 		outputThread = new Thread( ) {
 
 			public void run( )
 			{
 				try
 				{
+					final Module module = current[0];
+					final int step = currentStep[0];
 					PipedInputStream pipedIS = new PipedInputStream( );
 					PipedOutputStream pipedOS = new PipedOutputStream( );
 					pipedOS.connect( pipedIS );
@@ -920,17 +919,16 @@ public class InstallBRDPro
 					int length = "[exec]".length( );
 					while ( ( line[0] = input.readLine( ) ) != null )
 					{
+						if ( module != current[0] )
+							break;
 						if ( !flag[0] )
 						{
 							int index = line[0].indexOf( extactingStr );
 							if ( index != -1 )
 							{
 								String file = line[0].substring( index + length );
-								monitor.subTask( "[Step "
-										+ step[0]
-										+ "]"
-										+ file );
-								if ( current[0] == null )
+								monitor.subTask( "[Step " + step + "]" + file );
+								if ( module == null )
 								{
 									if ( data.isInstallShield( ) )
 									{
@@ -954,7 +952,7 @@ public class InstallBRDPro
 									}
 
 								}
-								else if ( current[0].getType( ) == ModuleType.source
+								else if ( module.getType( ) == ModuleType.source
 										&& file.indexOf( "eclipse\\plugins" ) > -1
 										&& file.indexOf( "source" ) > -1 )
 								{
@@ -989,23 +987,23 @@ public class InstallBRDPro
 			final boolean[] flag, final String defaultTaskName,
 			final File file, final long size )
 	{
-
-		if ( downloadThread != null && downloadThread.isAlive( ) )
-			return;
-
 		downloadThread = new Thread( ) {
 
 			public void run( )
 			{
 				long donwloadSize = file.length( );
 				long time = System.currentTimeMillis( );
+				final Module module = current[0];
 				while ( !flag[0] )
 				{
-
+					if ( module != current[0] )
+						break;
 					if ( file.exists( ) )
 					{
 						if ( file.length( ) != donwloadSize )
 						{
+							if ( module != current[0] )
+								break;
 							String speed = FileUtil.format( ( (float) ( file.length( ) - donwloadSize ) )
 									/ ( ( (float) ( System.currentTimeMillis( ) - time ) ) / 1000 ) )
 									+ "/s";
@@ -1023,7 +1021,7 @@ public class InstallBRDPro
 					}
 					try
 					{
-						Thread.sleep( 1000 );
+						Thread.sleep( 100 );
 					}
 					catch ( InterruptedException e )
 					{

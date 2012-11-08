@@ -212,6 +212,7 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 				if ( module != null )
 					moduleViewer.setChecked( module, true );
 			}
+			checkCheckStatus( moduleViewer, provider, ModuleType.sdk );
 			checkCheckStatus( moduleViewer, provider, ModuleType.plugin );
 			checkCheckStatus( moduleViewer, provider, ModuleType.source );
 			checkCheckStatus( moduleViewer, provider, ModuleType.extension );
