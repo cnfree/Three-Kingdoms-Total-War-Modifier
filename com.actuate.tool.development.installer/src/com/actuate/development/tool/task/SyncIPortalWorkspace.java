@@ -181,7 +181,8 @@ public class SyncIPortalWorkspace
 					downloadFlag,
 					defaultTaskName,
 					new File( data.getRoot( ) + "\\temp", warFile.getName( ) ),
-					fileLength );
+					fileLength,
+					step );
 
 			monitor.subTask( defaultTaskName
 					+ "\t[ Size: "
@@ -993,25 +994,25 @@ public class SyncIPortalWorkspace
 
 	private void downloadMonitor( final IProgressMonitor monitor,
 			final boolean[] flag, final String defaultTaskName,
-			final File file, final long size )
+			final File file, final long size, final int[] step )
 	{
-
-		if ( downloadThread != null && downloadThread.isAlive( ) )
-			return;
-
 		downloadThread = new Thread( ) {
 
 			public void run( )
 			{
+				int currentStep = step[0];
 				long donwloadSize = file.length( );
 				long time = System.currentTimeMillis( );
 				while ( !flag[0] )
 				{
-
+					if ( currentStep != step[0] )
+						break;
 					if ( file.exists( ) )
 					{
 						if ( file.length( ) != donwloadSize )
 						{
+							if ( currentStep != step[0] )
+								break;
 							String speed = FileUtil.format( ( (float) ( file.length( ) - donwloadSize ) )
 									/ ( ( (float) ( System.currentTimeMillis( ) - time ) ) / 1000 ) )
 									+ "/s";
