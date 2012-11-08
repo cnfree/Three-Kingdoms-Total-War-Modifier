@@ -307,6 +307,9 @@ public class InstallBRDPro
 					}
 					else if ( module == Module.gef )
 					{
+						if ( Arrays.asList( data.getModules( ) )
+								.contains( Module.gefsdk ) )
+							continue;
 						String pattern = "(?i)GEF.+ALL.+\\.zip";
 						File file = getSDKFile( eclipseOutputDir, pattern );
 						// file = new File(
@@ -370,6 +373,9 @@ public class InstallBRDPro
 					}
 					else if ( module == Module.wtp )
 					{
+						if ( Arrays.asList( data.getModules( ) )
+								.contains( Module.wtpsdk ) )
+							continue;
 						String pattern = "(?i)wtp.+sdk.+\\.zip";
 						File file = getSDKFile( eclipseOutputDir, pattern );
 						// file = new File(
@@ -508,6 +514,66 @@ public class InstallBRDPro
 										flag,
 										file );
 								handlePlugin( p, helper, file, Module.emfsdk );
+								continue;
+							}
+						}
+					}
+					else if ( module == Module.gefsdk )
+					{
+						String pattern = "(?i)GEF.+ALL.+\\.zip";
+						File file = getSDKFile( eclipseOutputDir, pattern );
+						// file = new File(
+						// "E:\\zip\\3.7\\emf-xsd-SDK-M201201231045.zip" );
+						if ( data.getModuleVersion( ).emf != null
+								&& data.getModuleVersion( ).emf.indexOf( '.' ) != -1 )
+						{
+							if ( file != null && file.exists( ) )
+							{
+								downloadMonitor( monitor,
+										downloadFlag,
+										subtaskName[0],
+										new File( data.getTempDir( )
+												+ "\\"
+												+ module.getName( )
+												+ "_sdk", file.getName( ) ),
+										file.length( ) );
+								initSubtask( monitor,
+										step,
+										consoleLogger,
+										subtaskName,
+										flag,
+										file );
+								handlePlugin( p, helper, file, Module.gefsdk );
+								continue;
+							}
+						}
+					}
+					else if ( module == Module.emfsdk )
+					{
+						String pattern = "(?i)wtp.+sdk.+\\.zip";
+						File file = getSDKFile( eclipseOutputDir, pattern );
+						// file = new File(
+						// "E:\\zip\\3.7\\emf-xsd-SDK-M201201231045.zip" );
+						if ( data.getModuleVersion( ).emf != null
+								&& data.getModuleVersion( ).emf.indexOf( '.' ) != -1 )
+						{
+							if ( file != null && file.exists( ) )
+							{
+								downloadMonitor( monitor,
+										downloadFlag,
+										subtaskName[0],
+										new File( data.getTempDir( )
+												+ "\\"
+												+ module.getName( )
+												+ "_sdk", file.getName( ) ),
+										file.length( ) );
+								initSubtask( monitor,
+										step,
+										consoleLogger,
+										subtaskName,
+										flag,
+										file );
+								handlePlugin( p, helper, file, Module.wtpsdk );
 								continue;
 							}
 						}

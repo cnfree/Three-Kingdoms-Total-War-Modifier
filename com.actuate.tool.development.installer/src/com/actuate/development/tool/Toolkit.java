@@ -19,38 +19,85 @@ public class Toolkit
 
 	public static String HOST;
 
+	public Toolkit( )
+	{
+		Shell shell = new Shell( );
+		shell.setImages( new Image[]{
+				ImageCache.getImage( "/icons/actuate_16.png" ),
+				ImageCache.getImage( "/icons/actuate_32.png" ),
+				ImageCache.getImage( "/icons/actuate_48.png" )
+		} );
+
+		Thread qaantThread = new Thread( ) {
+
+			public void run( )
+			{
+				if ( Network.ping( "Qaant", 32 ) != -1 )
+				{
+					if ( HOST == null )
+					{
+						HOST = "\\\\Qaant\\qa\\Toolkit\\plugins\\";
+						synchronized ( Toolkit.this )
+						{
+							Toolkit.this.notify( );
+						}
+					}
+				}
+			}
+		};
+		qaantThread.start( );
+
+		Thread guiThread = new Thread( ) {
+
+			public void run( )
+			{
+				if ( Network.ping( "GUI-VISTA", 32 ) != -1 )
+				{
+					if ( HOST == null )
+					{
+						HOST = "\\\\GUI-VISTA\\shared\\plugins\\";
+						synchronized ( Toolkit.this )
+						{
+							Toolkit.this.notify( );
+						}
+					}
+				}
+			}
+		};
+		guiThread.start( );
+
+		synchronized ( this )
+		{
+			try
+			{
+				if ( HOST == null )
+					this.wait( 3000 );
+			}
+			catch ( InterruptedException e )
+			{
+			}
+		}
+
+		if ( HOST == null )
+		{
+			MessageDialog.openError( shell,
+					"Error",
+					"Can't connect to server Qaant or GUI-Vista on network. Please try it later or contact with cchen@actuate.com." );
+			System.exit( 1 );
+		}
+
+		ToolkitWizard wizard = new ToolkitWizard( );
+		WizardDialog dialog = new WizardDialog( null, wizard );
+		dialog.open( );
+	}
+
 	public static void main( String[] args )
 	{
 		if ( args != null
 				&& args.length > 0
 				&& "-uac".equalsIgnoreCase( args[0] ) )
 		{
-			Shell shell = new Shell( );
-			shell.setImages( new Image[]{
-					ImageCache.getImage( "/icons/actuate_16.png" ),
-					ImageCache.getImage( "/icons/actuate_32.png" ),
-					ImageCache.getImage( "/icons/actuate_48.png" )
-			} );
-
-			if ( Network.ping( "Qaant", 32 ) != -1 )
-			{
-				HOST = "\\\\Qaant\\qa\\Toolkit\\plugins\\";
-			}
-			else if ( Network.ping( "GUI-VISTA", 32 ) != -1 )
-			{
-				HOST = "\\\\GUI-VISTA\\shared\\plugins\\";
-			}
-			if ( HOST == null )
-			{
-				MessageDialog.openError( shell,
-						"Error",
-						"Can't connect to server Qaant or GUI-Vista on network." );
-				return;
-			}
-
-			ToolkitWizard wizard = new ToolkitWizard( );
-			WizardDialog dialog = new WizardDialog( null, wizard );
-			dialog.open( );
+			new Toolkit( );
 		}
 		else
 		{

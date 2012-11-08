@@ -27,7 +27,6 @@ import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.sf.feeling.swt.win32.extension.Win32;
-import org.sf.feeling.swt.win32.extension.io.Network;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
