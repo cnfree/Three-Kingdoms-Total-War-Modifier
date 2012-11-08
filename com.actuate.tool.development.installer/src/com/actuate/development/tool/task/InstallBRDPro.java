@@ -616,36 +616,34 @@ public class InstallBRDPro
 			helper.parse( p, cleanFile );
 			p.executeTarget( "clean" );
 
-			if ( !data.isNotCreateShortcut( ) )
-			{
-				Display.getDefault( ).syncExec( new Runnable( ) {
+			Display.getDefault( ).syncExec( new Runnable( ) {
 
-					public void run( )
+				public void run( )
+				{
+					File eclipseFile = new File( data.getDirectory( ),
+							"\\eclipse\\eclipse.exe" );
+					String filePath = new File( eclipseFile.getParentFile( ),
+							"eclipse.lnk" ).getAbsolutePath( );
+					if ( eclipseFile.exists( ) )
 					{
-						String filePath = ShellFolder.DESKTOP.getAbsolutePath( 0 )
-								+ File.separator
-								+ new File( data.getDirectory( ) ).getName( )
-								+ ".lnk";
+						ShellLink.createShortCut( eclipseFile.getAbsolutePath( ),
+								filePath );
+						ShellLink.setShortCutArguments( filePath,
+								data.getShortcutArguments( ) );
+						ShellLink.setShortCutDescription( filePath,
+								"Contributor:cchen@actuate.com" );
+						ShellLink.setShortCutWorkingDirectory( filePath,
+								eclipseFile.getParentFile( ).getAbsolutePath( ) );
 
-						File eclipseFile = new File( data.getDirectory( ),
-								"\\eclipse\\eclipse.exe" );
-						if ( eclipseFile.exists( ) )
+						if ( !data.isNotCreateShortcut( ) )
 						{
-							ShellLink.createShortCut( eclipseFile.getAbsolutePath( ),
-									filePath );
-							ShellLink.setShortCutArguments( filePath,
-									data.getShortcutArguments( ) );
-							ShellLink.setShortCutDescription( filePath,
-									"Contributor:cchen@actuate.com" );
-							ShellLink.setShortCutWorkingDirectory( filePath,
-									eclipseFile.getParentFile( )
-											.getAbsolutePath( ) );
-
 							try
 							{
-								FileUtil.writeToBinarayFile( new File( eclipseFile.getParentFile( )
-										.getAbsolutePath( ),
-										"eclipse.lnk" ),
+								File file = new File( ShellFolder.DESKTOP.getAbsolutePath( 0 )
+										+ File.separator
+										+ new File( data.getDirectory( ) ).getName( )
+										+ ".lnk" );
+								FileUtil.writeToBinarayFile( file,
 										new FileInputStream( filePath ),
 										true );
 							}
@@ -653,12 +651,10 @@ public class InstallBRDPro
 							{
 								LogUtil.recordErrorMsg( e, false );
 							}
-
 						}
 					}
-				} );
-
-			}
+				}
+			} );
 
 			p.fireBuildFinished( null );
 

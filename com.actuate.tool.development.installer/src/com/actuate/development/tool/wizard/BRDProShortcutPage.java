@@ -51,27 +51,10 @@ class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 		gridLayout.marginHeight = 20;
 		composite.setLayout( gridLayout );
 
-		shortcutButton = new Button( composite, SWT.CHECK );
-		shortcutButton.setText( "Create &shortcut on Desktop" );
-		shortcutButton.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent e )
-			{
-				if ( data != null )
-					data.getCurrentInstallBRDProData( )
-							.setNotCreateShortcut( !shortcutButton.getSelection( ) );
-				checkTextStatus( shortcutButton );
-			}
-		} );
-
-		GridData gd = new GridData( );
-		gd.horizontalSpan = 2;
-		shortcutButton.setLayoutData( gd );
-
 		new Label( composite, SWT.NONE ).setText( "Shortcut &Arguments: " );
 		shortcutArgumentText = new Text( composite, SWT.BORDER );
 		shortcutArgumentText.setText( "-showlocation -nl en_us -vmargs -server -Xms256m -Xmx512m -XX:PermSize=64M -XX:MaxPermSize=256M" );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
+		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
 		shortcutArgumentText.setLayoutData( gd );
 
 		shortcutArgumentText.addModifyListener( new ModifyListener( ) {
@@ -88,6 +71,22 @@ class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 			}
 		} );
 
+		shortcutButton = new Button( composite, SWT.CHECK );
+		shortcutButton.setText( "Create &shortcut on Desktop" );
+		shortcutButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( data != null )
+					data.getCurrentInstallBRDProData( )
+							.setNotCreateShortcut( !shortcutButton.getSelection( ) );
+				//checkTextStatus( shortcutButton );
+			}
+		} );
+		gd = new GridData( );
+		gd.horizontalSpan = 2;
+		shortcutButton.setLayoutData( gd );
+
 		initPage( );
 
 		setControl( composite );
@@ -100,7 +99,7 @@ class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 		{
 			shortcutButton.setSelection( !data.getCurrentInstallBRDProData( )
 					.isNotCreateShortcut( ) );
-			checkTextStatus( shortcutButton );
+			//checkTextStatus( shortcutButton );
 			if ( data.getCurrentInstallBRDProData( ).getShortcutArguments( ) != null
 					&& data.getCurrentInstallBRDProData( )
 							.getShortcutArguments( )
@@ -128,10 +127,10 @@ class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 		return false;
 	}
 
-	private void checkTextStatus( final Button shortcutButton )
-	{
-		shortcutArgumentText.setEnabled( shortcutButton.getSelection( ) );
-	}
+//	private void checkTextStatus( final Button shortcutButton )
+//	{
+//		shortcutArgumentText.setEnabled( shortcutButton.getSelection( ) );
+//	}
 
 	public void propertyChange( PropertyChangeEvent event )
 	{
