@@ -29,7 +29,7 @@ public class Module
 			"/icons/gef.gif" ), wtpsdk = new Module( "wtpsdk",
 			"WTP SDK",
 			ModuleType.sdk,
-			"/icons/emf.gif" );
+			"/icons/wtp.gif" );
 
 	private String value;
 	private ModuleType type;
