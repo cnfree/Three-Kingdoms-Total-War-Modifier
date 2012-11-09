@@ -113,6 +113,12 @@ public class CreateClientDialog extends TitleAreaDialog
 		return contents;
 	}
 
+	protected void createButtonsForButtonBar( Composite parent )
+	{
+		super.createButtonsForButtonBar( parent );
+		checkStatus( );
+	}
+
 	protected void checkStatus( )
 	{
 		if ( txtName != null && txtName.getText( ).trim( ).length( ) == 0 )
