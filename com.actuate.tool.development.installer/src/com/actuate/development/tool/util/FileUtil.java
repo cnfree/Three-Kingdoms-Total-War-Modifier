@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 public class FileUtil
 {
 
@@ -131,8 +133,13 @@ public class FileUtil
 		}
 	}
 
-	public static boolean copyFile( String src, String des )
+	public static boolean copyFile( IProgressMonitor monitor, String src,
+			String des )
 	{
+		if ( monitor != null )
+		{
+			monitor.subTask( src );
+		}
 		FileInputStream fis = null;
 		try
 		{
@@ -160,14 +167,14 @@ public class FileUtil
 		return false;
 	}
 
-	public static boolean copyDirectory( String srcDirectory,
-			String desDirectory )
+	public static boolean copyDirectory( IProgressMonitor monitor,
+			String srcDirectory, String desDirectory )
 	{
-		return copyDirectory( srcDirectory, desDirectory, null );
+		return copyDirectory( monitor, srcDirectory, desDirectory, null );
 	}
 
-	public static boolean copyDirectory( String srcDirectory,
-			String desDirectory, FileFilter filter )
+	public static boolean copyDirectory( IProgressMonitor monitor,
+			String srcDirectory, String desDirectory, FileFilter filter )
 	{
 		try
 		{
@@ -191,12 +198,12 @@ public class FileUtil
 							+ File.separator
 							+ allFile[currentFile].getName( );
 					if ( filter == null || filter.accept( new File( srcName ) ) )
-						copyFile( srcName, desName );
+						copyFile( monitor, srcName, desName );
 				}
 				else
 				{
-					if ( !copyDirectory( allFile[currentFile].getPath( )
-							.toString( ),
+					if ( !copyDirectory( monitor,
+							allFile[currentFile].getPath( ).toString( ),
 							desDirectory
 									+ File.separator
 									+ allFile[currentFile].getName( )
@@ -250,9 +257,8 @@ public class FileUtil
 					+ destDir
 					+ "' is not a directory" ); //$NON-NLS-1$
 		}
-		copyDirectory( srcDir.getAbsolutePath( ),
-				new File( destDir, srcDir.getName( ) ).getAbsolutePath( ),
-				filter );
+		copyDirectory( null, srcDir.getAbsolutePath( ), new File( destDir,
+				srcDir.getName( ) ).getAbsolutePath( ), filter );
 	}
 
 	public static long sizeOfDirectory( File directory )

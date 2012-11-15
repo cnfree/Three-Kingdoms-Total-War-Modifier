@@ -28,11 +28,15 @@ public class CloneWorkspaceSettings
 		monitor.beginTask( "Cloning the workspace settings",
 				IProgressMonitor.UNKNOWN );
 
-		final boolean result = WorkspaceUtil.cloneWorkspaceSettings( data.getCloneWorkspaceData( )
-				.getSourceWorkspace( )
-				+ "\\.metadata",
+		final boolean result = WorkspaceUtil.cloneWorkspaceSettings( monitor,
+				data.getCloneWorkspaceData( ).getSourceWorkspace( )
+						+ "\\.metadata",
 				data.getCloneWorkspaceData( ).getTargetWorkspace( )
 						+ "\\.metadata" );
+
+		monitor.subTask( "" );
+		monitor.setTaskName( "Finished cloning the workspace settings" );
+
 		Display.getDefault( ).syncExec( new Runnable( ) {
 
 			public void run( )

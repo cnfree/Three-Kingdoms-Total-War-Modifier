@@ -76,7 +76,7 @@ public class CloneWorkspaceSettingsPage extends WizardPage
 		} );
 
 		new Label( composite, SWT.NONE ).setText( "&Source Workspace: " );
-		txtSource = new Text( composite, SWT.BORDER | SWT.READ_ONLY );
+		txtSource = new Text( composite, SWT.BORDER );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		txtSource.setLayoutData( gd );
 
@@ -155,7 +155,7 @@ public class CloneWorkspaceSettingsPage extends WizardPage
 
 		if ( txtWorkspace.getText( ).equals( txtSource ) )
 		{
-			setErrorMessage( "The target workspace is the same as the source workspace." );
+			setErrorMessage( "The target workspace directory is the same as the source workspace." );
 			return;
 		}
 

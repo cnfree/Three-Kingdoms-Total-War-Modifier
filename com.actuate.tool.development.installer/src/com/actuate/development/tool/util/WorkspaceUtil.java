@@ -4,10 +4,12 @@ package com.actuate.development.tool.util;
 import java.io.File;
 import java.io.FileFilter;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 public class WorkspaceUtil
 {
 
-	public static boolean cloneWorkspaceSettings( String oldWorkspace,
+	public static boolean cloneWorkspaceSettings( IProgressMonitor monitor, String oldWorkspace,
 			String newWorkspace )
 	{
 		if ( oldWorkspace == null
@@ -37,6 +39,6 @@ public class WorkspaceUtil
 				return false;
 			}
 		};
-		return FileUtil.copyDirectory( oldWorkspace, newWorkspace, filter );
+		return FileUtil.copyDirectory( monitor, oldWorkspace, newWorkspace, filter );
 	}
 }

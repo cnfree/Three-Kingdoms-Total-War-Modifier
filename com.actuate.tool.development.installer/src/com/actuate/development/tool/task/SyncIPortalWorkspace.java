@@ -250,6 +250,9 @@ public class SyncIPortalWorkspace
 
 			p.fireBuildFinished( null );
 
+			monitor.subTask( "" );
+			monitor.setTaskName( "Finished synchronizing the iPortal Viewer workspace" );
+
 			Display.getDefault( ).syncExec( new Runnable( ) {
 
 				public void run( )

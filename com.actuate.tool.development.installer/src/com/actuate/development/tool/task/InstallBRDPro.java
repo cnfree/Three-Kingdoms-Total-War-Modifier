@@ -658,6 +658,9 @@ public class InstallBRDPro
 
 			p.fireBuildFinished( null );
 
+			monitor.subTask( "" );
+			monitor.setTaskName( "Finished installing the BRDPro Development Environment" );
+
 			Display.getDefault( ).syncExec( new Runnable( ) {
 
 				public void run( )
