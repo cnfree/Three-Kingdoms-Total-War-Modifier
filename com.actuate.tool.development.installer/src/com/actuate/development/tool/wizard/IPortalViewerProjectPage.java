@@ -751,6 +751,8 @@ class IPortalViewerProjectPage extends WizardPage implements
 							.setRevertFiles( revertButton.getSelection( ) );
 			}
 		} );
+		
+		revertButton.setVisible( false );
 
 		setControl( composite );
 

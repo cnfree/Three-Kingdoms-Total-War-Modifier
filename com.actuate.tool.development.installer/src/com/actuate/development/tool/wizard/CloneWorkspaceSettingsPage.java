@@ -43,41 +43,9 @@ public class CloneWorkspaceSettingsPage extends WizardPage
 		gridLayout.marginHeight = 20;
 		composite.setLayout( gridLayout );
 
-		new Label( composite, SWT.NONE ).setText( "&Target Workspace: " );
-		txtWorkspace = new Text( composite, SWT.BORDER );
-		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
-		txtWorkspace.setLayoutData( gd );
-
-		txtWorkspace.addModifyListener( new ModifyListener( ) {
-
-			public void modifyText( ModifyEvent e )
-			{
-				checkStatus( );
-				setPageComplete( isPageComplete( ) );
-			}
-
-		} );
-
-		Button workspaceButton = new Button( composite, SWT.PUSH );
-		workspaceButton.setText( "Br&owse..." );
-		workspaceButton.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent e )
-			{
-				DirectoryDialog dialog = new DirectoryDialog( getShell( ) );
-				dialog.setMessage( "Select Directory" );
-				String path = dialog.open( );
-				if ( path != null )
-				{
-					txtWorkspace.setText( path );
-				}
-			}
-
-		} );
-
-		new Label( composite, SWT.NONE ).setText( "&Source Workspace: " );
+		new Label( composite, SWT.NONE ).setText( "&Source Workspace (old) : " );
 		txtSource = new Text( composite, SWT.BORDER );
-		gd = new GridData( GridData.FILL_HORIZONTAL );
+		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
 		txtSource.setLayoutData( gd );
 
 		txtSource.addModifyListener( new ModifyListener( ) {
@@ -107,6 +75,39 @@ public class CloneWorkspaceSettingsPage extends WizardPage
 			}
 
 		} );
+
+		new Label( composite, SWT.NONE ).setText( "&Target Workspace (new) : " );
+		txtWorkspace = new Text( composite, SWT.BORDER );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		txtWorkspace.setLayoutData( gd );
+
+		txtWorkspace.addModifyListener( new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				checkStatus( );
+				setPageComplete( isPageComplete( ) );
+			}
+
+		} );
+
+		Button workspaceButton = new Button( composite, SWT.PUSH );
+		workspaceButton.setText( "Br&owse..." );
+		workspaceButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				DirectoryDialog dialog = new DirectoryDialog( getShell( ) );
+				dialog.setMessage( "Select Directory" );
+				String path = dialog.open( );
+				if ( path != null )
+				{
+					txtWorkspace.setText( path );
+				}
+			}
+
+		} );
+
 		setControl( composite );
 
 	}
