@@ -12,10 +12,15 @@ import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -48,6 +53,10 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 
 	private ModuleContentProvider provider;
 
+	private ScrolledComposite scrollContent;
+
+	private Composite composite;
+
 	BRDProSettingPage( ToolFeatureData data )
 	{
 		super( "SettingPage" );
@@ -66,7 +75,16 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 	 */
 	public void createControl( Composite parent )
 	{
-		Composite composite = new Composite( parent, SWT.NONE );
+		scrollContent = new ScrolledComposite( parent, SWT.H_SCROLL
+				| SWT.V_SCROLL );
+		scrollContent.setAlwaysShowScrollBars( false );
+		scrollContent.setExpandHorizontal( true );
+		scrollContent.setExpandVertical( true );
+		scrollContent.setMinWidth( 400 );
+		scrollContent.setLayout( new FillLayout( ) );
+		scrollContent.setLayoutData( new GridData( GridData.FILL_BOTH ) );
+
+		composite = new Composite( scrollContent, SWT.NONE );
 		GridLayout gridLayout = new GridLayout( 3, false );
 		gridLayout.marginWidth = 10;
 		composite.setLayout( gridLayout );
@@ -78,9 +96,8 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 		moduleLabel.setLayoutData( gd );
 
 		moduleViewer = new CheckboxTreeViewer( composite, SWT.BORDER );
-
 		moduleViewer.getTree( )
-				.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
+				.setLayoutData( new GridData( GridData.FILL_BOTH ) );
 		provider = new ModuleContentProvider( );
 		moduleViewer.setContentProvider( provider );
 		moduleViewer.setLabelProvider( new ModuleLabelProvider( ) );
@@ -193,8 +210,29 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 		} );
 
 		initPage( );
-		setControl( composite );
 
+		Point size = composite.computeSize( SWT.DEFAULT, SWT.DEFAULT );
+		composite.setSize( size );
+
+		scrollContent.addControlListener( new ControlAdapter( ) {
+
+			public void controlResized( ControlEvent e )
+			{
+				computeSize( );
+			}
+		} );
+
+		scrollContent.setContent( composite );
+
+		setControl( scrollContent );
+
+	}
+
+	private void computeSize( )
+	{
+		scrollContent.setMinSize( composite.computeSize( SWT.DEFAULT,
+				SWT.DEFAULT ) );
+		composite.layout( );
 	}
 
 	private void initPage( )

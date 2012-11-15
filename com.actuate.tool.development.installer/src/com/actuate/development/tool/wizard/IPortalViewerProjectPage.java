@@ -22,10 +22,13 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -81,7 +84,15 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 	public void createControl( Composite parent )
 	{
-		Composite composite = new Composite( parent, SWT.NULL );
+		ScrolledComposite scrollContent = new ScrolledComposite( parent,
+				SWT.H_SCROLL | SWT.V_SCROLL );
+		scrollContent.setAlwaysShowScrollBars( false );
+		scrollContent.setExpandHorizontal( true );
+		scrollContent.setMinWidth( 550 );
+		scrollContent.setLayout( new FillLayout( ) );
+		scrollContent.setLayoutData( new GridData( GridData.FILL_BOTH ) );
+
+		Composite composite = new Composite( scrollContent, SWT.NULL );
 		GridLayout gridLayout = new GridLayout( );
 		gridLayout.marginWidth = 10;
 		// gridLayout.marginHeight = 10;
@@ -751,10 +762,15 @@ class IPortalViewerProjectPage extends WizardPage implements
 							.setRevertFiles( revertButton.getSelection( ) );
 			}
 		} );
-		
+
 		revertButton.setVisible( false );
 
-		setControl( composite );
+		Point size = composite.computeSize( SWT.DEFAULT, SWT.DEFAULT );
+		composite.setSize( size );
+
+		scrollContent.setContent( composite );
+
+		setControl( scrollContent );
 
 		if ( data != null && data.getCurrentIVProject( ) != null )
 		{
