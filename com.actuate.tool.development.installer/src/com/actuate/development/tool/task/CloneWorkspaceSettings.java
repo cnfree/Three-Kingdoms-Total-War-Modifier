@@ -29,8 +29,10 @@ public class CloneWorkspaceSettings
 				IProgressMonitor.UNKNOWN );
 
 		final boolean result = WorkspaceUtil.cloneWorkspaceSettings( data.getCloneWorkspaceData( )
-				.getSourceWorkspace( ),
-				data.getCloneWorkspaceData( ).getTargetWorkspace( ) );
+				.getSourceWorkspace( )
+				+ "\\.metadata",
+				data.getCloneWorkspaceData( ).getTargetWorkspace( )
+						+ "\\.metadata" );
 		Display.getDefault( ).syncExec( new Runnable( ) {
 
 			public void run( )

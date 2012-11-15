@@ -8,7 +8,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
-import org.sf.feeling.swt.win32.extension.io.Network;
 import org.sf.feeling.swt.win32.extension.jna.win32.Shell32;
 import org.sf.feeling.swt.win32.extension.jna.win32.structure.SHELLEXECUTEINFO;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
@@ -34,41 +33,17 @@ public class Toolkit
 
 			public void run( )
 			{
-				if ( Network.ping( "Qaant", 32 ) != -1 )
+				if ( new File( "\\\\Qaant\\qa\\Toolkit\\plugins\\" ).exists( ) )
 				{
-					if ( HOST == null
-							&& new File( "\\\\Qaant\\qa\\Toolkit\\plugins\\" ).exists( ) )
+					HOST = "\\\\Qaant\\qa\\Toolkit\\plugins\\";
+					synchronized ( Toolkit.this )
 					{
-						HOST = "\\\\Qaant\\qa\\Toolkit\\plugins\\";
-						synchronized ( Toolkit.this )
-						{
-							Toolkit.this.notify( );
-						}
+						Toolkit.this.notify( );
 					}
 				}
 			}
 		};
 		qaantThread.start( );
-
-		Thread guiThread = new Thread( ) {
-
-			public void run( )
-			{
-				if ( Network.ping( "GUI-VISTA", 32 ) != -1 )
-				{
-					if ( HOST == null
-							&& new File( "\\\\GUI-VISTA\\shared\\plugins\\" ).exists( ) )
-					{
-						HOST = "\\\\GUI-VISTA\\shared\\plugins\\";
-						synchronized ( Toolkit.this )
-						{
-							Toolkit.this.notify( );
-						}
-					}
-				}
-			}
-		};
-		guiThread.start( );
 
 		synchronized ( this )
 		{
@@ -86,7 +61,7 @@ public class Toolkit
 		{
 			MessageDialog.openError( shell,
 					"Error",
-					"Can't connect to server Qaant or GUI-Vista on network. Please try it later or contact with cchen@actuate.com." );
+					"Can't connect to server Qaant. Please try it later or contact with cchen@actuate.com." );
 			shell.dispose( );
 			System.exit( 1 );
 		}
