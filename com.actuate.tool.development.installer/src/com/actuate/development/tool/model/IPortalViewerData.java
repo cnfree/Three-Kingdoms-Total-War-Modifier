@@ -13,8 +13,10 @@ public class IPortalViewerData
 	private String view;
 
 	private boolean forceOperation;
-	
+
 	private boolean revertFiles;
+
+	private boolean skipSync;
 
 	private String server;
 
@@ -74,6 +76,11 @@ public class IPortalViewerData
 		return revertFiles;
 	}
 
+	public boolean isSkipSync( )
+	{
+		return skipSync;
+	}
+
 	public void setBirtViewerFile( String birtViewerFile )
 	{
 		this.birtViewerFile = birtViewerFile;
@@ -112,6 +119,11 @@ public class IPortalViewerData
 	public void setServer( String server )
 	{
 		this.server = server;
+	}
+
+	public void setSkipSync( boolean skipSync )
+	{
+		this.skipSync = skipSync;
 	}
 
 	public void setUser( String user )

@@ -63,11 +63,13 @@ public class InstallBRDPro
 
 	private static final String ECLIPSE_FEATURES = "eclipse\\features\\";
 
+	private static final String ECLIPSE_PLUGINS = "eclipse\\plugins\\";
+
 	private static final String ECLIPSE_FEATURE_PATTERN = "(?i)"
 			+ Pattern.quote( ECLIPSE_FEATURES );
 
 	private static final String ECLIPSE_VERSION_PATTERN = "(?i)"
-			+ Pattern.quote( ECLIPSE_FEATURES + ORG_ECLIPSE_PLATFORM )
+			+ Pattern.quote( ECLIPSE_PLUGINS + ORG_ECLIPSE_PLATFORM )
 			+ "(\\d+\\.\\d+\\.\\d+)";
 
 	private static final String EMF_VERSION_PATTERN = "(?i)"
@@ -163,78 +165,90 @@ public class InstallBRDPro
 
 		try
 		{
-			data.setTempDir( data.getDirectory( )
-					+ "\\temp"
-					+ System.currentTimeMillis( ) );
-			// data.clearDirectory = true;
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Initializing the installation task..." );
-			stepDetail[0] = "Initialize the installation task";
-
-			File logFile = new File( data.getDirectory( ), "uninstall.data" );
-			boolean useAntClean = !logFile.exists( );
-			if ( !useAntClean )
-			{
-				cleanInstallFile( );
-			}
-			File initFile = getAntFile( "/templates/Init.xml", useAntClean );
-			p.fireBuildStarted( );
-			p.init( );
 			ProjectHelper helper = ProjectHelper.getProjectHelper( );
-			helper.parse( p, initFile );
-			p.executeTarget( "init" );
-
-			File brdproFile = new File( data.getBrdproFile( ) );
-			long fileLength = brdproFile.length( );
-			String defaultTaskName = "[Step "
-					+ ++step[0]
-					+ "] Downloading the BRDPro archive file...";
-
 			boolean[] downloadFlag = new boolean[]{
 				false
 			};
-
-			downloadMonitor( monitor,
-					downloadFlag,
-					defaultTaskName,
-					new File( data.getTempDir( ) + "\\brdpro\\zip",
-							brdproFile.getName( ) ),
-					fileLength );
-
-			monitor.subTask( defaultTaskName
-					+ "\t[ Size: "
-					+ FileUtils.byteCountToDisplaySize( fileLength )
-					+ " ] " );
-			stepDetail[0] = "Download the BRDPro archive file";
-			File downloadFile = getAntFile( "/templates/Download.xml", true );
-			helper.parse( p, downloadFile );
-			p.executeTarget( "download" );
-
-			downloadFlag[0] = true;
-
-			checkBRDProVersion( monitor );
-
-			String[] subtaskName = new String[]{
-				"[Step "
-						+ ++step[0]
-						+ "] Extracting and installing the BRDPro archive file..."
-			};
-			monitor.subTask( subtaskName[0] );
-			stepDetail[0] = "Extract and install the BRDPro archive file";
-			File extractFile = getConfigFile( "/templates/brdpro.ini",
-					"/templates/Extract.xml",
-					"/links/comOda.link" );
-			helper.parse( p, extractFile );
-
 			boolean[] flag = new boolean[]{
 				false
 			};
+			String[] subtaskName = new String[1];
 
-			interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
+			if ( !monitor.isCanceled( ) )
+			{
+				data.setTempDir( data.getDirectory( )
+						+ "\\temp"
+						+ System.currentTimeMillis( ) );
+				// data.clearDirectory = true;
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Initializing the installation task..." );
+				stepDetail[0] = "Initialize the installation task";
 
-			p.executeTarget( "extract_brdpro" );
+				File logFile = new File( data.getDirectory( ), "uninstall.data" );
+				boolean useAntClean = !logFile.exists( );
+				if ( !useAntClean )
+				{
+					cleanInstallFile( );
+				}
+				File initFile = getAntFile( "/templates/Init.xml", useAntClean );
+				p.fireBuildStarted( );
+				p.init( );
+				helper.parse( p, initFile );
+				p.executeTarget( "init" );
+			}
 
+			if ( !monitor.isCanceled( ) )
+			{
+				File brdproFile = new File( data.getBrdproFile( ) );
+				long fileLength = brdproFile.length( );
+				String defaultTaskName = "[Step "
+						+ ++step[0]
+						+ "] Downloading the BRDPro archive file...";
+
+				downloadMonitor( monitor,
+						downloadFlag,
+						defaultTaskName,
+						new File( data.getTempDir( ) + "\\brdpro\\zip",
+								brdproFile.getName( ) ),
+						fileLength );
+
+				monitor.subTask( defaultTaskName
+						+ "\t[ Size: "
+						+ FileUtils.byteCountToDisplaySize( fileLength )
+						+ " ] " );
+				stepDetail[0] = "Download the BRDPro archive file";
+				File downloadFile = getAntFile( "/templates/Download.xml", true );
+				helper.parse( p, downloadFile );
+				p.executeTarget( "download" );
+
+				downloadFlag[0] = true;
+				checkBRDProVersion( monitor );
+			}
+
+			if ( !monitor.isCanceled( ) )
+			{
+				subtaskName = new String[]{
+					"[Step "
+							+ ++step[0]
+							+ "] Extracting and installing the BRDPro archive file..."
+				};
+				monitor.subTask( subtaskName[0] );
+				stepDetail[0] = "Extract and install the BRDPro archive file";
+				File extractFile = getConfigFile( "/templates/brdpro.ini",
+						"/templates/Extract.xml",
+						"/links/comOda.link" );
+				helper.parse( p, extractFile );
+
+				interruptOutput( monitor,
+						step,
+						consoleLogger,
+						flag,
+						subtaskName );
+
+				p.executeTarget( "extract_brdpro" );
+			}
+			
 			flag[0] = true;
 
 			final List<Module> failedList = new ArrayList<Module>( );
@@ -261,6 +275,11 @@ public class InstallBRDPro
 					downloadFlag = new boolean[]{
 						false
 					};
+
+					if ( monitor.isCanceled( ) )
+					{
+						break;
+					}
 
 					current[0] = module;
 					subtaskName[0] = "[Step "
@@ -608,109 +627,130 @@ public class InstallBRDPro
 			flag[0] = true;
 			downloadFlag[0] = true;
 
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Cleaning the temporary files..." );
-			stepDetail[0] = "Clean the temporary files";
-			File cleanFile = getAntFile( "/templates/Clean.xml", true );
-			helper.parse( p, cleanFile );
-			p.executeTarget( "clean" );
+			if ( !monitor.isCanceled( ) )
+			{
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Cleaning the temporary files..." );
+				stepDetail[0] = "Clean the temporary files";
+				File cleanFile = getAntFile( "/templates/Clean.xml", true );
+				helper.parse( p, cleanFile );
+				p.executeTarget( "clean" );
 
-			Display.getDefault( ).syncExec( new Runnable( ) {
+				Display.getDefault( ).syncExec( new Runnable( ) {
 
-				public void run( )
-				{
-					File eclipseFile = new File( data.getDirectory( ),
-							"\\eclipse\\eclipse.exe" );
-					String filePath = new File( eclipseFile.getParentFile( ),
-							"eclipse.lnk" ).getAbsolutePath( );
-					if ( eclipseFile.exists( ) )
+					public void run( )
 					{
-						ShellLink.createShortCut( eclipseFile.getAbsolutePath( ),
-								filePath );
-						ShellLink.setShortCutArguments( filePath,
-								data.getShortcutArguments( ) );
-						ShellLink.setShortCutDescription( filePath,
-								"Contributor:cchen@actuate.com" );
-						ShellLink.setShortCutWorkingDirectory( filePath,
-								eclipseFile.getParentFile( ).getAbsolutePath( ) );
-
-						if ( !data.isNotCreateShortcut( ) )
+						File eclipseFile = new File( data.getDirectory( ),
+								"\\eclipse\\eclipse.exe" );
+						String filePath = new File( eclipseFile.getParentFile( ),
+								"eclipse.lnk" ).getAbsolutePath( );
+						if ( eclipseFile.exists( ) )
 						{
-							try
+							ShellLink.createShortCut( eclipseFile.getAbsolutePath( ),
+									filePath );
+							ShellLink.setShortCutArguments( filePath,
+									data.getShortcutArguments( ) );
+							ShellLink.setShortCutDescription( filePath,
+									"Contributor:cchen@actuate.com" );
+							ShellLink.setShortCutWorkingDirectory( filePath,
+									eclipseFile.getParentFile( )
+											.getAbsolutePath( ) );
+
+							if ( !data.isNotCreateShortcut( ) )
 							{
-								File file = new File( ShellFolder.DESKTOP.getAbsolutePath( 0 )
-										+ File.separator
-										+ new File( data.getDirectory( ) ).getName( )
-										+ ".lnk" );
-								FileUtil.writeToBinarayFile( file,
-										new FileInputStream( filePath ),
-										true );
-							}
-							catch ( FileNotFoundException e )
-							{
-								LogUtil.recordErrorMsg( e, false );
+								try
+								{
+									File file = new File( ShellFolder.DESKTOP.getAbsolutePath( 0 )
+											+ File.separator
+											+ new File( data.getDirectory( ) ).getName( )
+											+ ".lnk" );
+									FileUtil.writeToBinarayFile( file,
+											new FileInputStream( filePath ),
+											true );
+								}
+								catch ( FileNotFoundException e )
+								{
+									LogUtil.recordErrorMsg( e, false );
+								}
 							}
 						}
 					}
-				}
-			} );
+				} );
 
-			p.fireBuildFinished( null );
+				p.fireBuildFinished( null );
 
-			monitor.subTask( "" );
-			monitor.setTaskName( "Finished installing the BRDPro Development Environment" );
+				monitor.subTask( "" );
+				monitor.setTaskName( "Finished installing the BRDPro Development Environment" );
 
-			Display.getDefault( ).syncExec( new Runnable( ) {
+				Display.getDefault( ).syncExec( new Runnable( ) {
 
-				public void run( )
-				{
-					if ( UIUtil.getShell( ).getMinimized( ) )
-						Windows.flashWindow( UIUtil.getShell( ).handle, true );
-					StringBuffer buffer = new StringBuffer( );
-					buffer.append( "Install the Actuate BRDPro Development Environment sucessfully." );
-
-					if ( failedList.size( ) > 0 )
+					public void run( )
 					{
-						buffer.append( "\n\nDetails:\n" );
-						for ( int i = 0; i < failedList.size( ); i++ )
+						if ( UIUtil.getShell( ).getMinimized( ) )
+							Windows.flashWindow( UIUtil.getShell( ).handle,
+									true );
+						StringBuffer buffer = new StringBuffer( );
+						buffer.append( "Install the Actuate BRDPro Development Environment sucessfully." );
+
+						if ( failedList.size( ) > 0 )
 						{
-							buffer.append( ( i + 1 )
-									+ ". Install the "
-									+ failedList.get( i ).getValue( )
-									+ " "
-									+ failedList.get( i ).getType( ).getValue( )
-									+ " failed.\n" );
+							buffer.append( "\n\nDetails:\n" );
+							for ( int i = 0; i < failedList.size( ); i++ )
+							{
+								buffer.append( ( i + 1 )
+										+ ". Install the "
+										+ failedList.get( i ).getValue( )
+										+ " "
+										+ failedList.get( i )
+												.getType( )
+												.getValue( )
+										+ " failed.\n" );
+							}
 						}
-					}
 
-					MessageDialog.openInformation( null,
-							"Information",
-							buffer.toString( ) );
-					Windows.flashWindow( UIUtil.getShell( ).handle, false );
-					StringBuffer uninstallBuffer = new StringBuffer( );
-					if ( installBuffer != null && installBuffer.length( ) > 0 )
-					{
-						uninstallBuffer.append( "[BRDPro]\n" );
-						uninstallBuffer.append( installBuffer );
+						MessageDialog.openInformation( null,
+								"Information",
+								buffer.toString( ) );
+						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+						StringBuffer uninstallBuffer = new StringBuffer( );
+						if ( installBuffer != null
+								&& installBuffer.length( ) > 0 )
+						{
+							uninstallBuffer.append( "[BRDPro]\n" );
+							uninstallBuffer.append( installBuffer );
 
-					}
-					if ( sourceBuffer != null && sourceBuffer.length( ) > 0 )
-					{
-						uninstallBuffer.append( "[Source]\n" );
-						uninstallBuffer.append( sourceBuffer );
-					}
-					if ( linkBuffer != null && linkBuffer.length( ) > 0 )
-					{
-						uninstallBuffer.append( "[Link]\n" );
-						uninstallBuffer.append( linkBuffer );
-					}
+						}
+						if ( sourceBuffer != null && sourceBuffer.length( ) > 0 )
+						{
+							uninstallBuffer.append( "[Source]\n" );
+							uninstallBuffer.append( sourceBuffer );
+						}
+						if ( linkBuffer != null && linkBuffer.length( ) > 0 )
+						{
+							uninstallBuffer.append( "[Link]\n" );
+							uninstallBuffer.append( linkBuffer );
+						}
 
-					FileUtil.writeToFile( new File( data.getDirectory( ),
-							"uninstall.data" ), uninstallBuffer.toString( )
-							.trim( ) );
-				}
-			} );
+						FileUtil.writeToFile( new File( data.getDirectory( ),
+								"uninstall.data" ), uninstallBuffer.toString( )
+								.trim( ) );
+					}
+				} );
+			}
+			else
+			{
+				Display.getDefault( ).syncExec( new Runnable( ) {
+
+					public void run( )
+					{
+						MessageDialog.openInformation( null,
+								"Information",
+								"Canceled installing the BRDPro Development Environment." );
+						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+					}
+				} );
+			}
 		}
 		catch ( final Exception e )
 		{
@@ -1495,20 +1535,6 @@ public class InstallBRDPro
 
 		if ( isFeature )
 		{
-			if ( version.eclipse == null )
-			{
-				Pattern pattern = Pattern.compile( ECLIPSE_VERSION_PATTERN );
-				Matcher matcher = pattern.matcher( line );
-				if ( matcher.find( ) )
-				{
-					version.eclipse = matcher.group( )
-							.toLowerCase( )
-							.trim( )
-							.replace( ECLIPSE_FEATURES, "" )
-							.replace( ORG_ECLIPSE_PLATFORM, "" );
-					return;
-				}
-			}
 			if ( version.emf == null )
 			{
 				Pattern pattern = Pattern.compile( EMF_VERSION_PATTERN );
@@ -1562,6 +1588,23 @@ public class InstallBRDPro
 							.trim( )
 							.replace( ECLIPSE_FEATURES, "" )
 							.replace( ORG_ECLIPSE_WTP, "" );
+					return;
+				}
+			}
+		}
+		else
+		{
+			if ( version.eclipse == null )
+			{
+				Pattern pattern = Pattern.compile( ECLIPSE_VERSION_PATTERN );
+				Matcher matcher = pattern.matcher( line );
+				if ( matcher.find( ) )
+				{
+					version.eclipse = matcher.group( )
+							.toLowerCase( )
+							.trim( )
+							.replace( ECLIPSE_PLUGINS, "" )
+							.replace( ORG_ECLIPSE_PLATFORM, "" );
 					return;
 				}
 			}

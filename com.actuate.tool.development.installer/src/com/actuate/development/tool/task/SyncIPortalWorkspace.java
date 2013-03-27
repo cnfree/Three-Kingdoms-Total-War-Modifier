@@ -59,8 +59,15 @@ public class SyncIPortalWorkspace
 		if ( data == null )
 			return;
 		int total = 10;
-		if ( data.isRevertFiles( ) )
-			total++;
+		if ( data.isSkipSync( ) )
+		{
+			total -= 4;
+		}
+		else
+		{
+			if ( data.isRevertFiles( ) )
+				total++;
+		}
 		monitor.beginTask( "Total " + total + " steps",
 				IProgressMonitor.UNKNOWN );
 
@@ -69,81 +76,85 @@ public class SyncIPortalWorkspace
 		final String[] originRoot = new String[1];
 		try
 		{
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Checking the perforce connection settings..." );
-			stepDetail[0] = "Check the perforce connection settings";
-
-			final String result = checkP4ConnectionSettings( );
-
-			if ( result != null )
-			{
-				Display.getDefault( ).syncExec( new Runnable( ) {
-
-					public void run( )
-					{
-						if ( UIUtil.getShell( ).getMinimized( ) )
-							Windows.flashWindow( UIUtil.getShell( ).handle,
-									true );
-						MessageDialog.openError( null, "Error", result );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
-					}
-				} );
-				return;
-			}
-
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Updating the perforce client workspace specification from "
-					+ data.getServer( ) );
-			stepDetail[0] = "Update the perforce client workspace specification from "
-					+ data.getServer( );
-
-			originRoot[0] = updateClientSpecification( FileUtil.getTempFile( "specification.txt" ),
-					data.getRoot( ) );
-
-			if ( originRoot[0] == null )
-			{
-				return;
-			}
-
-			if ( data.isRevertFiles( ) )
+			if ( !data.isSkipSync( ) )
 			{
 				monitor.subTask( "[Step "
 						+ ++step[0]
-						+ "] Reverting the iPortal Viewer workspace..." );
-				stepDetail[0] = "Revert the iPortal Viewer workspace";
+						+ "] Checking the perforce connection settings..." );
+				stepDetail[0] = "Check the perforce connection settings";
+
+				final String result = checkP4ConnectionSettings( );
+
+				if ( result != null )
+				{
+					Display.getDefault( ).syncExec( new Runnable( ) {
+
+						public void run( )
+						{
+							if ( UIUtil.getShell( ).getMinimized( ) )
+								Windows.flashWindow( UIUtil.getShell( ).handle,
+										true );
+							MessageDialog.openError( null, "Error", result );
+							Windows.flashWindow( UIUtil.getShell( ).handle,
+									false );
+						}
+					} );
+					return;
+				}
+
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Updating the perforce client workspace specification from "
+						+ data.getServer( ) );
+				stepDetail[0] = "Update the perforce client workspace specification from "
+						+ data.getServer( );
+
+				originRoot[0] = updateClientSpecification( FileUtil.getTempFile( "specification.txt" ),
+						data.getRoot( ) );
+
+				if ( originRoot[0] == null )
+				{
+					return;
+				}
+
+				if ( data.isRevertFiles( ) )
+				{
+					monitor.subTask( "[Step "
+							+ ++step[0]
+							+ "] Reverting the iPortal Viewer workspace..." );
+					stepDetail[0] = "Revert the iPortal Viewer workspace";
+
+					if ( originRoot[0] != null )
+					{
+						revertiPortal( monitor, step );
+					}
+				}
+
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Synchronizing the iPortal Viewer workspace..." );
+				stepDetail[0] = "Synchronize the iPortal Viewer workspace";
 
 				if ( originRoot[0] != null )
 				{
-					revertiPortal( monitor, step );
+					synciPortal( monitor, step );
 				}
-			}
 
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Synchronizing the iPortal Viewer workspace..." );
-			stepDetail[0] = "Synchronize the iPortal Viewer workspace";
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Resetting the perforce client workspace specification from "
+						+ data.getServer( ) );
+				stepDetail[0] = "Reset the perforce client workspace specification from "
+						+ data.getServer( );
 
-			if ( originRoot[0] != null )
-			{
-				synciPortal( monitor, step );
-			}
+				if ( originRoot[0] != null )
+				{
+					updateClientSpecification( FileUtil.getTempFile( "specification.txt",
+							".txt" ),
+							originRoot[0] );
 
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Resetting the perforce client workspace specification from "
-					+ data.getServer( ) );
-			stepDetail[0] = "Reset the perforce client workspace specification from "
-					+ data.getServer( );
-
-			if ( originRoot[0] != null )
-			{
-				updateClientSpecification( FileUtil.getTempFile( "specification.txt",
-						".txt" ),
-						originRoot[0] );
-
-				originRoot[0] = null;
+					originRoot[0] = null;
+				}
 			}
 
 			Project p = new Project( );
@@ -155,118 +166,164 @@ public class SyncIPortalWorkspace
 			consoleLogger.setMessageOutputLevel( Project.MSG_INFO );
 			p.addBuildListener( consoleLogger );
 
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Initializing the iPortal Viewer workspace replacement task..." );
-			stepDetail[0] = "Initialize the iPortal Viewer workspace replacement task";
-
-			File initFile = getAntFile( "/templates/Init_IV.xml" );
-			p.fireBuildStarted( );
-			p.init( );
-			ProjectHelper helper = ProjectHelper.getProjectHelper( );
-			helper.parse( p, initFile );
-			p.executeTarget( "init" );
-
-			String defaultTaskName = "[Step "
-					+ ++step[0]
-					+ "] Downloading the iPortal Viewer archive file...";
-
-			boolean[] downloadFlag = new boolean[]{
-				false
-			};
-
-			File warFile = new File( data.getBirtViewerFile( ) );
-			long fileLength = warFile.length( );
-			downloadMonitor( monitor,
-					downloadFlag,
-					defaultTaskName,
-					new File( data.getRoot( ) + "\\temp", warFile.getName( ) ),
-					fileLength,
-					step );
-
-			monitor.subTask( defaultTaskName
-					+ "\t[ Size: "
-					+ FileUtils.byteCountToDisplaySize( fileLength )
-					+ " ] " );
-			stepDetail[0] = "Download the iPortal Viewer archive file";
-			File downloadFile = getAntFile( "/templates/Download_IV.xml" );
-			helper.parse( p, downloadFile );
-			p.executeTarget( "download" );
-
-			downloadFlag[0] = true;
-
-			String[] subtaskName = new String[]{
-				"[Step "
-						+ ++step[0]
-						+ "] Extracting the iPortal Viewer archive file..."
-			};
-			monitor.subTask( subtaskName[0] );
-			stepDetail[0] = "Extract the iPortal Viewer archive file";
-			String extractXML = "/templates/Extract_IV.xml";
-			if ( !warFile.getName( ).toLowerCase( ).endsWith( ".zip" ) )
-				extractXML = "/templates/Extract_IV_II.xml";
-			File extractFile = getAntFile( extractXML );
-			helper.parse( p, extractFile );
-
-			final boolean[] flag = new boolean[]{
-				false
-			};
-
-			interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
-
-			p.executeTarget( "unzip_webviewer" );
-
-			flag[0] = true;
-
-			Thread.sleep( 100 );
-
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Replacing the iPortal Viewer workspace files..." );
-			stepDetail[0] = "Replace the iPortal Viewer workspace files";
-			File reaplceFile = getAntFile( "/templates/Replace_IV.xml" );
-			helper.parse( p, reaplceFile );
-			p.executeTarget( "replace" );
-
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Updating the iPortal Viewer workspace class path..." );
-			stepDetail[0] = "Update the iPortal Viewer workspace class path";
-			File classPathFile = new File( data.getRoot( )
-					+ File.separatorChar
-					+ data.getView( ), ".classpath" );
-			if ( classPathFile.exists( ) )
+			if ( !monitor.isCanceled( ) )
 			{
-				updateClassPath( classPathFile );
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Initializing the iPortal Viewer workspace replacement task..." );
+				stepDetail[0] = "Initialize the iPortal Viewer workspace replacement task";
+
+				File initFile = getAntFile( "/templates/Init_IV.xml" );
+				p.fireBuildStarted( );
+				p.init( );
+				ProjectHelper helper = ProjectHelper.getProjectHelper( );
+				helper.parse( p, initFile );
+				p.executeTarget( "init" );
+
+				final boolean[] flag = new boolean[]{
+					false
+				};
+
+				if ( !monitor.isCanceled( ) )
+				{
+					String defaultTaskName = "[Step "
+							+ ++step[0]
+							+ "] Downloading the iPortal Viewer archive file...";
+
+					boolean[] downloadFlag = new boolean[]{
+						false
+					};
+
+					File warFile = new File( data.getBirtViewerFile( ) );
+					long fileLength = warFile.length( );
+					downloadMonitor( monitor,
+							downloadFlag,
+							defaultTaskName,
+							new File( data.getRoot( ) + "\\temp",
+									warFile.getName( ) ),
+							fileLength,
+							step );
+
+					if ( !monitor.isCanceled( ) )
+					{
+						monitor.subTask( defaultTaskName
+								+ "\t[ Size: "
+								+ FileUtils.byteCountToDisplaySize( fileLength )
+								+ " ] " );
+						stepDetail[0] = "Download the iPortal Viewer archive file";
+						File downloadFile = getAntFile( "/templates/Download_IV.xml" );
+						helper.parse( p, downloadFile );
+						p.executeTarget( "download" );
+
+						downloadFlag[0] = true;
+					}
+
+					if ( !monitor.isCanceled( ) )
+					{
+						String[] subtaskName = new String[]{
+							"[Step "
+									+ ++step[0]
+									+ "] Extracting the iPortal Viewer archive file..."
+						};
+						monitor.subTask( subtaskName[0] );
+						stepDetail[0] = "Extract the iPortal Viewer archive file";
+						String extractXML = "/templates/Extract_IV.xml";
+						if ( !warFile.getName( )
+								.toLowerCase( )
+								.endsWith( ".zip" ) )
+							extractXML = "/templates/Extract_IV_II.xml";
+						File extractFile = getAntFile( extractXML );
+						helper.parse( p, extractFile );
+
+						interruptOutput( monitor,
+								step,
+								consoleLogger,
+								flag,
+								subtaskName );
+
+						p.executeTarget( "unzip_webviewer" );
+					}
+				}
+
+				flag[0] = true;
+
+				if ( !monitor.isCanceled( ) )
+				{
+					Thread.sleep( 100 );
+
+					monitor.subTask( "[Step "
+							+ ++step[0]
+							+ "] Replacing the iPortal Viewer workspace files..." );
+					stepDetail[0] = "Replace the iPortal Viewer workspace files";
+					File reaplceFile = getAntFile( "/templates/Replace_IV.xml" );
+					helper.parse( p, reaplceFile );
+					p.executeTarget( "replace" );
+				}
+
+				if ( !monitor.isCanceled( ) )
+				{
+					monitor.subTask( "[Step "
+							+ ++step[0]
+							+ "] Updating the iPortal Viewer workspace class path..." );
+					stepDetail[0] = "Update the iPortal Viewer workspace class path";
+					File classPathFile = new File( data.getRoot( )
+							+ File.separatorChar
+							+ data.getView( ), ".classpath" );
+					if ( classPathFile.exists( ) )
+					{
+						updateClassPath( classPathFile );
+					}
+				}
+
+				if ( !monitor.isCanceled( ) )
+				{
+					monitor.subTask( "[Step "
+							+ ++step[0]
+							+ "] Cleaning the temporary files..." );
+					stepDetail[0] = "Clean the temporary files";
+					File cleanFile = getAntFile( "/templates/Clean_IV.xml" );
+					helper.parse( p, cleanFile );
+					p.executeTarget( "clean" );
+				}
+
+				p.fireBuildFinished( null );
 			}
 
-			monitor.subTask( "[Step "
-					+ ++step[0]
-					+ "] Cleaning the temporary files..." );
-			stepDetail[0] = "Clean the temporary files";
-			File cleanFile = getAntFile( "/templates/Clean_IV.xml" );
-			helper.parse( p, cleanFile );
-			p.executeTarget( "clean" );
+			if ( !monitor.isCanceled( ) )
+			{
+				monitor.subTask( "" );
+				monitor.setTaskName( "Finished synchronizing the iPortal Viewer workspace" );
 
-			p.fireBuildFinished( null );
+				Display.getDefault( ).syncExec( new Runnable( ) {
 
-			monitor.subTask( "" );
-			monitor.setTaskName( "Finished synchronizing the iPortal Viewer workspace" );
+					public void run( )
+					{
+						if ( UIUtil.getShell( ).getMinimized( ) )
+							Windows.flashWindow( UIUtil.getShell( ).handle,
+									true );
+						StringBuffer buffer = new StringBuffer( );
+						buffer.append( "Synchronize the iPortal Viewer workspace sucessfully." );
+						MessageDialog.openInformation( null,
+								"Information",
+								buffer.toString( ) );
+						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+					}
+				} );
 
-			Display.getDefault( ).syncExec( new Runnable( ) {
+			}
+			else
+			{
+				Display.getDefault( ).syncExec( new Runnable( ) {
 
-				public void run( )
-				{
-					if ( UIUtil.getShell( ).getMinimized( ) )
-						Windows.flashWindow( UIUtil.getShell( ).handle, true );
-					StringBuffer buffer = new StringBuffer( );
-					buffer.append( "Synchronize the iPortal Viewer workspace sucessfully." );
-					MessageDialog.openInformation( null,
-							"Information",
-							buffer.toString( ) );
-					Windows.flashWindow( UIUtil.getShell( ).handle, false );
-				}
-			} );
+					public void run( )
+					{
+						MessageDialog.openInformation( null,
+								"Information",
+								"Canceled synchronizing the iPortal Viewer workspace." );
+						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+					}
+				} );
+			}
 
 		}
 		catch ( final Exception e )

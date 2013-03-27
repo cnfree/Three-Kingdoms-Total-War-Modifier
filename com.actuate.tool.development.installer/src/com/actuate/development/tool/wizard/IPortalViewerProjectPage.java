@@ -62,6 +62,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Text txtRoot;
 	private Combo comboView;
 	private Button forceButton;
+	private Button skipSyncButton;
 	private Text txtServer;
 	private Text txtUser;
 	private Text txtPassword;
@@ -752,6 +753,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		revertButton = new Button( checkGroup, SWT.CHECK );
 		revertButton.setText( "&Revert Files" );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.exclude = true;
 		revertButton.setLayoutData( gd );
 		revertButton.addSelectionListener( new SelectionAdapter( ) {
 
@@ -764,6 +766,20 @@ class IPortalViewerProjectPage extends WizardPage implements
 		} );
 
 		revertButton.setVisible( false );
+
+		skipSyncButton = new Button( checkGroup, SWT.CHECK );
+		skipSyncButton.setText( "Skip S&ync" );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		skipSyncButton.setLayoutData( gd );
+		skipSyncButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( data != null )
+					data.getCurrentIportalViewerData( )
+							.setSkipSync( skipSyncButton.getSelection( ) );
+			}
+		} );
 
 		Point size = composite.computeSize( SWT.DEFAULT, SWT.DEFAULT );
 		composite.setSize( size );
@@ -891,11 +907,14 @@ class IPortalViewerProjectPage extends WizardPage implements
 					.isForceOperation( ) );
 			revertButton.setSelection( data.getCurrentIportalViewerData( )
 					.isRevertFiles( ) );
+			skipSyncButton.setSelection( data.getCurrentIportalViewerData( )
+					.isSkipSync( ) );
 		}
 		else
 		{
 			forceButton.setSelection( false );
 			revertButton.setSelection( false );
+			skipSyncButton.setSelection( false );
 		}
 	}
 
