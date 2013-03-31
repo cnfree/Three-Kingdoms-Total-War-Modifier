@@ -82,6 +82,8 @@ public class ToolkitWizard extends Wizard
 
 	private static final String P4VIEW = "P4View";
 
+	private static final String CUSTOMPROJECTNAME = "CustomProjectName";
+
 	private static final String FORCEOPERATION = "ForceOperation";
 
 	private static final String REVERTFILES = "RevertFiles";
@@ -166,6 +168,10 @@ public class ToolkitWizard extends Wizard
 				if ( setting.get( P4VIEW ) != null )
 				{
 					ivData.setView( setting.get( P4VIEW ) );
+				}
+				if ( setting.get( CUSTOMPROJECTNAME ) != null )
+				{
+					ivData.setCustomProjectName( setting.get( CUSTOMPROJECTNAME ) );
 				}
 				if ( setting.get( FORCEOPERATION ) != null )
 				{
@@ -606,6 +612,8 @@ public class ToolkitWizard extends Wizard
 					.getRoot( ) );
 			projectSetting.put( P4VIEW, data.getCurrentIportalViewerData( )
 					.getView( ) );
+			projectSetting.put( CUSTOMPROJECTNAME,
+					data.getCurrentIportalViewerData( ).getCustomProjectName( ) );
 			projectSetting.put( FORCEOPERATION,
 					data.getCurrentIportalViewerData( ).isForceOperation( ) );
 			projectSetting.put( REVERTFILES, data.getCurrentIportalViewerData( )

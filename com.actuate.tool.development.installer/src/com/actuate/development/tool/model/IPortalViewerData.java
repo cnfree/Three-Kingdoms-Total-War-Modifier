@@ -11,7 +11,9 @@ public class IPortalViewerData
 	private String root;
 
 	private String view;
-
+	
+	private String customProjectName;
+	
 	private boolean forceOperation;
 
 	private boolean revertFiles;
@@ -34,6 +36,11 @@ public class IPortalViewerData
 	public String getClient( )
 	{
 		return client;
+	}
+
+	public String getCustomProjectName( )
+	{
+		return customProjectName;
 	}
 
 	public String getPassword( )
@@ -89,6 +96,11 @@ public class IPortalViewerData
 	public void setClient( String client )
 	{
 		this.client = client;
+	}
+
+	public void setCustomProjectName( String customProjectName )
+	{
+		this.customProjectName = customProjectName;
 	}
 
 	public void setForceOperation( boolean forceOperation )

@@ -73,6 +73,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Map<String, String> rootMap = new HashMap<String, String>( );
 	private Button btnDelete;
 	private Button revertButton;
+	private Text customProjectName;
 
 	IPortalViewerProjectPage( ToolFeatureData data )
 	{
@@ -128,22 +129,46 @@ class IPortalViewerProjectPage extends WizardPage implements
 		} );
 
 		new Label( fileSelectionGroup, SWT.NONE ).setText( "&Viewer File: " );
-		comboFiles = new Combo( fileSelectionGroup, SWT.READ_ONLY | SWT.BORDER );
+		comboFiles = new Combo( fileSelectionGroup, SWT.BORDER );
+
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.widthHint = 350;
+		comboFiles.setLayoutData( gd );
+
+		comboFiles.addModifyListener( new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				BusyIndicator.showWhile( Display.getDefault( ),
+						new Runnable( ) {
+
+							public void run( )
+							{
+								handleProjectFileSelection( );
+							}
+						} );
+
+			}
+		} );
+
+		new Label( fileSelectionGroup, SWT.NONE ).setText( "Custo&m Project Name: " );
+		customProjectName = new Text( fileSelectionGroup, SWT.SINGLE
+				| SWT.BORDER );
 
 		gd = new GridData( );
 		gd.widthHint = 350;
 		gd.horizontalAlignment = SWT.FILL;
-		comboFiles.setLayoutData( gd );
-		comboFiles.addSelectionListener( new SelectionAdapter( ) {
+		customProjectName.setLayoutData( gd );
+		customProjectName.addModifyListener( new ModifyListener( ) {
 
-			public void widgetSelected( SelectionEvent e )
+			public void modifyText( ModifyEvent e )
 			{
 				if ( data != null )
+				{
 					data.getCurrentIportalViewerData( )
-							.setBirtViewerFile( comboFiles.getText( ) );
-				handleProjectFileSelection( );
+							.setCustomProjectName( customProjectName.getText( ) );
+				}
 			}
-
 		} );
 
 		if ( !data.getIportalViewMap( ).isEmpty( ) )
@@ -838,6 +863,22 @@ class IPortalViewerProjectPage extends WizardPage implements
 		}
 
 		if ( data != null
+				&& data.getCurrentIportalViewerData( ).getCustomProjectName( ) != null
+				&& data.getCurrentIportalViewerData( )
+						.getCustomProjectName( )
+						.trim( )
+						.length( ) > 0 )
+		{
+			customProjectName.setText( data.getCurrentIportalViewerData( )
+					.getCustomProjectName( )
+					.trim( ) );
+		}
+		else
+		{
+			customProjectName.setText( "" );
+		}
+
+		if ( data != null
 				&& data.getCurrentIportalViewerData( ).getServer( ) != null
 				&& data.getCurrentIportalViewerData( )
 						.getServer( )
@@ -929,8 +970,6 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 			return comboProjects != null
 					&& comboProjects.getSelectionIndex( ) > -1
-					&& comboFiles != null
-					&& comboFiles.getSelectionIndex( ) > -1
 					&& getErrorMessage( ) == null;
 		}
 		return false;
@@ -973,11 +1012,17 @@ class IPortalViewerProjectPage extends WizardPage implements
 	{
 		if ( data != null )
 		{
-			data.getCurrentIportalViewerData( )
-					.setBirtViewerFile( data.getIportalViewMap( )
-							.get( comboProjects.getText( ) )
-							.get( comboFiles.getSelectionIndex( ) )
-							.getAbsolutePath( ) );
+			if ( comboFiles.getSelectionIndex( ) == -1 )
+			{
+				data.getCurrentIportalViewerData( )
+						.setBirtViewerFile( comboFiles.getText( ) );
+			}
+			else
+				data.getCurrentIportalViewerData( )
+						.setBirtViewerFile( data.getIportalViewMap( )
+								.get( comboProjects.getText( ) )
+								.get( comboFiles.getSelectionIndex( ) )
+								.getAbsolutePath( ) );
 		}
 		setPageComplete( isPageComplete( ) );
 	}
@@ -998,6 +1043,15 @@ class IPortalViewerProjectPage extends WizardPage implements
 				&& txtPassword.getText( ).trim( ).length( ) > 0 );
 
 		btnDelete.setEnabled( btnTest.isEnabled( ) );
+
+		if ( comboFiles.getSelectionIndex( ) == -1 )
+		{
+			if ( !new File( comboFiles.getText( ) ).exists( ) )
+			{
+				setErrorMessage( "The path of iPortal Viewer file is invalid." );
+				return;
+			}
+		}
 
 		if ( txtRoot.getText( ).trim( ).length( ) == 0 )
 		{
