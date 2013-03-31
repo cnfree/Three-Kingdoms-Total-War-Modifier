@@ -419,7 +419,8 @@ public class FileUtil
 			char[] v = new char[chars_read];
 			System.arraycopy( data, 0, v, 0, chars_read );
 			String temp = new String( v );
-			Pattern pattern = Pattern.compile( regex );
+			Pattern pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE
+					| Pattern.DOTALL );
 			Matcher matcher = pattern.matcher( temp );
 			StringBuffer sbr = new StringBuffer( );
 			while ( matcher.find( ) )
@@ -429,7 +430,8 @@ public class FileUtil
 				while ( iter.hasNext( ) )
 				{
 					String key = (String) iter.next( );
-					Pattern pattern1 = Pattern.compile( key );
+					Pattern pattern1 = Pattern.compile( key,
+							Pattern.CASE_INSENSITIVE | Pattern.DOTALL );
 					Matcher matcher1 = pattern1.matcher( group );
 					group = matcher1.replaceAll( Matcher.quoteReplacement( (String) map.get( key ) ) );
 				}

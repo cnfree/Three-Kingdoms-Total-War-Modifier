@@ -16,7 +16,9 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -273,6 +275,19 @@ public class SyncIPortalWorkspace
 					{
 						updateClassPath( classPathFile );
 					}
+
+					if ( data.getCustomProjectName( ) != null
+							&& data.getCustomProjectName( ).trim( ).length( ) > 0 )
+					{
+						File projectFile = new File( data.getRoot( )
+								+ File.separatorChar
+								+ data.getView( ), ".project" );
+						if ( projectFile.exists( ) )
+						{
+							updateProjetName( projectFile,
+									data.getCustomProjectName( ).trim( ) );
+						}
+					}
 				}
 
 				if ( !monitor.isCanceled( ) )
@@ -349,6 +364,16 @@ public class SyncIPortalWorkspace
 				}
 			} );
 		}
+
+	}
+
+	private void updateProjetName( File projectFile, String projectName )
+	{
+		Map<String, String> map = new HashMap<String, String>( );
+		map.put( "<name>.+?</name>", "<name>" + projectName + "</name>" );
+		FileUtil.replaceFile( projectFile,
+				"<projectDescription>.+?</name>",
+				map );
 
 	}
 
