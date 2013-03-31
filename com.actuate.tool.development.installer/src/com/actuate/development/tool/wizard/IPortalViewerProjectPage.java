@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.nebula.widgets.cdatetime.CDT;
+import org.eclipse.nebula.widgets.cdatetime.CDateTime;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -27,6 +30,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -34,6 +39,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
@@ -74,6 +80,9 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Button btnDelete;
 	private Button revertButton;
 	private Text customProjectName;
+	private Composite specifyContainer;
+	private Combo choiceCombo;
+	private Button specifyRivision;
 
 	IPortalViewerProjectPage( ToolFeatureData data )
 	{
@@ -751,12 +760,86 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 		} );
 
+		Composite choiceGroup = new Composite( p4ConfigGroup, SWT.NONE );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 3;
+		choiceGroup.setLayoutData( gd );
+
+		GridLayout layout = new GridLayout( );
+		layout.numColumns = 4;
+		layout.marginWidth = layout.marginHeight = 0;
+		choiceGroup.setLayout( layout );
+
+		Button latestRivision = new Button( choiceGroup, SWT.RADIO );
+		latestRivision.setText( "&Get latest revision" );
+
+		specifyRivision = new Button( choiceGroup, SWT.RADIO );
+		specifyRivision.setText( "Specify &revision using:" );
+
+		choiceCombo = new Combo( choiceGroup, SWT.READ_ONLY
+				| SWT.SINGLE
+				| SWT.BORDER );
+		choiceCombo.setItems( new String[]{
+				"Revision", "Changelist", "Date/Time"
+		} );
+		choiceCombo.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( choiceCombo.getSelectionIndex( ) == 0 )
+				{
+					selectRevisionChoice( );
+				}
+				else if ( choiceCombo.getSelectionIndex( ) == 1 )
+				{
+					selectChangelistChoice( );
+				}
+				else if ( choiceCombo.getSelectionIndex( ) == 2 )
+				{
+					selectDateTimeChoice( );
+				}
+			}
+		} );
+
+		specifyContainer = new Composite( choiceGroup, SWT.NONE );
+		Button testButton = new Button( specifyContainer, SWT.PUSH );
+		Text testText = new Text( specifyContainer, SWT.BORDER );
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		int buttonHeight = testButton.computeSize( SWT.DEFAULT, SWT.DEFAULT ).y;
+		int textHeight = testText.computeSize( SWT.DEFAULT, SWT.DEFAULT ).y;
+		gd.heightHint = buttonHeight > textHeight ? buttonHeight : textHeight;
+		testButton.dispose( );
+		testText.dispose( );
+		specifyContainer.setLayoutData( gd );
+
+		choiceCombo.select( 0 );
+		selectRevisionChoice( );
+
+		latestRivision.setSelection( true );
+		specifyRivision.setSelection( false );
+
+		resetChoiceStatus( );
+
+		specifyRivision.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent paramSelectionEvent )
+			{
+				resetChoiceStatus( );
+			}
+
+		} );
+
+		layout = new GridLayout( );
+		layout.numColumns = 3;
+		layout.marginWidth = layout.marginHeight = 0;
+		specifyContainer.setLayout( layout );
+
 		Composite checkGroup = new Composite( p4ConfigGroup, SWT.CHECK );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 3;
 		checkGroup.setLayoutData( gd );
 
-		GridLayout layout = new GridLayout( );
+		layout = new GridLayout( );
 		layout.numColumns = 2;
 		layout.marginWidth = layout.marginHeight = 0;
 		checkGroup.setLayout( layout );
@@ -825,6 +908,144 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 		initPage( );
 
+	}
+
+	protected void enableSpecifyContainer( boolean enabled )
+	{
+		Control[] children = specifyContainer.getChildren( );
+		if ( children != null )
+		{
+			for ( int i = 0; i < children.length; i++ )
+			{
+				children[i].setEnabled( enabled );
+			}
+		}
+		specifyContainer.setEnabled( enabled );
+	}
+
+	protected void selectDateTimeChoice( )
+	{
+		disposeSpecifyContainerChildren( );
+		final CDateTime dateTimeText = new CDateTime( specifyContainer,
+				CDT.BORDER | CDT.DROP_DOWN );
+		dateTimeText.setFormat( -1 );
+		dateTimeText.setPattern( "yyyy/MM/dd HH:mm:ss" );
+		dateTimeText.setSelection( Calendar.getInstance( ).getTime( ) );
+		GridData gd = new GridData( );
+		gd.widthHint = 200;
+		gd.verticalAlignment = SWT.CENTER;
+		gd.grabExcessVerticalSpace = true;
+		dateTimeText.setLayoutData( gd );
+		dateTimeText.addSelectionListener( new SelectionAdapter( ) {
+
+			@Override
+			public void widgetSelected( SelectionEvent e )
+			{
+				super.widgetSelected( e );
+			}
+		} );
+
+		specifyContainer.layout( );
+		specifyContainer.getParent( ).layout( );
+		specifyContainer.getParent( ).getParent( ).layout( );
+	}
+
+	private void disposeSpecifyContainerChildren( )
+	{
+		Control[] children = specifyContainer.getChildren( );
+		if ( children != null )
+		{
+			for ( int i = 0; i < children.length; i++ )
+			{
+				children[i].dispose( );
+			}
+		}
+
+	}
+
+	protected void selectChangelistChoice( )
+	{
+		disposeSpecifyContainerChildren( );
+		final Text changelistText = new Text( specifyContainer, SWT.BORDER );
+		GridData gd = new GridData( );
+		gd.widthHint = 200;
+		gd.verticalAlignment = SWT.CENTER;
+		gd.grabExcessVerticalSpace = true;
+		changelistText.setLayoutData( gd );
+		changelistText.addVerifyListener( new VerifyListener( ) {
+
+			public void verifyText( VerifyEvent ve )
+			{
+				if ( ve.character == SWT.BS
+						|| ve.keyCode == SWT.ARROW_LEFT
+						|| ve.keyCode == SWT.ARROW_RIGHT
+						|| ve.keyCode == SWT.DEL )
+				{
+					ve.doit = true;
+					return;
+				}
+				if ( !( '0' <= ve.character && ve.character <= '9' ) )
+				{
+					ve.doit = false;
+					return;
+				}
+			}
+		} );
+		Button browseButton = new Button( specifyContainer, SWT.PUSH );
+		browseButton.setText( "Bro&wse..." );
+		browseButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+
+			}
+		} );
+		gd = new GridData( );
+		gd.verticalAlignment = SWT.CENTER;
+		gd.grabExcessVerticalSpace = true;
+		browseButton.setLayoutData( gd );
+		specifyContainer.layout( );
+		specifyContainer.getParent( ).layout( );
+		specifyContainer.getParent( ).getParent( ).layout( );
+	}
+
+	protected void selectRevisionChoice( )
+	{
+		disposeSpecifyContainerChildren( );
+		final Text revisionText = new Text( specifyContainer, SWT.BORDER );
+		GridData gd = new GridData( );
+		gd.widthHint = 200;
+		gd.verticalAlignment = SWT.CENTER;
+		gd.grabExcessVerticalSpace = true;
+		revisionText.setLayoutData( gd );
+		revisionText.addVerifyListener( new VerifyListener( ) {
+
+			public void verifyText( VerifyEvent ve )
+			{
+				if ( ve.character == SWT.BS
+						|| ve.keyCode == SWT.ARROW_LEFT
+						|| ve.keyCode == SWT.ARROW_RIGHT
+						|| ve.keyCode == SWT.DEL )
+				{
+					ve.doit = true;
+					return;
+				}
+				if ( !( '0' <= ve.character && ve.character <= '9' ) )
+				{
+					ve.doit = false;
+					return;
+				}
+			}
+		} );
+		Label revisionLabel = new Label( specifyContainer, SWT.NONE );
+		revisionLabel.setText( "Enter revision number" );
+		gd = new GridData( );
+		gd.verticalAlignment = SWT.CENTER;
+		gd.grabExcessVerticalSpace = true;
+		revisionLabel.setLayoutData( gd );
+		specifyContainer.layout( );
+		specifyContainer.getParent( ).layout( );
+		specifyContainer.getParent( ).getParent( ).layout( );
 	}
 
 	private void initPage( )
@@ -1526,4 +1747,11 @@ class IPortalViewerProjectPage extends WizardPage implements
 			}
 		} );
 	}
+
+	private void resetChoiceStatus( )
+	{
+		choiceCombo.setEnabled( specifyRivision.getSelection( ) );
+		enableSpecifyContainer( specifyRivision.getSelection( ) );
+	}
+
 }
