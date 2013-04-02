@@ -13,9 +13,11 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
 import com.actuate.development.tool.model.ToolFeature;
@@ -41,7 +43,7 @@ class BRDProProjectPage extends WizardPage
 	public void createControl( Composite parent )
 	{
 		Composite composite = new Composite( parent, SWT.NULL );
-		GridLayout gridLayout = new GridLayout( 2, false );
+		GridLayout gridLayout = new GridLayout( 3, false );
 		gridLayout.marginWidth = 10;
 		gridLayout.marginHeight = 20;
 		composite.setLayout( gridLayout );
@@ -51,6 +53,7 @@ class BRDProProjectPage extends WizardPage
 
 		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.widthHint = 350;
+		gd.horizontalSpan = 2;
 		comboProjects.setLayoutData( gd );
 		comboProjects.addSelectionListener( new SelectionAdapter( ) {
 
@@ -88,6 +91,30 @@ class BRDProProjectPage extends WizardPage
 
 		} );
 
+		final Button browseButton = new Button( composite, SWT.PUSH );
+		browseButton.setText( "Bro&wse..." );
+		gd = new GridData( );
+		browseButton.setLayoutData( gd );
+		browseButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				FileDialog dialog = new FileDialog( browseButton.getShell( ),
+						SWT.OPEN | SWT.SINGLE );
+				dialog.setFilterExtensions( new String[]{
+					"*.jar;*.war;*.zip"
+				} );
+				dialog.setFilterNames( new String[]{
+					"Archive File (*.jar;*.war;*.zip)"
+				} );
+				String file = dialog.open( );
+				if ( file != null )
+				{
+					comboFiles.setText( file );
+				}
+			}
+		} );
+
 		if ( !data.getBrdproMap( ).isEmpty( ) )
 			comboProjects.setItems( data.getBrdproMap( )
 					.keySet( )
@@ -109,8 +136,7 @@ class BRDProProjectPage extends WizardPage
 
 	private void checkStatus( )
 	{
-		if ( comboFiles.getSelectionIndex( ) == -1
-				&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
+		if ( comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 		{
 			if ( !new File( comboFiles.getText( ) ).exists( ) )
 			{
@@ -162,8 +188,7 @@ class BRDProProjectPage extends WizardPage
 	{
 		if ( data != null )
 		{
-			if ( comboFiles.getSelectionIndex( ) == -1
-					&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
+			if ( comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 			{
 				data.getCurrentInstallBRDProData( )
 						.setBrdproFile( comboFiles.getText( ) );

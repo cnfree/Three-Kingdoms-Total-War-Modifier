@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -116,7 +117,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.minimumWidth = 0;
 		fileSelectionGroup.setLayoutData( gd );
-		fileSelectionGroup.setLayout( new GridLayout( 2, false ) );
+		fileSelectionGroup.setLayout( new GridLayout( 3, false ) );
 
 		new Label( fileSelectionGroup, SWT.NONE ).setText( "Viewer &Project: " );
 		comboProjects = new Combo( fileSelectionGroup, SWT.READ_ONLY
@@ -125,6 +126,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		gd = new GridData( );
 		gd.widthHint = 350;
 		gd.horizontalAlignment = SWT.FILL;
+		gd.horizontalSpan = 2;
 		comboProjects.setLayoutData( gd );
 		comboProjects.addSelectionListener( new SelectionAdapter( ) {
 
@@ -162,12 +164,37 @@ class IPortalViewerProjectPage extends WizardPage implements
 			}
 		} );
 
+		final Button browseButton = new Button( fileSelectionGroup, SWT.PUSH );
+		browseButton.setText( "Bro&wse..." );
+		gd = new GridData( );
+		browseButton.setLayoutData( gd );
+		browseButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				FileDialog dialog = new FileDialog( browseButton.getShell( ),
+						SWT.OPEN | SWT.SINGLE );
+				dialog.setFilterExtensions( new String[]{
+					"*.jar;*.war;*.zip"
+				} );
+				dialog.setFilterNames( new String[]{
+					"Archive File (*.jar;*.war;*.zip)"
+				} );
+				String file = dialog.open( );
+				if ( file != null )
+				{
+					comboFiles.setText( file );
+				}
+			}
+		} );
+
 		new Label( fileSelectionGroup, SWT.NONE ).setText( "Custo&m Project Name: " );
 		customProjectName = new Text( fileSelectionGroup, SWT.SINGLE
 				| SWT.BORDER );
 
 		gd = new GridData( );
 		gd.widthHint = 350;
+		gd.horizontalSpan = 2;
 		gd.horizontalAlignment = SWT.FILL;
 		customProjectName.setLayoutData( gd );
 		customProjectName.addModifyListener( new ModifyListener( ) {
@@ -1430,8 +1457,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 	{
 		if ( data != null )
 		{
-			if ( comboFiles.getSelectionIndex( ) == -1
-					&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
+			if ( comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 			{
 				data.getCurrentIportalViewerData( )
 						.setBirtViewerFile( comboFiles.getText( ) );
@@ -1463,8 +1489,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 		btnDelete.setEnabled( btnTest.isEnabled( ) );
 
-		if ( comboFiles.getSelectionIndex( ) == -1
-				&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
+		if ( comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 		{
 			if ( !new File( comboFiles.getText( ) ).exists( ) )
 			{
