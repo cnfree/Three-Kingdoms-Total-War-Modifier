@@ -248,7 +248,7 @@ public class InstallBRDPro
 
 				p.executeTarget( "extract_brdpro" );
 			}
-			
+
 			flag[0] = true;
 
 			final List<Module> failedList = new ArrayList<Module>( );
@@ -621,6 +621,21 @@ public class InstallBRDPro
 						}
 					}
 					failedList.add( module );
+				}
+			}
+
+			if ( !monitor.isCanceled( ) )
+			{
+				monitor.subTask( "[Step "
+						+ ++step[0]
+						+ "] Executing user custom task..." );
+				stepDetail[0] = "Execute user custom task";
+				File reaplceFile = new File( FileSystem.getCurrentDirectory( )
+						+ "/custom/BRDPro_Task.xml" );
+				if ( reaplceFile.exists( ) )
+				{
+					helper.parse( p, reaplceFile );
+					p.executeTarget( "custom" );
 				}
 			}
 

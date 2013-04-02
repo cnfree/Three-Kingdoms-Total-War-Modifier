@@ -60,7 +60,7 @@ public class SyncIPortalWorkspace
 	{
 		if ( data == null )
 			return;
-		int total = 10;
+		int total = 11;
 		if ( data.isSkipSync( ) )
 		{
 			total -= 4;
@@ -260,6 +260,21 @@ public class SyncIPortalWorkspace
 					File reaplceFile = getAntFile( "/templates/Replace_IV.xml" );
 					helper.parse( p, reaplceFile );
 					p.executeTarget( "replace" );
+				}
+
+				if ( !monitor.isCanceled( ) )
+				{
+					monitor.subTask( "[Step "
+							+ ++step[0]
+							+ "] Executing user custom task..." );
+					stepDetail[0] = "Execute user custom task";
+					File reaplceFile = new File( FileSystem.getCurrentDirectory( )
+							+ "/custom/IV_Task.xml" );
+					if ( reaplceFile.exists( ) )
+					{
+						helper.parse( p, reaplceFile );
+						p.executeTarget( "custom" );
+					}
 				}
 
 				if ( !monitor.isCanceled( ) )
