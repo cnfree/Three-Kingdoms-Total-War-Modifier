@@ -11,9 +11,9 @@ public class IPortalViewerData
 	private String root;
 
 	private String view;
-	
+
 	private String customProjectName;
-	
+
 	private boolean forceOperation;
 
 	private boolean revertFiles;
@@ -27,6 +27,20 @@ public class IPortalViewerData
 	private String password;
 
 	private String client;
+
+	private String revisionArg;
+
+	private boolean isLatestRevision = true;
+
+	public boolean isLatestRevision( )
+	{
+		return isLatestRevision;
+	}
+
+	public String getRevisionArg( )
+	{
+		return revisionArg;
+	}
 
 	public String getBirtViewerFile( )
 	{
@@ -146,6 +160,16 @@ public class IPortalViewerData
 	public void setView( String view )
 	{
 		this.view = view;
+	}
+
+	public void setRevisionArg( String revisionArg )
+	{
+		this.revisionArg = revisionArg;
+	}
+
+	public void setLatestRevision( boolean isLatestRevision )
+	{
+		this.isLatestRevision = isLatestRevision;
 	}
 
 }

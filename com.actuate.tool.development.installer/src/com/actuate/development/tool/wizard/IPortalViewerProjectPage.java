@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
@@ -47,6 +50,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.development.tool.dialog.ChangelistDialog;
 import com.actuate.development.tool.dialog.CreateClientDialog;
 import com.actuate.development.tool.model.Modules;
 import com.actuate.development.tool.model.ToolFeature;
@@ -770,7 +774,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 		layout.marginWidth = layout.marginHeight = 0;
 		choiceGroup.setLayout( layout );
 
-		Button latestRivision = new Button( choiceGroup, SWT.RADIO );
+		final Button latestRivision = new Button( choiceGroup, SWT.RADIO );
 		latestRivision.setText( "&Get latest revision" );
 
 		specifyRivision = new Button( choiceGroup, SWT.RADIO );
@@ -822,9 +826,27 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 		specifyRivision.addSelectionListener( new SelectionAdapter( ) {
 
-			public void widgetSelected( SelectionEvent paramSelectionEvent )
+			public void widgetSelected( SelectionEvent e )
 			{
+				if ( specifyRivision.getSelection( ) )
+				{
+					data.getCurrentIportalViewerData( )
+							.setLatestRevision( false );
+				}
 				resetChoiceStatus( );
+			}
+
+		} );
+
+		latestRivision.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( latestRivision.getSelection( ) )
+				{
+					data.getCurrentIportalViewerData( )
+							.setLatestRevision( true );
+				}
 			}
 
 		} );
@@ -921,6 +943,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 			}
 		}
 		specifyContainer.setEnabled( enabled );
+
 	}
 
 	protected void selectDateTimeChoice( )
@@ -941,9 +964,22 @@ class IPortalViewerProjectPage extends WizardPage implements
 			@Override
 			public void widgetSelected( SelectionEvent e )
 			{
-				super.widgetSelected( e );
+				if ( dateTimeText.getText( ).trim( ).length( ) > 0 )
+				{
+					data.getCurrentIportalViewerData( )
+							.setRevisionArg( "@"
+									+ new SimpleDateFormat( "yyyy/MM/dd:HH:mm:ss" ).format( dateTimeText.getSelection( ) ) );
+				}
+				else
+					data.getCurrentIportalViewerData( ).setRevisionArg( null );
 			}
 		} );
+
+		if ( dateTimeText.getText( ).trim( ).length( ) > 0 )
+			data.getCurrentIportalViewerData( ).setRevisionArg( "@"
+					+ dateTimeText.getText( ).trim( ) );
+		else
+			data.getCurrentIportalViewerData( ).setRevisionArg( null );
 
 		specifyContainer.layout( );
 		specifyContainer.getParent( ).layout( );
@@ -972,6 +1008,17 @@ class IPortalViewerProjectPage extends WizardPage implements
 		gd.verticalAlignment = SWT.CENTER;
 		gd.grabExcessVerticalSpace = true;
 		changelistText.setLayoutData( gd );
+		changelistText.addModifyListener( new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				if ( changelistText.getText( ).trim( ).length( ) > 0 )
+					data.getCurrentIportalViewerData( ).setRevisionArg( "@"
+							+ changelistText.getText( ).trim( ) );
+				else
+					data.getCurrentIportalViewerData( ).setRevisionArg( null );
+			}
+		} );
 		changelistText.addVerifyListener( new VerifyListener( ) {
 
 			public void verifyText( VerifyEvent ve )
@@ -983,6 +1030,28 @@ class IPortalViewerProjectPage extends WizardPage implements
 				{
 					ve.doit = true;
 					return;
+				}
+				if ( ve.character == '\0' )
+				{
+					try
+					{
+						if ( ve.text.trim( ).length( ) == 0
+								|| Integer.parseInt( ve.text.trim( ) ) > 0 )
+						{
+							ve.doit = true;
+							return;
+						}
+						else
+						{
+							ve.doit = false;
+							return;
+						}
+					}
+					catch ( NumberFormatException e )
+					{
+						ve.doit = false;
+						return;
+					}
 				}
 				if ( !( '0' <= ve.character && ve.character <= '9' ) )
 				{
@@ -997,7 +1066,102 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 			public void widgetSelected( SelectionEvent e )
 			{
+				BusyIndicator.showWhile( Display.getDefault( ),
+						new Runnable( ) {
 
+							public void run( )
+							{
+
+								try
+								{
+									final boolean[] error = new boolean[1];
+									final Process p4Process = Runtime.getRuntime( )
+											.exec( "p4 -p "
+													+ txtServer.getText( )
+													+ " -u "
+													+ txtUser.getText( )
+													+ " -P "
+													+ txtPassword.getText( )
+													+ " changes -t -l -m 300 //"
+													+ data.getCurrentIportalViewerData( )
+															.getView( )
+													+ "/..." );
+
+									Thread thread = new Thread( ) {
+
+										public void run( )
+										{
+											try
+											{
+												BufferedReader input = new BufferedReader( new InputStreamReader( p4Process.getErrorStream( ) ) );
+												final String[] line = new String[1];
+												final StringBuffer buffer = new StringBuffer( );
+												while ( ( line[0] = input.readLine( ) ) != null )
+												{
+													buffer.append( line[0]
+															+ "\r\n" );
+												}
+												input.close( );
+
+												if ( buffer.length( ) > 0 )
+												{
+													error[0] = true;
+													Display.getDefault( )
+															.syncExec( new Runnable( ) {
+
+																public void run( )
+																{
+																	MessageDialog.openError( UIUtil.getShell( ),
+																			"Error",
+																			buffer.toString( ) );
+																}
+															} );
+												}
+											}
+											catch ( Exception e )
+											{
+												Logger.getLogger( IPortalViewerProjectPage.class.getName( ) )
+														.log( Level.WARNING,
+																"Get error stream failed.", e ); //$NON-NLS-1$
+											}
+										}
+									};
+									thread.setDaemon( true );
+									thread.start( );
+
+									StringWriter output = new StringWriter( );
+									IOUtils.copy( p4Process.getInputStream( ),
+											output );
+									p4Process.waitFor( );
+
+									Thread.sleep( 100 );
+
+									if ( !error[0] )
+									{
+										ChangelistDialog dialog = new ChangelistDialog( UIUtil.getShell( ) );
+										dialog.setInput( output.toString( ) );
+										if ( dialog.open( ) == Dialog.OK )
+										{
+											if ( dialog.getResult( ) != null )
+											{
+												changelistText.setText( dialog.getResult( ) );
+											}
+											else
+											{
+												changelistText.setText( "" );
+											}
+										};
+									}
+								}
+								catch ( Exception e )
+								{
+									MessageDialog.openError( null,
+											"Error",
+											e.getMessage( ) );
+								}
+
+							}
+						} );
 			}
 		} );
 		gd = new GridData( );
@@ -1018,6 +1182,19 @@ class IPortalViewerProjectPage extends WizardPage implements
 		gd.verticalAlignment = SWT.CENTER;
 		gd.grabExcessVerticalSpace = true;
 		revisionText.setLayoutData( gd );
+
+		revisionText.addModifyListener( new ModifyListener( ) {
+
+			public void modifyText( ModifyEvent e )
+			{
+				if ( revisionText.getText( ).trim( ).length( ) > 0 )
+					data.getCurrentIportalViewerData( ).setRevisionArg( "#"
+							+ revisionText.getText( ).trim( ) );
+				else
+					data.getCurrentIportalViewerData( ).setRevisionArg( null );
+			}
+		} );
+
 		revisionText.addVerifyListener( new VerifyListener( ) {
 
 			public void verifyText( VerifyEvent ve )
@@ -1029,6 +1206,28 @@ class IPortalViewerProjectPage extends WizardPage implements
 				{
 					ve.doit = true;
 					return;
+				}
+				if ( ve.character == '\0' )
+				{
+					try
+					{
+						if ( ve.text.trim( ).length( ) == 0
+								|| Integer.parseInt( ve.text.trim( ) ) > 0 )
+						{
+							ve.doit = true;
+							return;
+						}
+						else
+						{
+							ve.doit = false;
+							return;
+						}
+					}
+					catch ( NumberFormatException e )
+					{
+						ve.doit = false;
+						return;
+					}
 				}
 				if ( !( '0' <= ve.character && ve.character <= '9' ) )
 				{

@@ -564,7 +564,7 @@ public class SyncIPortalWorkspace
 		{
 			final Process downloadProcess = Runtime.getRuntime( )
 					.exec( new String[]{
-							"cmd",
+					"cmd",
 							"/c",
 							"p4 -p "
 									+ data.getServer( )
@@ -579,6 +579,9 @@ public class SyncIPortalWorkspace
 									+ " //"
 									+ data.getView( )
 									+ "/..."
+									+ ( data.isLatestRevision( ) ? ""
+											: ( data.getRevisionArg( ) != null ? data.getRevisionArg( )
+													: "" ) )
 					} );
 
 			Thread errThread = new Thread( ) {
