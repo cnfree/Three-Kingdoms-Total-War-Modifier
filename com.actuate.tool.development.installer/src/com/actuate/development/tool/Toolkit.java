@@ -12,6 +12,7 @@ import org.sf.feeling.swt.win32.extension.jna.win32.Shell32;
 import org.sf.feeling.swt.win32.extension.jna.win32.structure.SHELLEXECUTEINFO;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.development.tool.util.ClassPathUpdater;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.wizard.ToolkitWizard;
 
@@ -77,6 +78,7 @@ public class Toolkit
 				&& args.length > 0
 				&& "-uac".equalsIgnoreCase( args[0] ) )
 		{
+			ClassPathUpdater.loadClasspath( );
 			new Toolkit( );
 		}
 		else
