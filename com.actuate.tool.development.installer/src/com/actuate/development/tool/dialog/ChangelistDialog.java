@@ -12,10 +12,8 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
@@ -64,53 +62,6 @@ public class ChangelistDialog extends TitleAreaDialog
 		}
 	};
 
-	private ITableLabelProvider labelProvider = new ITableLabelProvider( ) {
-
-		public Image getColumnImage( Object element, int columnIndex )
-		{
-			return null;
-		}
-
-		public String getColumnText( Object element, int columnIndex )
-		{
-			Changelist info = (Changelist) element;
-			if ( columnIndex == 0 )
-			{
-				return info.getId( );
-			}
-			else if ( columnIndex == 1 )
-			{
-				return info.getSubmitTime( );
-			}
-			else if ( columnIndex == 2 )
-			{
-				return info.getSubmitBy( );
-			}
-			else if ( columnIndex == 3 )
-			{
-				return info.getDescription( );
-			}
-			return ""; //$NON-NLS-1$
-		}
-
-		public void addListener( ILabelProviderListener listener )
-		{
-		}
-
-		public void dispose( )
-		{
-		}
-
-		public boolean isLabelProperty( Object element, String property )
-		{
-			return false;
-		}
-
-		public void removeListener( ILabelProviderListener listener )
-		{
-		}
-
-	};
 
 	private String result;
 	private TableViewer viewer;
