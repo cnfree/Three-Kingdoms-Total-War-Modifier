@@ -109,7 +109,8 @@ class BRDProProjectPage extends WizardPage
 
 	private void checkStatus( )
 	{
-		if ( comboFiles.getSelectionIndex( ) == -1 )
+		if ( comboFiles.getSelectionIndex( ) == -1
+				&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 		{
 			if ( !new File( comboFiles.getText( ) ).exists( ) )
 			{
@@ -161,7 +162,8 @@ class BRDProProjectPage extends WizardPage
 	{
 		if ( data != null )
 		{
-			if ( comboFiles.getSelectionIndex( ) == -1 )
+			if ( comboFiles.getSelectionIndex( ) == -1
+					&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 			{
 				data.getCurrentInstallBRDProData( )
 						.setBrdproFile( comboFiles.getText( ) );
@@ -170,7 +172,7 @@ class BRDProProjectPage extends WizardPage
 				data.getCurrentInstallBRDProData( )
 						.setBrdproFile( data.getBrdproMap( )
 								.get( comboProjects.getText( ) )
-								.get( comboFiles.getSelectionIndex( ) )
+								.get( comboFiles.indexOf( comboFiles.getText( ) ) )
 								.getAbsolutePath( ) );
 		}
 		setPageComplete( isPageComplete( ) );

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +31,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
@@ -1432,7 +1430,8 @@ class IPortalViewerProjectPage extends WizardPage implements
 	{
 		if ( data != null )
 		{
-			if ( comboFiles.getSelectionIndex( ) == -1 )
+			if ( comboFiles.getSelectionIndex( ) == -1
+					&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 			{
 				data.getCurrentIportalViewerData( )
 						.setBirtViewerFile( comboFiles.getText( ) );
@@ -1441,7 +1440,7 @@ class IPortalViewerProjectPage extends WizardPage implements
 				data.getCurrentIportalViewerData( )
 						.setBirtViewerFile( data.getIportalViewMap( )
 								.get( comboProjects.getText( ) )
-								.get( comboFiles.getSelectionIndex( ) )
+								.get( comboFiles.indexOf( comboFiles.getText( ) ) )
 								.getAbsolutePath( ) );
 		}
 		setPageComplete( isPageComplete( ) );
@@ -1464,7 +1463,8 @@ class IPortalViewerProjectPage extends WizardPage implements
 
 		btnDelete.setEnabled( btnTest.isEnabled( ) );
 
-		if ( comboFiles.getSelectionIndex( ) == -1 )
+		if ( comboFiles.getSelectionIndex( ) == -1
+				&& comboFiles.indexOf( comboFiles.getText( ) ) == -1 )
 		{
 			if ( !new File( comboFiles.getText( ) ).exists( ) )
 			{
