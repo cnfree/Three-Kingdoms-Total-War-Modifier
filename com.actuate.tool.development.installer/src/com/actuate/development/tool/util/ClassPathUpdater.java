@@ -13,16 +13,10 @@ import org.sf.feeling.swt.win32.extension.io.FileSystem;
 public final class ClassPathUpdater
 {
 
-	/** URLClassLoader的addURL方法 */
 	private static Method addURL = initAddMethod( );
 
 	private static URLClassLoader classloader = (URLClassLoader) ClassLoader.getSystemClassLoader( );
 
-	/**
-	 * 初始化addUrl 方法.
-	 * 
-	 * @return 可访问addUrl方法的Method对象
-	 */
 	private static Method initAddMethod( )
 	{
 		try
@@ -40,9 +34,6 @@ public final class ClassPathUpdater
 		}
 	}
 
-	/**
-	 * 加载jar classpath。
-	 */
 	public static void loadClasspath( )
 	{
 		List<String> files = getJarFiles( );
@@ -96,8 +87,8 @@ public final class ClassPathUpdater
 		}
 		else
 		{
-			if ( file.getAbsolutePath( ).endsWith( ".jar" )
-					|| file.getAbsolutePath( ).endsWith( ".zip" ) )
+			if ( file.getAbsolutePath( ).toLowerCase( ).endsWith( ".jar" )
+					|| file.getAbsolutePath( ).toLowerCase( ).endsWith( ".zip" ) )
 			{
 				addURL( file );
 			}

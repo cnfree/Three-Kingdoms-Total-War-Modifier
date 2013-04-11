@@ -6,7 +6,7 @@ import org.eclipse.swt.widgets.Shell;
 public class UIUtil
 {
 
-	static Shell shell;
+	private static Shell shell;
 
 	public static void setShell( Shell shell )
 	{
