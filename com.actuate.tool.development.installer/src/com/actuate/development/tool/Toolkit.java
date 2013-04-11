@@ -35,7 +35,7 @@ public class Toolkit
 
 			public void run( )
 			{
-				String plugins = PathConfig.getProperty( PathConfig.PLUGINS );
+				String plugins = PathConfig.getProperty( PathConfig.PLUGINS, "\\\\qaant\\qa\\Toolkit\\plugins" );
 				if ( new File( plugins ).exists( ) )
 				{
 					HOST = plugins;
@@ -62,7 +62,7 @@ public class Toolkit
 
 		if ( HOST == null )
 		{
-			String server = PathConfig.getProperty( PathConfig.SERVER );
+			String server = PathConfig.getProperty( PathConfig.SERVER, "Qaant" );
 			MessageDialog.openError( shell,
 					"Error",
 					"Can't connect to server "+server+". Please try it later or contact with administrator." );

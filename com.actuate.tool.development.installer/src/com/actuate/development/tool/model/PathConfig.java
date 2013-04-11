@@ -95,9 +95,9 @@ public class PathConfig
 		}
 	}
 
-	public static String getProperty( String property )
+	public static String getProperty( String property, String defaultValue )
 	{
-		return props.getProperty( property );
+		return props.getProperty( property, defaultValue );
 	}
 
 	private static Object convert( String string )

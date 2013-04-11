@@ -34,6 +34,7 @@ import com.actuate.development.tool.model.IPortalViewerData;
 import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Modules;
+import com.actuate.development.tool.model.PathConfig;
 import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
 import com.actuate.development.tool.task.CloneWorkspaceSettings;
@@ -74,9 +75,7 @@ public class ToolkitWizard extends Wizard
 	public static final String SHORTCUTARGUMENTS = "ShortcutArguments";
 
 	static final String DIALOG_SETTING_FILE = new File( System.getProperties( )
-			.getProperty( "user.home" )
-			+ File.separator
-			+ "\\.brdpro_toolkit\\userInfo.xml" ).getAbsolutePath( );
+			.getProperty( "user.home" ) + "\\.brdpro_toolkit\\userInfo.xml" ).getAbsolutePath( );
 
 	private static final String P4ROOT = "P4Root";
 
@@ -343,7 +342,9 @@ public class ToolkitWizard extends Wizard
 									IProgressMonitor.UNKNOWN );
 							final String[][] fileNames = new String[1][];
 
-							File file = new File( "\\\\qaant\\ActuateBuild" );
+							String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
+									"\\\\qaant\\ActuateBuild" );
+							File file = new File( buildDir );
 							fileNames[0] = file.list( new FilenameFilter( ) {
 
 								public boolean accept( File dir, String name )
@@ -403,6 +404,16 @@ public class ToolkitWizard extends Wizard
 	private void checkActuateBuildFile( File file,
 			final List<File> brdproFiles, final List<File> iportalViewerFiles )
 	{
+		final String[] subDirRegexs = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_SUB_DIR,
+				"(?i)ActuateBirtViewer;(?i)BRDPro" )
+				.split( ";" );
+		final String[] brdProRegexs = PathConfig.getProperty( PathConfig.BRDPRO,
+				"(?i)actuatebirtdesignerprofessional.*\\.zip;(?i)brdpro.*\\.zip" )
+				.split( ";" );
+		final String[] iPortalRegexs = PathConfig.getProperty( PathConfig.IPORTAL,
+				"(?i)actuatebirtviewer.*\\.zip;(?i)wl_tomcat_actuatebirtjavacomponent.*\\.war" )
+				.split( ";" );
+
 		File[] children = file.listFiles( new FileFilter( ) {
 
 			public boolean accept( File file )
@@ -410,30 +421,31 @@ public class ToolkitWizard extends Wizard
 				String fileName = file.getName( ).toLowerCase( );
 				if ( file.isFile( ) )
 				{
-					if ( ( fileName.startsWith( "actuatebirtdesignerprofessional" ) || fileName.startsWith( "brdpro" ) )
-							&& fileName.endsWith( ".zip" ) )
+					for ( int i = 0; i < brdProRegexs.length; i++ )
 					{
-						brdproFiles.add( file );
+						if ( fileName.matches( brdProRegexs[i] ) )
+						{
+							brdproFiles.add( file );
+							return false;
+						}
 					}
-					if ( fileName.startsWith( "actuatebirtviewer" )
-							&& fileName.endsWith( ".zip" ) )
+
+					for ( int i = 0; i < iPortalRegexs.length; i++ )
 					{
-						iportalViewerFiles.add( file );
-					}
-					if ( fileName.startsWith( "wl_tomcat_actuatebirtjavacomponent" )
-							&& fileName.endsWith( ".war" ) )
-					{
-						iportalViewerFiles.add( file );
+						if ( fileName.matches( iPortalRegexs[i] ) )
+						{
+							iportalViewerFiles.add( file );
+							return false;
+						}
 					}
 				}
-				else if ( file.getName( ).equalsIgnoreCase( "BRDPro" ) )
+				else
 				{
-					return true;
-				}
-				else if ( file.getName( )
-						.equalsIgnoreCase( "ActuateBirtViewer" ) )
-				{
-					return true;
+					for ( int i = 0; i < subDirRegexs.length; i++ )
+					{
+						if ( fileName.matches( subDirRegexs[i] ) )
+							return true;
+					}
 				}
 				return false;
 			}
