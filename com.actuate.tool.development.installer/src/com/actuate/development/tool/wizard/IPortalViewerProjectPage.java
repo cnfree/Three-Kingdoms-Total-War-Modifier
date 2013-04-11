@@ -60,7 +60,7 @@ import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.util.UIUtil;
 
-class IPortalViewerProjectPage extends WizardPage implements
+public class IPortalViewerProjectPage extends WizardPage implements
 		IPropertyChangeListener
 {
 
@@ -87,13 +87,13 @@ class IPortalViewerProjectPage extends WizardPage implements
 	private Combo choiceCombo;
 	private Button specifyRivision;
 
-	IPortalViewerProjectPage( ToolFeatureData data )
+	public IPortalViewerProjectPage( ToolFeatureData data )
 	{
 		super( "ProjectPage" );
-		setTitle( "Select the iPortal Viewer Project" );
-		setDescription( "Select the iPortal Viewer file." );
 		this.data = data;
 		this.data.addChangeListener( this );
+		setTitle( "Select the iPortal Viewer Project" );
+		setDescription( "Select the iPortal Viewer file." );
 	}
 
 	public void createControl( Composite parent )

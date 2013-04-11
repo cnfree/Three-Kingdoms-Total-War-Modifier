@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.actuate.development.tool.model.ToolFeatureData;
 
-class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
+public class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 {
 
 	private Text shortcutArgumentText;
@@ -27,13 +27,13 @@ class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
 
 	private Button shortcutButton;
 
-	BRDProShortcutPage( ToolFeatureData data )
+	public BRDProShortcutPage( ToolFeatureData data )
 	{
 		super( "ShortcutPage" );
-		setTitle( "Create the Executable Shortcut" );
-		setDescription( "Create the BRDPro executable shortcut on Desktop." );
 		this.data = data;
 		this.data.addChangeListener( this );
+		setTitle( "Create the Executable Shortcut" );
+		setDescription( "Create the BRDPro executable shortcut on Desktop." );
 	}
 
 	/*

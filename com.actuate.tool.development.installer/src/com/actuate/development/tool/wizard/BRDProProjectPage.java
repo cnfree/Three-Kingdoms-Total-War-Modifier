@@ -24,7 +24,7 @@ import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
 import com.actuate.development.tool.util.FileSorter;
 
-class BRDProProjectPage extends WizardPage
+public class BRDProProjectPage extends WizardPage
 {
 
 	private Combo comboProjects;
@@ -32,12 +32,12 @@ class BRDProProjectPage extends WizardPage
 
 	private ToolFeatureData data;
 
-	BRDProProjectPage( ToolFeatureData data )
+	public BRDProProjectPage( ToolFeatureData data )
 	{
 		super( "ProjectPage" );
+		this.data = data;
 		setTitle( "Select the BRDPro Project" );
 		setDescription( "Select the BRDPro installation file." );
-		this.data = data;
 	}
 
 	public void createControl( Composite parent )

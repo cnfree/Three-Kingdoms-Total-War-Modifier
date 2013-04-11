@@ -74,7 +74,7 @@ public class ToolkitWizard extends Wizard
 
 	public static final String SHORTCUTARGUMENTS = "ShortcutArguments";
 
-	static final String DIALOG_SETTING_FILE = new File( System.getProperties( )
+	private static final String DIALOG_SETTING_FILE = new File( System.getProperties( )
 			.getProperty( "user.home" ) + "\\.brdpro_toolkit\\userInfo.xml" ).getAbsolutePath( );
 
 	private static final String P4ROOT = "P4Root";
@@ -96,7 +96,7 @@ public class ToolkitWizard extends Wizard
 	private static final String P4CLIENT = "P4Client";
 
 	// the model object.
-	ToolFeatureData data = new ToolFeatureData( );
+	private ToolFeatureData data = new ToolFeatureData( );
 
 	public ToolkitWizard( )
 	{

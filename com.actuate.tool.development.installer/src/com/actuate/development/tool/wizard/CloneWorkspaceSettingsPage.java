@@ -30,9 +30,9 @@ public class CloneWorkspaceSettingsPage extends WizardPage
 	CloneWorkspaceSettingsPage( ToolFeatureData data )
 	{
 		super( "CloneWorspaceSettingsPage" );
+		this.data = data;
 		setTitle( "Clone Workspace Settings" );
 		setDescription( "Clone settings from an old workspace to a new workspace." );
-		this.data = data;
 	}
 
 	public void createControl( Composite parent )

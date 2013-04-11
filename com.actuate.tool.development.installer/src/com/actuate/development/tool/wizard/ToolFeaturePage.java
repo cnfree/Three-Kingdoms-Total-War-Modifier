@@ -24,9 +24,9 @@ public class ToolFeaturePage extends WizardPage
 	ToolFeaturePage( ToolFeatureData data )
 	{
 		super( "InstallTypePage" );
+		this.data = data;
 		setTitle( "Select the Toolkit Feature" );
 		setDescription( "Select the toolkit feature." );
-		this.data = data;
 	}
 
 	public void createControl( Composite parent )

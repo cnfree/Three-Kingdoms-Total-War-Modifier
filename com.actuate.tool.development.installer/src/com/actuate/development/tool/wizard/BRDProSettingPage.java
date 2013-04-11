@@ -36,7 +36,7 @@ import com.actuate.development.tool.model.ToolFeatureData;
 import com.actuate.development.tool.provider.ModuleContentProvider;
 import com.actuate.development.tool.provider.ModuleLabelProvider;
 
-class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
+public class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 {
 
 	private Text txtDirectory;
@@ -57,13 +57,13 @@ class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
 
 	private Composite composite;
 
-	BRDProSettingPage( ToolFeatureData data )
+	public BRDProSettingPage( ToolFeatureData data )
 	{
 		super( "SettingPage" );
-		setTitle( "Config Installation Settings" );
-		setDescription( "Config the BRDPro development environment settings." );
 		this.data = data;
 		this.data.addChangeListener( this );
+		setTitle( "Config Installation Settings" );
+		setDescription( "Config the BRDPro development environment settings." );
 	}
 
 	/*
