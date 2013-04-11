@@ -26,10 +26,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -446,7 +448,9 @@ public class FileUtil
 		}
 		catch ( Exception e )
 		{
-			e.printStackTrace( );
+			Logger.getLogger( FileUtil.class.getName( ) ).log( Level.WARNING,
+					"Replace file failed.", //$NON-NLS-1$
+					e );
 		}
 	}
 
@@ -472,7 +476,9 @@ public class FileUtil
 		}
 		catch ( IOException e )
 		{
-			e.printStackTrace( );
+			Logger.getLogger( FileUtil.class.getName( ) ).log( Level.WARNING,
+					"Get file content failed.", //$NON-NLS-1$
+					e );
 		}
 		return null;
 	}
@@ -508,4 +514,33 @@ public class FileUtil
 		return configFile;
 	}
 
+	public static Object convert( String string )
+	{
+		try
+		{
+			return new String( string.getBytes( "ISO-8859-1" ), "utf-8" );
+		}
+		catch ( UnsupportedEncodingException e )
+		{
+			return string;
+		}
+	}
+
+	public static Properties loadProperties( File file )
+	{
+		Properties props = new Properties( );
+		try
+		{
+			InputStream in = new FileInputStream( file );
+			props.load( in );
+			in.close( );
+		}
+		catch ( Exception e )
+		{
+			Logger.getLogger( FileUtil.class.getName( ) ).log( Level.WARNING,
+					"Load properties failed.",
+					e );
+		}
+		return props;
+	}
 }

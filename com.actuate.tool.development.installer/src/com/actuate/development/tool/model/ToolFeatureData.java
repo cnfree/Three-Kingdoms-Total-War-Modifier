@@ -19,8 +19,10 @@ public class ToolFeatureData
 	private List<InstallBRDProData> installBRDProDatas = new ArrayList<InstallBRDProData>( );
 	private List<IPortalViewerData> iPortalViewerDatas = new ArrayList<IPortalViewerData>( );
 	private CloneWorkspaceData cloneWorkspaceData;
-	private String currentBRDProProject = "A11SP4";
-	private String currentIVProject = "A11SP4";
+	private String currentBRDProProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_BRDPRO_PROJECT,
+			"A11SP4" );
+	private String currentIVProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_IPORTAL_PROJECT,
+			"A11SP4" );
 
 	public String getCurrentIVProject( )
 	{

@@ -4,12 +4,12 @@ package com.actuate.development.tool.model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.eclipse.swt.SWT;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
 
 import com.actuate.development.tool.util.FileUtil;
@@ -55,11 +55,11 @@ public class PathConfig
 	static
 	{
 		File config = new File( FileSystem.getCurrentDirectory( )
-				+ "/conf/config.ini" );
+				+ "/conf/path.ini" );
 		if ( !config.exists( ) )
 		{
 			FileUtil.writeToBinarayFile( config,
-					PathConfig.class.getResourceAsStream( "/conf/config.ini" ),
+					PathConfig.class.getResourceAsStream( "/conf/path.ini" ),
 					true );
 		}
 		try
@@ -73,7 +73,7 @@ public class PathConfig
 			}
 			else
 			{
-				InputStream in = PathConfig.class.getResourceAsStream( "/conf/config.ini" );
+				InputStream in = PathConfig.class.getResourceAsStream( "/conf/path.ini" );
 				props.load( in );
 				in.close( );
 			}
@@ -86,46 +86,20 @@ public class PathConfig
 				String key = (String) entry.getKey( );
 				String value = (String) entry.getValue( );
 				props.remove( entry.getKey( ) );
-				props.put( convert( key ), convert( value ) );
+				props.put( FileUtil.convert( key ), FileUtil.convert( value ) );
 			}
 		}
 		catch ( Exception e )
 		{
-			SWT.error( SWT.ERROR_IO, e );
+			Logger.getLogger( PathConfig.class.getName( ) ).log( Level.WARNING,
+					"Load properties failed.",
+					e );
 		}
 	}
 
 	public static String getProperty( String property, String defaultValue )
 	{
 		return props.getProperty( property, defaultValue );
-	}
-
-	private static Object convert( String string )
-	{
-		try
-		{
-			return new String( string.getBytes( "ISO-8859-1" ), "utf-8" );
-		}
-		catch ( UnsupportedEncodingException e )
-		{
-			return string;
-		}
-	}
-
-	public static Properties loadProperties( File file )
-	{
-		Properties props = new Properties( );
-		try
-		{
-			InputStream in = new FileInputStream( file );
-			props.load( in );
-			in.close( );
-		}
-		catch ( Exception e )
-		{
-			SWT.error( SWT.ERROR_IO, e );
-		}
-		return props;
 	}
 
 }

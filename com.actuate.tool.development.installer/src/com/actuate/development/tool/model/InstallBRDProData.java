@@ -3,17 +3,16 @@ package com.actuate.development.tool.model;
 
 public class InstallBRDProData
 {
-	
+
 	private String project;
 	private String directory;
 	private Module[] modules;
-	
+
 	public Module[] getModules( )
 	{
 		return modules;
 	}
 
-	
 	public void setModules( Module[] modules )
 	{
 		this.modules = modules;
@@ -22,7 +21,8 @@ public class InstallBRDProData
 	private boolean notClearDirectory = false;
 	private boolean notCloseBRDPro = false;
 	private boolean notCreateShortcut = false;
-	private String shortcutArguments = "-showlocation -nl en_us -vmargs -server -Xms256m -Xmx1024m -XX:PermSize=64M -XX:MaxPermSize=256M";
+	private String shortcutArguments = UserDataConfig.getProperty( UserDataConfig.BRDPRO_SHORTCUT_ARGS,
+			"-showlocation -nl en_us -vmargs -server -Xms256m -Xmx1024m -XX:PermSize=64M -XX:MaxPermSize=256M" );
 	private String brdproFile;
 	private boolean isInstallShield;
 	private ModuleVersion moduleVersion;
@@ -127,7 +127,5 @@ public class InstallBRDProData
 	{
 		this.tempDir = tempDir;
 	}
-
-	
 
 }
