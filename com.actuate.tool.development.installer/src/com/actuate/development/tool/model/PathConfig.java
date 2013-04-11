@@ -17,10 +17,10 @@ import com.actuate.development.tool.util.FileUtil;
 public class PathConfig
 {
 
-	// Plugins server
+	// Toolkit server
 	public final static String SERVER = "server";
 
-	// Plugins directory
+	// Toolkit plugins directory
 	public final static String PLUGINS = "plugins";
 
 	// Actuate build directory
