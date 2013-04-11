@@ -80,7 +80,7 @@ public class Tool
 
 	public static void init( )
 	{
-		String xmlpath = Toolkit.HOST + "toolkit.xml";
+		String xmlpath = Toolkit.HOST + "\\toolkit.xml";
 		Serializer serializer = new Persister( );
 		File source = new File( xmlpath );
 		try
@@ -94,7 +94,7 @@ public class Tool
 				{
 					new Module( plugin.getName( ),
 							plugin.getLabel( ),
-							Toolkit.HOST + plugin.getIcon( ),
+							Toolkit.HOST + "\\" + plugin.getIcon( ),
 							plugin.getFile( ).trim( ) );
 				}
 				else

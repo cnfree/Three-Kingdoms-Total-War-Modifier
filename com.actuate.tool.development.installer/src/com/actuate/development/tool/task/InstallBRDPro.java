@@ -263,6 +263,7 @@ public class InstallBRDPro
 						+ eclipseVersion
 						+ "_Release_platform";
 				String pluginOutputDir = Toolkit.HOST
+						+ "\\"
 						+ eclipseBigVersion
 						+ "\\"
 						+ eclipseVersion;

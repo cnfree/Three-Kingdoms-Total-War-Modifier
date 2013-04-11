@@ -177,7 +177,7 @@ public class Modules
 		IPortalConfig config = iPortalConfigMap.get( project );
 		if ( config != null )
 		{
-			File file = new File( Toolkit.HOST + config.getReplaceFile( ) );
+			File file = new File( Toolkit.HOST + "\\" + config.getReplaceFile( ) );
 			if ( file.exists( ) )
 				return file;
 		}

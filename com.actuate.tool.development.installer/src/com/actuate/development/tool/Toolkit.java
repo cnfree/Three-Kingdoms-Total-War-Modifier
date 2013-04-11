@@ -12,6 +12,7 @@ import org.sf.feeling.swt.win32.extension.jna.win32.Shell32;
 import org.sf.feeling.swt.win32.extension.jna.win32.structure.SHELLEXECUTEINFO;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.development.tool.model.PathConfig;
 import com.actuate.development.tool.util.ClassPathUpdater;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.wizard.ToolkitWizard;
@@ -34,9 +35,10 @@ public class Toolkit
 
 			public void run( )
 			{
-				if ( new File( "\\\\Qaant\\qa\\Toolkit\\plugins\\" ).exists( ) )
+				String plugins = PathConfig.getProperty( PathConfig.PLUGINS );
+				if ( new File( plugins ).exists( ) )
 				{
-					HOST = "\\\\Qaant\\qa\\Toolkit\\plugins\\";
+					HOST = plugins;
 					synchronized ( Toolkit.this )
 					{
 						Toolkit.this.notify( );
@@ -60,9 +62,10 @@ public class Toolkit
 
 		if ( HOST == null )
 		{
+			String server = PathConfig.getProperty( PathConfig.SERVER );
 			MessageDialog.openError( shell,
 					"Error",
-					"Can't connect to server Qaant. Please try it later or contact with cchen@actuate.com." );
+					"Can't connect to server "+server+". Please try it later or contact with administrator." );
 			shell.dispose( );
 			System.exit( 1 );
 		}
