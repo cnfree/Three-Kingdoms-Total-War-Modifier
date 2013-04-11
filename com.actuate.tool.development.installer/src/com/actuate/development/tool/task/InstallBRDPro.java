@@ -1319,8 +1319,8 @@ public class InstallBRDPro
 
 	private File getDTPFile( final String pattern )
 	{
-		File sdkDir = new File( "\\\\qa-build\\BIRTOutput\\dtp.output\\"
-				+ data.getModuleVersion( ).dtp );
+		File sdkDir = new File( "\\\\qa-build\\BIRTOutput\\dtp.output",
+				data.getModuleVersion( ).dtp );
 		if ( sdkDir.exists( ) )
 		{
 			List<File> files = new ArrayList<File>( );
