@@ -43,6 +43,7 @@ import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.ModuleType;
 import com.actuate.development.tool.model.ModuleVersion;
+import com.actuate.development.tool.model.PathConfig;
 import com.actuate.development.tool.util.FileSorter;
 import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
@@ -259,9 +260,9 @@ public class InstallBRDPro
 				String eclipseBigVersion = data.getModuleVersion( ).eclipse.substring( 0,
 						data.getModuleVersion( ).eclipse.lastIndexOf( '.' ) );
 
-				String eclipseOutputDir = "\\\\qa-build\\BIRTOutput\\platform\\"
-						+ eclipseVersion
-						+ "_Release_platform";
+				String eclipseOutputDir = PathConfig.getProperty( PathConfig.PLATFORM,
+						"\\\\qa-build\\BIRTOutput\\platform\\{0}_Release_platform" )
+						.replace( "{0}", eclipseVersion );
 				String pluginOutputDir = Toolkit.HOST
 						+ "\\"
 						+ eclipseBigVersion
@@ -299,7 +300,8 @@ public class InstallBRDPro
 
 					if ( module == Module.eclipse )
 					{
-						String pattern = "(?i)eclipse.+SDK.+win32\\.zip";
+						String pattern = PathConfig.getProperty( PathConfig.ECLIPSE_SDK,
+								"(?i)eclipse.+SDK.+win32\\.zip" );
 						File file = getSDKFile( eclipseOutputDir, pattern );
 
 						// file = new File(
@@ -330,7 +332,8 @@ public class InstallBRDPro
 						if ( Arrays.asList( data.getModules( ) )
 								.contains( Module.gefsdk ) )
 							continue;
-						String pattern = "(?i)GEF.+ALL.+\\.zip";
+						String pattern = PathConfig.getProperty( PathConfig.GEF_SDK,
+								"(?i)GEF.+ALL.+\\.zip" );
 						File file = getSDKFile( eclipseOutputDir, pattern );
 						// file = new File(
 						// "E:\\zip\\3.7\\GEF-ALL-3.7.2.zip" );
@@ -363,7 +366,8 @@ public class InstallBRDPro
 						if ( Arrays.asList( data.getModules( ) )
 								.contains( Module.emfsdk ) )
 							continue;
-						String pattern = "(?i)emf.+SDK.+\\.zip";
+						String pattern = PathConfig.getProperty( PathConfig.EMF_SDK,
+								"(?i)emf.+SDK.+\\.zip" );
 						File file = getSDKFile( eclipseOutputDir, pattern );
 						// file = new File(
 						// "E:\\zip\\3.7\\emf-xsd-SDK-M201201231045.zip" );
@@ -396,7 +400,8 @@ public class InstallBRDPro
 						if ( Arrays.asList( data.getModules( ) )
 								.contains( Module.wtpsdk ) )
 							continue;
-						String pattern = "(?i)wtp.+sdk.+\\.zip";
+						String pattern = PathConfig.getProperty( PathConfig.WTP_SDK,
+								"(?i)wtp.+sdk.+\\.zip" );
 						File file = getSDKFile( eclipseOutputDir, pattern );
 						// file = new File(
 						// "E:\\zip\\3.7\\wtp-sdk-M-3.3.2-20120210195245.zip"
@@ -427,7 +432,8 @@ public class InstallBRDPro
 					}
 					else if ( module == Module.dtp )
 					{
-						String pattern = "(?i)dtp-sdk.+\\.zip";
+						String pattern = PathConfig.getProperty( PathConfig.DTP_SDK,
+								"(?i)dtp-sdk.+\\.zip" );
 						File file = getDTPFile( pattern );
 						// file = new File(
 						// "E:\\zip\\3.7\\dtp-sdk-1.10.1RC1-201207130500.zip"
@@ -1320,7 +1326,8 @@ public class InstallBRDPro
 
 	private File getDTPFile( final String pattern )
 	{
-		File sdkDir = new File( "\\\\qa-build\\BIRTOutput\\dtp.output",
+		File sdkDir = new File( PathConfig.getProperty( PathConfig.DTP_OUTPUT,
+				"\\\\qa-build\\BIRTOutput\\dtp.output" ),
 				data.getModuleVersion( ).dtp );
 		if ( sdkDir.exists( ) )
 		{
