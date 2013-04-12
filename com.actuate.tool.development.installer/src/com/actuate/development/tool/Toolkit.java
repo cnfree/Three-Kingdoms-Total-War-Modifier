@@ -3,8 +3,10 @@ package com.actuate.development.tool;
 
 import java.io.File;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
@@ -35,7 +37,8 @@ public class Toolkit
 
 			public void run( )
 			{
-				String plugins = PathConfig.getProperty( PathConfig.PLUGINS, "\\\\qaant\\qa\\Toolkit\\plugins" );
+				String plugins = PathConfig.getProperty( PathConfig.PLUGINS,
+						"\\\\qaant\\qa\\Toolkit\\plugins" );
 				if ( new File( plugins ).exists( ) )
 				{
 					HOST = plugins;
@@ -63,11 +66,32 @@ public class Toolkit
 		if ( HOST == null )
 		{
 			String server = PathConfig.getProperty( PathConfig.SERVER, "Qaant" );
-			MessageDialog.openError( shell,
+			MessageDialog dialog = new MessageDialog( null,
 					"Error",
-					"Can't connect to server "+server+". Please try it later or contact with administrator." );
+					null,
+					"Can't connect to server "
+							+ server
+							+ ". Please try it later or contact with administrator.",
+					SWT.ICON_ERROR,
+					new String[]{
+						IDialogConstants.OK_LABEL
+					},
+					0 ) {
+
+				protected void configureShell( Shell shell )
+				{
+					super.configureShell( shell );
+					shell.setImages( new Image[]{
+							ImageCache.getImage( "/icons/actuate_16.png" ),
+							ImageCache.getImage( "/icons/actuate_32.png" ),
+							ImageCache.getImage( "/icons/actuate_48.png" )
+					} );
+					shell.forceActive( );
+				}
+			};
+			dialog.open( );;
 			shell.dispose( );
-			System.exit( 1 );
+			return;
 		}
 
 		ToolkitWizard wizard = new ToolkitWizard( );
