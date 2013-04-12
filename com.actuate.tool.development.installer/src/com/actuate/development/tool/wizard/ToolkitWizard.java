@@ -344,8 +344,13 @@ public class ToolkitWizard extends Wizard
 					} );
 					shell.forceActive( );
 				}
+
+				protected void cancelPressed( )
+				{
+					System.exit( 0 );
+				}
 			};
-			
+
 			dialog.run( true, true, new IRunnableWithProgress( ) {
 
 				public void run( final IProgressMonitor monitor )
