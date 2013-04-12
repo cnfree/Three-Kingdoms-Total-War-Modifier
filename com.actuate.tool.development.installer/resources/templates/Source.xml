@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="${source}">
-	<target name="${source}_download">
+	<target name="init">
+		<property name="build.temp" value="$tempDir" />
+		<property name="build.path" value="$installPath" />
+		<property name="brdpro.zip" value="$brdproFile" />
+	</target>
+
+	<target name="${source}_download" depends="init">
 		<copy todir="${build.temp}\\${source}_sdk">
 			<fileset file="${sourceFile}" />
 		</copy>
-
 		<exec dir="tool" executable="${runtime}\tool\7z.exe" failonerror="true">
 			<arg line="x &quot;${build.temp}\\${source}_sdk\*.zip&quot; -o&quot;${build.temp}\\${source}_sdk&quot; -aoa" />
 		</exec>
-		
 	</target>
 
-	<target name="${source}_install">
+	<target name="${source}_install" depends="init">
 		<move todir="${build.path}\eclipse\dropins\eclipse\plugins">
-			<fileset dir="${build.temp}\\${source}_sdk\eclipse\plugins\"
-				includes="*source*.*" />
+			<fileset dir="${build.temp}\\${source}_sdk\eclipse\plugins\" includes="*source*.*" />
 		</move>
 	</target>
 

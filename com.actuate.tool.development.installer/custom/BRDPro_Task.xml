@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Actuate BRDPro Development Environment Build Custom Task">
 
-	<!--
+	<target name="init">
 		<property name="build.temp" value="$tempDir" />
 		<property name="build.path" value="$installPath" />
 		<property name="brdpro.zip" value="$brdproFile" />
-	-->
-	
-	<target name="custom">
-	
 	</target>
-	
+
+
+	<target name="custom" depends="init">
+
+	</target>
+
 </project>

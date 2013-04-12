@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Clean">
-	<!-- - - - - - - - - - - - - - - - - - 
-	          target: clean                      
-	         - - - - - - - - - - - - - - - - - -->
-	<target name="clean">
+	<target name="init">
+		<property name="build.temp" value="$tempDir" />
+		<property name="build.path" value="$installPath" />
+		<property name="brdpro.zip" value="$brdproFile" />
+	</target>
+
+	<target name="clean" depends="init">
 		<delete dir="${build.temp}" />
 	</target>
 </project>

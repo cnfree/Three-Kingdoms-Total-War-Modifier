@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="${plugin}">
-	<!-- - - - - - - - - - - - - - - - - - 
-	          target: plugin                     
-	         - - - - - - - - - - - - - - - - - -->
-	<target name="${plugin}_install">
 
+	<target name="init">
+		<property name="build.temp" value="$tempDir" />
+		<property name="build.path" value="$installPath" />
+		<property name="brdpro.zip" value="$brdproFile" />
+	</target>
+
+	<target name="${plugin}_install" depends="init">
 		<mkdir dir="${build.path}\links\\${plugin}" />
-
 		<copy todir="${build.temp}\\${plugin}">
 			<fileset file="${pluginFile}" />
 		</copy>
-		
 		<exec dir="tool" executable="${runtime}\tool\7z.exe" failonerror="true">
-			<arg line="x &quot;${build.temp}\\${plugin}\*.zip&quot; -o&quot;${build.path}\links\\${plugin}&quot; -aoa" />
+			<arg
+				line="x &quot;${build.temp}\\${plugin}\*.zip&quot; -o&quot;${build.path}\links\\${plugin}&quot; -aoa" />
 		</exec>
-
 	</target>
 </project>
