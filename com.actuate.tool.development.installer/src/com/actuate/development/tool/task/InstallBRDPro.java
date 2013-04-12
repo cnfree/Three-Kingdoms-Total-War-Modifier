@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +46,7 @@ import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.ModuleType;
 import com.actuate.development.tool.model.ModuleVersion;
 import com.actuate.development.tool.model.PathConfig;
+import com.actuate.development.tool.util.BRDProAntTask;
 import com.actuate.development.tool.util.FileSorter;
 import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
@@ -103,6 +106,10 @@ public class InstallBRDPro
 
 	private Thread downloadThread;
 
+	private Process antProcess;
+
+	private boolean monitorAntProcess;
+
 	public InstallBRDPro( InstallBRDProData data )
 	{
 		this.data = data;
@@ -113,7 +120,9 @@ public class InstallBRDPro
 		if ( data == null )
 			return;
 
-		// startCancelMonitor( monitor );
+		monitorAntProcess = true;
+
+		startMonitorProcess( monitor );
 
 		installBuffer = new StringBuffer( );
 		sourceBuffer = new StringBuffer( );
@@ -159,6 +168,8 @@ public class InstallBRDPro
 		final String[] stepDetail = new String[1];
 		Project p = new Project( );
 		p.setBasedir( FileSystem.getCurrentDirectory( ) );
+		p.fireBuildStarted( );
+		p.init( );
 
 		final DefaultLogger consoleLogger = new DefaultLogger( );
 		consoleLogger.setErrorPrintStream( System.err );
@@ -169,6 +180,7 @@ public class InstallBRDPro
 		try
 		{
 			ProjectHelper helper = ProjectHelper.getProjectHelper( );
+
 			boolean[] downloadFlag = new boolean[]{
 				false
 			};
@@ -195,10 +207,17 @@ public class InstallBRDPro
 					cleanInstallFile( monitor );
 				}
 				File initFile = getAntFile( "/templates/Init.xml", useAntClean );
-				p.fireBuildStarted( );
-				p.init( );
-				helper.parse( p, initFile );
-				p.executeTarget( "init" );
+
+				antProcess = Runtime.getRuntime( ).exec( new String[]{
+						System.getProperty( "java.home" ) + "/bin/java",
+						"-cp",
+						System.getProperty( "java.class.path" ),
+						BRDProAntTask.class.getName( ),
+						"\"" + initFile.getAbsolutePath( ) + "\"",
+						"init"
+				} );
+				antProcess.waitFor( );
+				antProcess = null;
 			}
 
 			if ( !monitor.isCanceled( ) )
@@ -222,11 +241,23 @@ public class InstallBRDPro
 						+ " ] " );
 				stepDetail[0] = "Download the BRDPro archive file";
 				File downloadFile = getAntFile( "/templates/Download.xml", true );
-				helper.parse( p, downloadFile );
-				p.executeTarget( "download" );
 
-				downloadFlag[0] = true;
-				checkBRDProVersion( monitor );
+				antProcess = Runtime.getRuntime( ).exec( new String[]{
+						System.getProperty( "java.home" ) + "/bin/java",
+						"-cp",
+						System.getProperty( "java.class.path" ),
+						BRDProAntTask.class.getName( ),
+						"\"" + downloadFile.getAbsolutePath( ) + "\"",
+						"download"
+				} );
+				antProcess.waitFor( );
+				antProcess = null;
+
+				if ( !monitor.isCanceled( ) )
+				{
+					downloadFlag[0] = true;
+					checkBRDProVersion( monitor );
+				}
 			}
 
 			if ( !monitor.isCanceled( ) )
@@ -241,6 +272,7 @@ public class InstallBRDPro
 				File extractFile = getConfigFile( "/templates/brdpro.ini",
 						"/templates/Extract.xml",
 						"/links/comOda.link" );
+
 				helper.parse( p, extractFile );
 
 				interruptOutput( monitor,
@@ -637,14 +669,27 @@ public class InstallBRDPro
 			{
 				monitor.subTask( "[Step "
 						+ ++step[0]
-						+ "] Executing user custom task..." );
-				stepDetail[0] = "Execute user custom task";
-				File reaplceFile = new File( FileSystem.getCurrentDirectory( )
-						+ "/custom/BRDPro_Task.xml" );
-				if ( reaplceFile.exists( ) )
+						+ "] Executing the user custom task..." );
+				stepDetail[0] = "Execute the user custom task";
+				File customFile = getAntFile( FileSystem.getCurrentDirectory( )
+						+ "\\custom\\BRDPro_Task.xml", false );
+
+				antProcess = Runtime.getRuntime( ).exec( new String[]{
+						System.getProperty( "java.home" ) + "/bin/java",
+						"-cp",
+						System.getProperty( "java.class.path" ),
+						BRDProAntTask.class.getName( ),
+						"\"" + customFile.getAbsolutePath( ) + "\"",
+						"custom"
+				} );
+
+				StringBuffer buffer = new StringBuffer( );
+				interruptCustomTaskErrorMessage( antProcess, buffer );
+
+				int result = antProcess.waitFor( );
+				if ( result == -1 )
 				{
-					helper.parse( p, reaplceFile );
-					p.executeTarget( "custom" );
+					throw new Exception( buffer.toString( ) );
 				}
 			}
 
@@ -703,6 +748,8 @@ public class InstallBRDPro
 				} );
 
 				p.fireBuildFinished( null );
+
+				monitorAntProcess = false;
 
 				monitor.subTask( "" );
 				monitor.setTaskName( "Finished installing the BRDPro Development Environment" );
@@ -764,6 +811,8 @@ public class InstallBRDPro
 			}
 			else
 			{
+				monitorAntProcess = false;
+
 				Display.getDefault( ).syncExec( new Runnable( ) {
 
 					public void run( )
@@ -779,21 +828,99 @@ public class InstallBRDPro
 		catch ( final Exception e )
 		{
 			p.fireBuildFinished( e );
-			Display.getDefault( ).syncExec( new Runnable( ) {
 
-				public void run( )
-				{
-					if ( UIUtil.getShell( ).getMinimized( ) )
-						Windows.flashWindow( UIUtil.getShell( ).handle, true );
-					LogUtil.recordErrorMsg( "Step "
-							+ step[0]
-							+ ": "
-							+ stepDetail[0]
-							+ " failed.", e, true );
-					Windows.flashWindow( UIUtil.getShell( ).handle, false );
-				}
-			} );
+			monitorAntProcess = false;
+
+			if ( monitor.isCanceled( ) )
+			{
+				Display.getDefault( ).syncExec( new Runnable( ) {
+
+					public void run( )
+					{
+						MessageDialog.openInformation( null,
+								"Information",
+								"Canceled installing the BRDPro Development Environment." );
+						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+					}
+				} );
+			}
+			else
+			{
+				Display.getDefault( ).syncExec( new Runnable( ) {
+
+					public void run( )
+					{
+						if ( UIUtil.getShell( ).getMinimized( ) )
+							Windows.flashWindow( UIUtil.getShell( ).handle,
+									true );
+						LogUtil.recordErrorMsg( "Step "
+								+ step[0]
+								+ ": "
+								+ stepDetail[0]
+								+ " failed.", e, true );
+						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+					}
+				} );
+			}
 		}
+	}
+
+	private void startMonitorProcess( final IProgressMonitor monitor )
+	{
+		Thread thread = new Thread( "Monitor Process" ) {
+
+			public void run( )
+			{
+				while ( monitorAntProcess )
+				{
+					if ( monitor.isCanceled( ) )
+					{
+						if ( antProcess != null )
+						{
+							antProcess.destroy( );
+						}
+
+						try
+						{
+							String path = new File( FileSystem.getCurrentDirectory( ) ).getCanonicalPath( );
+							ProcessEntry[] entrys = Kernel.getSystemProcessesSnap( );
+							if ( entrys != null )
+							{
+								for ( int i = 0; i < entrys.length; i++ )
+								{
+									ProcessEntry entry = entrys[i];
+									if ( entry.getProcessName( )
+											.toLowerCase( )
+											.startsWith( "7z" )
+											|| entry.getProcessName( )
+													.toLowerCase( )
+													.startsWith( "iscab" ) )
+									{
+										String entryPath = new File( entry.getExePath( ) ).getCanonicalPath( );
+										if ( entryPath.startsWith( path ) )
+										{
+											Kernel.killProcess( entry.getProcessId( ) );
+										}
+									}
+								}
+							}
+						}
+						catch ( IOException e )
+						{
+						}
+					}
+					try
+					{
+						Thread.sleep( 100 );
+					}
+					catch ( InterruptedException e )
+					{
+					}
+				}
+			}
+		};
+		thread.setDaemon( true );
+		thread.start( );
 	}
 
 	private void cleanInstallFile( IProgressMonitor monitor )
@@ -827,6 +954,10 @@ public class InstallBRDPro
 		{
 			for ( int i = 0; i < files.length; i++ )
 			{
+				if ( monitor.isCanceled( ) )
+				{
+					return;
+				}
 				if ( files[i].getName( ).equalsIgnoreCase( ".settings" ) )
 					continue;
 				FileUtil.deleteFile( monitor, files[i] );
@@ -843,6 +974,12 @@ public class InstallBRDPro
 			String line;
 			while ( ( line = in.readLine( ) ) != null )
 			{
+				if ( monitor.isCanceled( ) )
+				{
+					in.close( );
+					return;
+				}
+
 				line = line.trim( );
 				if ( line.length( ) == 0 )
 					continue;
@@ -907,8 +1044,13 @@ public class InstallBRDPro
 			in.close( );
 		}
 
-		deleteDirectory( new File( data.getDirectory( ), "eclipse\\links" ) );
-		deleteDirectory( new File( data.getDirectory( ), "links" ) );
+		if ( !monitor.isCanceled( ) )
+		{
+			deleteDirectory( new File( data.getDirectory( ), "eclipse\\links" ) );
+			deleteDirectory( new File( data.getDirectory( ), "links" ) );
+		}
+		else
+			return;
 
 		File[] tempDirs = new File( data.getDirectory( ) ).listFiles( new FileFilter( ) {
 
@@ -930,6 +1072,8 @@ public class InstallBRDPro
 		{
 			for ( int i = 0; i < tempDirs.length; i++ )
 			{
+				if ( monitor.isCanceled( ) )
+					return;
 				FileUtil.deleteDirectory( monitor, tempDirs[i] );
 			}
 		}
@@ -961,6 +1105,32 @@ public class InstallBRDPro
 				+ " ] ";
 		interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
 		monitor.subTask( subtaskName[0] );
+	}
+
+	private void interruptCustomTaskErrorMessage( final Process process,
+			final StringBuffer buffer )
+	{
+		Thread errThread = new Thread( ) {
+
+			public void run( )
+			{
+				try
+				{
+					BufferedReader input = new BufferedReader( new InputStreamReader( process.getErrorStream( ) ) );
+					String line;
+					while ( ( line = input.readLine( ) ) != null )
+					{
+						buffer.append( line ).append( "\r\n" );
+					}
+					input.close( );
+				}
+				catch ( Exception e )
+				{
+				}
+			}
+		};
+		errThread.setDaemon( true );
+		errThread.start( );
 	}
 
 	private void interruptOutput( final IProgressMonitor monitor,
@@ -1220,6 +1390,9 @@ public class InstallBRDPro
 		velocityEngine.init( );
 
 		VelocityContext context = new VelocityContext( );
+		context.put( "tempDir", data.getTempDir( ) );
+		context.put( "brdproFile", data.getBrdproFile( ) );
+		context.put( "installPath", data.getDirectory( ) );
 		context.put( "source", module.getName( ) );
 		context.put( "sourceFile", file.getAbsolutePath( ) );
 		context.put( "runtime", FileSystem.getCurrentDirectory( ) );
@@ -1273,6 +1446,9 @@ public class InstallBRDPro
 		velocityEngine.init( );
 
 		VelocityContext context = new VelocityContext( );
+		context.put( "tempDir", data.getTempDir( ) );
+		context.put( "brdproFile", data.getBrdproFile( ) );
+		context.put( "installPath", data.getDirectory( ) );
 		context.put( "plugin", module.getName( ) );
 		context.put( "pluginFile", file.getAbsolutePath( ) );
 		context.put( "runtime", FileSystem.getCurrentDirectory( ) );
@@ -1393,11 +1569,30 @@ public class InstallBRDPro
 
 	private File getAntFile( String fileName, boolean useAntClean )
 	{
-
-		File templateFile = FileUtil.getTempFile( fileName );
-		FileUtil.writeToBinarayFile( templateFile, this.getClass( )
-				.getResourceAsStream( fileName ), true );
-
+		File templateFile = null;
+		File xmlFile = new File( fileName );
+		if ( xmlFile.exists( ) )
+		{
+			try
+			{
+				templateFile = FileUtil.getTempFile( xmlFile.getName( ) );
+				FileInputStream fis = new FileInputStream( fileName );
+				FileUtil.writeToBinarayFile( templateFile, fis, true );
+				fis.close( );
+				fileName = xmlFile.getName( );
+			}
+			catch ( IOException e )
+			{
+				Logger.getLogger( this.getClass( ).getName( ) )
+						.log( Level.WARNING, "Read file failed.", e );
+			}
+		}
+		else
+		{
+			templateFile = FileUtil.getTempFile( fileName );
+			FileUtil.writeToBinarayFile( templateFile, this.getClass( )
+					.getResourceAsStream( fileName ), true );
+		}
 		VelocityEngine velocityEngine = new VelocityEngine( );
 		velocityEngine.setProperty( VelocityEngine.FILE_RESOURCE_LOADER_PATH,
 				templateFile.getAbsoluteFile( )
@@ -1437,6 +1632,7 @@ public class InstallBRDPro
 
 		VelocityContext context = new VelocityContext( );
 		context.put( "tempDir", data.getTempDir( ) );
+		context.put( "brdproFile", data.getBrdproFile( ) );
 		context.put( "installPath", data.getDirectory( ) );
 
 		Template template = velocityEngine.getTemplate( configTemplateFile.getName( ) );
@@ -1465,6 +1661,9 @@ public class InstallBRDPro
 		context.put( "isInstallShield", data.isInstallShield( ) );
 		context.put( "odaLinkPath", linkFile.getAbsolutePath( ) );
 		context.put( "runtime", FileSystem.getCurrentDirectory( ) );
+		context.put( "tempDir", data.getTempDir( ) );
+		context.put( "brdproFile", data.getBrdproFile( ) );
+		context.put( "installPath", data.getDirectory( ) );
 
 		template = velocityEngine.getTemplate( antTemplateFile.getName( ) );
 		sw = new StringWriter( );
