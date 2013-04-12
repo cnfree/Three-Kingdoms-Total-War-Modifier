@@ -301,19 +301,22 @@ public class FileUtil
 	/**
 	 * Recursively delete a directory.
 	 * 
+	 * @param monitor
+	 * 
 	 * @param directory
 	 *            directory to delete
 	 * @throws IOException
 	 *             in case deletion is unsuccessful
 	 */
-	public static void deleteDirectory( File directory ) throws IOException
+	public static void deleteDirectory( IProgressMonitor monitor, File directory )
+			throws IOException
 	{
 		if ( !directory.exists( ) )
 		{
 			return;
 		}
 
-		cleanDirectory( directory );
+		cleanDirectory( monitor, directory );
 		if ( !directory.delete( ) )
 		{
 			String message = "Unable to delete directory " + directory + ".";
@@ -321,8 +324,11 @@ public class FileUtil
 		}
 	}
 
-	public static void deleteFile( File file ) throws IOException
+	public static void deleteFile( IProgressMonitor monitor, File file )
+			throws IOException
 	{
+		if ( monitor.isCanceled( ) )
+			return;
 		if ( !file.exists( ) )
 		{
 			return;
@@ -330,18 +336,21 @@ public class FileUtil
 		if ( file.isFile( ) )
 			file.delete( );
 		else
-			deleteDirectory( file );
+			deleteDirectory( monitor, file );
 	}
 
 	/**
 	 * Clean a directory without deleting it.
+	 * 
+	 * @param monitor
 	 * 
 	 * @param directory
 	 *            directory to clean
 	 * @throws IOException
 	 *             in case cleaning is unsuccessful
 	 */
-	public static void cleanDirectory( File directory ) throws IOException
+	public static void cleanDirectory( IProgressMonitor monitor, File directory )
+			throws IOException
 	{
 		if ( !directory.exists( ) )
 		{
@@ -360,10 +369,13 @@ public class FileUtil
 		File[] files = directory.listFiles( );
 		for ( int i = 0; i < files.length; i++ )
 		{
+			if ( monitor.isCanceled( ) )
+				return;
+
 			File file = files[i];
 			try
 			{
-				forceDelete( file );
+				forceDelete( monitor, file );
 			}
 			catch ( IOException ioe )
 			{
@@ -377,11 +389,14 @@ public class FileUtil
 		}
 	}
 
-	public static void forceDelete( File file ) throws IOException
+	public static void forceDelete( IProgressMonitor monitor, File file )
+			throws IOException
 	{
 		if ( file.isDirectory( ) )
 		{
-			deleteDirectory( file );
+			if ( monitor.isCanceled( ) )
+				return;
+			deleteDirectory( monitor, file );
 		}
 		else
 		{

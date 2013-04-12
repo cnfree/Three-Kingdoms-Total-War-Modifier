@@ -113,6 +113,8 @@ public class InstallBRDPro
 		if ( data == null )
 			return;
 
+		// startCancelMonitor( monitor );
+
 		installBuffer = new StringBuffer( );
 		sourceBuffer = new StringBuffer( );
 		linkBuffer = new StringBuffer( );
@@ -190,7 +192,7 @@ public class InstallBRDPro
 				boolean useAntClean = !logFile.exists( );
 				if ( !useAntClean )
 				{
-					cleanInstallFile( );
+					cleanInstallFile( monitor );
 				}
 				File initFile = getAntFile( "/templates/Init.xml", useAntClean );
 				p.fireBuildStarted( );
@@ -794,21 +796,29 @@ public class InstallBRDPro
 		}
 	}
 
-	private void cleanInstallFile( ) throws IOException
+	private void cleanInstallFile( IProgressMonitor monitor )
+			throws IOException
 	{
-		FileUtil.deleteFile( new File( data.getDirectory( ), "bodtools" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "oda" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "resources" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "MyClasses" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "License" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "setup" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "ico" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ),
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
+				"bodtools" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ), "oda" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
+				"resources" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
+				"MyClasses" ) );
+		FileUtil.deleteFile( monitor,
+				new File( data.getDirectory( ), "License" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ), "setup" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ), "ico" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
 				"3rdparty_products.txt" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "startbrdpro.bat" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "eclipse\\p2" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ), "startbrdpro.bat" ) );
-		FileUtil.deleteFile( new File( data.getDirectory( ),
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
+				"startbrdpro.bat" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
+				"eclipse\\p2" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
+				"startbrdpro.bat" ) );
+		FileUtil.deleteFile( monitor, new File( data.getDirectory( ),
 				"eclipse\\eclipse.lnk" ) );
 
 		File configs = new File( data.getDirectory( ), "eclipse\\configuration" );
@@ -819,7 +829,7 @@ public class InstallBRDPro
 			{
 				if ( files[i].getName( ).equalsIgnoreCase( ".settings" ) )
 					continue;
-				FileUtil.deleteFile( files[i] );
+				FileUtil.deleteFile( monitor, files[i] );
 			}
 		}
 
@@ -884,10 +894,12 @@ public class InstallBRDPro
 					}
 					else if ( startLink )
 					{
-						FileUtil.deleteFile( new File( data.getDirectory( ),
-								"eclipse\\links\\" + line + ".link" ) );
-						FileUtil.deleteFile( new File( data.getDirectory( ),
-								"links\\" + line ) );
+						FileUtil.deleteFile( monitor,
+								new File( data.getDirectory( ),
+										"eclipse\\links\\" + line + ".link" ) );
+						FileUtil.deleteFile( monitor,
+								new File( data.getDirectory( ), "links\\"
+										+ line ) );
 					}
 				}
 
@@ -918,7 +930,7 @@ public class InstallBRDPro
 		{
 			for ( int i = 0; i < tempDirs.length; i++ )
 			{
-				FileUtil.deleteDirectory( tempDirs[i] );
+				FileUtil.deleteDirectory( monitor, tempDirs[i] );
 			}
 		}
 		// FileUtil.deleteFile( uninstallFile );

@@ -26,6 +26,7 @@ import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
 import org.sf.feeling.swt.win32.extension.Win32;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
@@ -75,7 +76,8 @@ public class ToolkitWizard extends Wizard
 	public static final String SHORTCUTARGUMENTS = "ShortcutArguments";
 
 	private static final String DIALOG_SETTING_FILE = new File( System.getProperties( )
-			.getProperty( "user.home" ) + "\\.brdpro_toolkit\\userInfo.xml" ).getAbsolutePath( );
+			.getProperty( "user.home" )
+			+ "\\.brdpro_toolkit\\userInfo.xml" ).getAbsolutePath( );
 
 	private static final String P4ROOT = "P4Root";
 
@@ -330,70 +332,79 @@ public class ToolkitWizard extends Wizard
 
 		try
 		{
-			new ProgressMonitorDialog( getShell( ) ).run( true,
-					true,
-					new IRunnableWithProgress( ) {
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog( null ) {
 
-						public void run( final IProgressMonitor monitor )
-								throws InvocationTargetException,
-								InterruptedException
-						{
-							monitor.beginTask( "Collecting Actuate Build Projects...",
-									IProgressMonitor.UNKNOWN );
-							final String[][] fileNames = new String[1][];
-
-							String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
-									"\\\\qaant\\ActuateBuild" );
-							File file = new File( buildDir );
-							fileNames[0] = file.list( new FilenameFilter( ) {
-
-								public boolean accept( File dir, String name )
-								{
-									File file = new File( dir, name );
-									monitor.subTask( "Scanning "
-											+ file.getAbsolutePath( ) );
-									List<File> brdproFiles = new ArrayList<File>( );
-									List<File> iportalViewerFiles = new ArrayList<File>( );
-
-									checkActuateBuildFile( file,
-											brdproFiles,
-											iportalViewerFiles );
-
-									if ( brdproFiles.size( ) > 0 )
-									{
-										if ( !data.getBrdproMap( )
-												.containsKey( name ) )
-											data.getBrdproMap( ).put( name,
-													new ArrayList<File>( ) );
-										data.getBrdproMap( )
-												.get( name )
-												.addAll( brdproFiles );
-									}
-									if ( iportalViewerFiles.size( ) > 0
-											&& Modules.getInstance( )
-													.getIPortalProjects( )
-													.contains( name ) )
-									{
-										if ( !data.getIportalViewMap( )
-												.containsKey( name ) )
-											data.getIportalViewMap( )
-													.put( name,
-															new ArrayList<File>( ) );
-										data.getIportalViewMap( )
-												.get( name )
-												.addAll( iportalViewerFiles );
-									}
-									if ( brdproFiles.size( ) > 0
-											|| iportalViewerFiles.size( ) > 0 )
-										return true;
-									return false;
-								}
-
-							} );
-
-							monitor.done( );
-						}
+				protected void configureShell( Shell shell )
+				{
+					super.configureShell( shell );
+					shell.setImages( new Image[]{
+							ImageCache.getImage( "/icons/actuate_16.png" ),
+							ImageCache.getImage( "/icons/actuate_32.png" ),
+							ImageCache.getImage( "/icons/actuate_48.png" )
 					} );
+					shell.forceActive( );
+				}
+			};
+			
+			dialog.run( true, true, new IRunnableWithProgress( ) {
+
+				public void run( final IProgressMonitor monitor )
+						throws InvocationTargetException, InterruptedException
+				{
+					monitor.beginTask( "Collecting Actuate Build Projects...",
+							IProgressMonitor.UNKNOWN );
+					final String[][] fileNames = new String[1][];
+
+					String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
+							"\\\\qaant\\ActuateBuild" );
+					File file = new File( buildDir );
+					fileNames[0] = file.list( new FilenameFilter( ) {
+
+						public boolean accept( File dir, String name )
+						{
+							File file = new File( dir, name );
+							monitor.subTask( "Scanning "
+									+ file.getAbsolutePath( ) );
+							List<File> brdproFiles = new ArrayList<File>( );
+							List<File> iportalViewerFiles = new ArrayList<File>( );
+
+							checkActuateBuildFile( file,
+									brdproFiles,
+									iportalViewerFiles );
+
+							if ( brdproFiles.size( ) > 0 )
+							{
+								if ( !data.getBrdproMap( ).containsKey( name ) )
+									data.getBrdproMap( ).put( name,
+											new ArrayList<File>( ) );
+								data.getBrdproMap( )
+										.get( name )
+										.addAll( brdproFiles );
+							}
+							if ( iportalViewerFiles.size( ) > 0
+									&& Modules.getInstance( )
+											.getIPortalProjects( )
+											.contains( name ) )
+							{
+								if ( !data.getIportalViewMap( )
+										.containsKey( name ) )
+									data.getIportalViewMap( ).put( name,
+											new ArrayList<File>( ) );
+								data.getIportalViewMap( )
+										.get( name )
+										.addAll( iportalViewerFiles );
+							}
+							if ( brdproFiles.size( ) > 0
+									|| iportalViewerFiles.size( ) > 0 )
+								return true;
+							return false;
+						}
+
+					} );
+
+					monitor.done( );
+				}
+			} );
 		}
 		catch ( Exception e )
 		{

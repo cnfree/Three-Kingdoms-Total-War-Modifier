@@ -38,6 +38,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
+import org.sf.feeling.swt.win32.extension.system.Kernel;
+import org.sf.feeling.swt.win32.extension.system.ProcessEntry;
 
 import com.actuate.development.tool.model.IPortalViewerData;
 import com.actuate.development.tool.model.Modules;
@@ -671,7 +673,52 @@ public class SyncIPortalWorkspace
 			inThread.setDaemon( true );
 			inThread.start( );
 
+			final boolean[] processFinish = new boolean[]{
+				false
+			};
+
+			Thread cancelThread = new Thread( ) {
+
+				public void run( )
+				{
+					while ( !processFinish[0] )
+					{
+						if ( monitor.isCanceled( ) )
+						{
+							downloadProcess.destroy( );
+
+							ProcessEntry[] entrys = Kernel.getSystemProcessesSnap( );
+							if ( entrys != null )
+							{
+								for ( int i = 0; i < entrys.length; i++ )
+								{
+									ProcessEntry entry = entrys[i];
+									if ( entry.getProcessName( ).equalsIgnoreCase( "p4.exe" ) )
+									{
+										Kernel.killProcess( entry.getProcessId( ) );
+									}
+								}
+							}
+						}
+						else
+						{
+							try
+							{
+								Thread.sleep( 100 );
+							}
+							catch ( InterruptedException e )
+							{
+							}
+						}
+					}
+				}
+			};
+			cancelThread.setDaemon( true );
+			cancelThread.start( );
+
 			downloadProcess.waitFor( );
+
+			processFinish[0] = true;
 
 			Thread.sleep( 100 );
 
