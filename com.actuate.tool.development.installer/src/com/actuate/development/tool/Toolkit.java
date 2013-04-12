@@ -8,6 +8,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
 import org.sf.feeling.swt.win32.extension.jna.win32.Shell32;
@@ -26,12 +27,7 @@ public class Toolkit
 
 	public Toolkit( )
 	{
-		Shell shell = new Shell( );
-		shell.setImages( new Image[]{
-				ImageCache.getImage( "/icons/actuate_16.png" ),
-				ImageCache.getImage( "/icons/actuate_32.png" ),
-				ImageCache.getImage( "/icons/actuate_48.png" )
-		} );
+		Display display = new Display( );
 
 		Thread qaantThread = new Thread( ) {
 
@@ -89,14 +85,15 @@ public class Toolkit
 					shell.forceActive( );
 				}
 			};
-			dialog.open( );;
-			shell.dispose( );
+			dialog.open( );
+			display.dispose( );
 			return;
 		}
 
 		ToolkitWizard wizard = new ToolkitWizard( );
 		WizardDialog dialog = new WizardDialog( null, wizard );
 		dialog.open( );
+		display.dispose( );
 	}
 
 	public static void main( String[] args )
