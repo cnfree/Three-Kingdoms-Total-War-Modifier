@@ -119,56 +119,21 @@ public class InstallBRDPro
 		if ( data == null )
 			return;
 
-		monitorAntProcess = true;
-
 		startMonitorProcess( monitor );
 
-		installBuffer = new StringBuffer( );
-		sourceBuffer = new StringBuffer( );
-		linkBuffer = new StringBuffer( );
 		monitor.beginTask( "Total "
 				+ ( 5 + ( data.getModules( ) == null ? 0
 						: data.getModules( ).length ) ) + " steps",
 				IProgressMonitor.UNKNOWN );
-		if ( !data.isNotCloseBRDPro( ) && data.getDirectory( ) != null )
-		{
-			try
-			{
-				String path = new File( data.getDirectory( ) ).getCanonicalPath( );
-				ProcessEntry[] entrys = Kernel.getSystemProcessesSnap( );
-				if ( entrys != null )
-				{
-					for ( int i = 0; i < entrys.length; i++ )
-					{
-						ProcessEntry entry = entrys[i];
-						String entryPath = new File( entry.getExePath( ) ).getCanonicalPath( );
-						if ( entryPath.startsWith( path ) )
-						{
-							Kernel.killProcess( entry.getProcessId( ) );
-						}
-					}
-				}
 
-				int[] handles = Windows.enumWindows( );
-				for ( int i = 0; i < handles.length; i++ )
-				{
-					String name = Windows.getWindowText( handles[i] );
-					if ( name.startsWith( path ) )
-					{
-						Windows.forceCloseWindow( handles[i] );
-					}
-				}
-			}
-			catch ( IOException e1 )
-			{
-			}
-		}
-		final int[] step = new int[1];
-		final String[] stepDetail = new String[1];
+		closeRelationalDirectory( );
+
 		Project p = new Project( );
 		p.setBasedir( FileSystem.getCurrentDirectory( ) );
 		p.fireBuildStarted( );
 		p.init( );
+
+		ProjectHelper helper = ProjectHelper.getProjectHelper( );
 
 		final DefaultLogger consoleLogger = new DefaultLogger( );
 		consoleLogger.setErrorPrintStream( System.err );
@@ -176,111 +141,42 @@ public class InstallBRDPro
 		consoleLogger.setMessageOutputLevel( Project.MSG_INFO );
 		p.addBuildListener( consoleLogger );
 
+		boolean[] downloadFlag = new boolean[]{
+			false
+		};
+		boolean[] flag = new boolean[]{
+			false
+		};
+		String[] subtaskName = new String[1];
+
+		installBuffer = new StringBuffer( );
+		sourceBuffer = new StringBuffer( );
+		linkBuffer = new StringBuffer( );
+
+		final int[] step = new int[1];
+		final String[] stepDetail = new String[1];
+
 		try
 		{
-			ProjectHelper helper = ProjectHelper.getProjectHelper( );
-
-			boolean[] downloadFlag = new boolean[]{
-				false
-			};
-			boolean[] flag = new boolean[]{
-				false
-			};
-			String[] subtaskName = new String[1];
-
 			if ( !monitor.isCanceled( ) )
 			{
-				data.setTempDir( data.getDirectory( )
-						+ "\\temp"
-						+ System.currentTimeMillis( ) );
-				// data.clearDirectory = true;
-				monitor.subTask( "[Step "
-						+ ++step[0]
-						+ "] Initializing the installation task..." );
-				stepDetail[0] = "Initialize the installation task";
-
-				File logFile = new File( data.getDirectory( ), "uninstall.data" );
-				boolean useAntClean = !logFile.exists( );
-				if ( !useAntClean )
-				{
-					cleanInstallFile( monitor );
-				}
-				File initFile = getAntFile( "/templates/Init.xml", useAntClean );
-
-				antProcess = Runtime.getRuntime( ).exec( new String[]{
-						System.getProperty( "java.home" ) + "/bin/java",
-						"-cp",
-						System.getProperty( "java.class.path" ),
-						AntTask.class.getName( ),
-						"\"" + initFile.getAbsolutePath( ) + "\"",
-						"init"
-				} );
-				antProcess.waitFor( );
-				antProcess = null;
+				initTask( monitor, step, stepDetail );
 			}
 
 			if ( !monitor.isCanceled( ) )
 			{
-				File brdproFile = new File( data.getBrdproFile( ) );
-				long fileLength = brdproFile.length( );
-				String defaultTaskName = "[Step "
-						+ ++step[0]
-						+ "] Downloading the BRDPro archive file...";
-
-				downloadMonitor( monitor,
-						downloadFlag,
-						defaultTaskName,
-						new File( data.getTempDir( ) + "\\brdpro\\zip",
-								brdproFile.getName( ) ),
-						fileLength );
-
-				monitor.subTask( defaultTaskName
-						+ "\t[ Size: "
-						+ FileUtils.byteCountToDisplaySize( fileLength )
-						+ " ] " );
-				stepDetail[0] = "Download the BRDPro archive file";
-				File downloadFile = getAntFile( "/templates/Download.xml", true );
-
-				antProcess = Runtime.getRuntime( ).exec( new String[]{
-						System.getProperty( "java.home" ) + "/bin/java",
-						"-cp",
-						System.getProperty( "java.class.path" ),
-						AntTask.class.getName( ),
-						"\"" + downloadFile.getAbsolutePath( ) + "\"",
-						"download"
-				} );
-				antProcess.waitFor( );
-				antProcess = null;
-
-				if ( !monitor.isCanceled( ) )
-				{
-					downloadFlag[0] = true;
-					checkBRDProVersion( monitor );
-				}
+				downloadBRDPro( monitor, downloadFlag, step, stepDetail );
 			}
 
 			if ( !monitor.isCanceled( ) )
 			{
-				subtaskName = new String[]{
-					"[Step "
-							+ ++step[0]
-							+ "] Extracting and installing the BRDPro archive file..."
-				};
-				monitor.subTask( subtaskName[0] );
-				stepDetail[0] = "Extract and install the BRDPro archive file";
-				File extractFile = getConfigFile( "/templates/brdpro.ini",
-						"/templates/Extract.xml",
-						"/links/comOda.link" );
-
-				helper.parse( p, extractFile );
-
-				interruptOutput( monitor,
-						step,
+				subtaskName = installBRDPro( monitor,
+						p,
+						helper,
 						consoleLogger,
 						flag,
-						subtaskName );
-
-				p.executeTarget( "extract_brdpro" );
+						step,
+						stepDetail );
 			}
 
 			flag[0] = true;
@@ -342,7 +238,7 @@ public class InstallBRDPro
 						// );
 						if ( file != null && file.exists( ) )
 						{
-							downloadMonitor( monitor,
+							monitorDownload( monitor,
 									downloadFlag,
 									subtaskName[0],
 									new File( data.getTempDir( )
@@ -375,7 +271,7 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
-								downloadMonitor( monitor,
+								monitorDownload( monitor,
 										downloadFlag,
 										subtaskName[0],
 										new File( data.getTempDir( )
@@ -409,7 +305,7 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
-								downloadMonitor( monitor,
+								monitorDownload( monitor,
 										downloadFlag,
 										subtaskName[0],
 										new File( data.getTempDir( )
@@ -444,7 +340,7 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
-								downloadMonitor( monitor,
+								monitorDownload( monitor,
 										downloadFlag,
 										subtaskName[0],
 										new File( data.getTempDir( )
@@ -476,7 +372,7 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
-								downloadMonitor( monitor,
+								monitorDownload( monitor,
 										downloadFlag,
 										subtaskName[0],
 										new File( data.getTempDir( )
@@ -504,7 +400,7 @@ public class InstallBRDPro
 						// );
 						if ( file != null && file.exists( ) )
 						{
-							downloadMonitor( monitor,
+							monitorDownload( monitor,
 									downloadFlag,
 									subtaskName[0],
 									new File( data.getTempDir( )
@@ -530,7 +426,7 @@ public class InstallBRDPro
 						// );
 						if ( file != null && file.exists( ) )
 						{
-							downloadMonitor( monitor,
+							monitorDownload( monitor,
 									downloadFlag,
 									subtaskName[0],
 									new File( data.getTempDir( )
@@ -558,7 +454,7 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
-								downloadMonitor( monitor,
+								monitorDownload( monitor,
 										downloadFlag,
 										subtaskName[0],
 										new File( data.getTempDir( )
@@ -588,7 +484,7 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
-								downloadMonitor( monitor,
+								monitorDownload( monitor,
 										downloadFlag,
 										subtaskName[0],
 										new File( data.getTempDir( )
@@ -618,7 +514,7 @@ public class InstallBRDPro
 						{
 							if ( file != null && file.exists( ) )
 							{
-								downloadMonitor( monitor,
+								monitorDownload( monitor,
 										downloadFlag,
 										subtaskName[0],
 										new File( data.getTempDir( )
@@ -643,7 +539,7 @@ public class InstallBRDPro
 						File file = getPluginFile( pluginOutputDir, pattern );
 						if ( file != null && file.exists( ) )
 						{
-							downloadMonitor( monitor,
+							monitorDownload( monitor,
 									downloadFlag,
 									subtaskName[0],
 									new File( data.getTempDir( )
@@ -666,29 +562,11 @@ public class InstallBRDPro
 
 			flag[0] = true;
 			downloadFlag[0] = true;
-			
+
 			if ( !monitor.isCanceled( ) )
 			{
-				monitor.subTask( "[Step "
-						+ ++step[0]
-						+ "] Executing the user custom task..." );
-				stepDetail[0] = "Execute the user custom task";
-				File customFile = getAntFile( FileSystem.getCurrentDirectory( )
-						+ "\\custom\\BRDPro_Task.xml", false );
-
-				antProcess = Runtime.getRuntime( ).exec( new String[]{
-						System.getProperty( "java.home" ) + "/bin/java",
-						"-cp",
-						System.getProperty( "java.class.path" ),
-						AntTask.class.getName( ),
-						"\"" + customFile.getAbsolutePath( ) + "\"",
-						"custom"
-				} );
-
 				StringBuffer buffer = new StringBuffer( );
-				interruptCustomTaskErrorMessage( antProcess, buffer );
-
-				int result = antProcess.waitFor( );
+				int result = executeUserTask( monitor, step, stepDetail, buffer );
 				if ( result == -1 )
 				{
 					throw new Exception( buffer.toString( ) );
@@ -697,175 +575,344 @@ public class InstallBRDPro
 
 			if ( !monitor.isCanceled( ) )
 			{
-				monitor.subTask( "[Step "
-						+ ++step[0]
-						+ "] Cleaning the temporary files..." );
-				stepDetail[0] = "Clean the temporary files";
-				File cleanFile = getAntFile( "/templates/Clean.xml", true );
-				helper.parse( p, cleanFile );
-				p.executeTarget( "clean" );
-
-				Display.getDefault( ).syncExec( new Runnable( ) {
-
-					public void run( )
-					{
-						File eclipseFile = new File( data.getDirectory( ),
-								"\\eclipse\\eclipse.exe" );
-						String filePath = new File( eclipseFile.getParentFile( ),
-								"eclipse.lnk" ).getAbsolutePath( );
-						if ( eclipseFile.exists( ) )
-						{
-							ShellLink.createShortCut( eclipseFile.getAbsolutePath( ),
-									filePath );
-							ShellLink.setShortCutArguments( filePath,
-									data.getShortcutArguments( ) );
-							ShellLink.setShortCutDescription( filePath,
-									"Contributor:cchen@actuate.com" );
-							ShellLink.setShortCutWorkingDirectory( filePath,
-									eclipseFile.getParentFile( )
-											.getAbsolutePath( ) );
-
-							if ( !data.isNotCreateShortcut( ) )
-							{
-								try
-								{
-									File file = new File( ShellFolder.DESKTOP.getAbsolutePath( 0 )
-											+ File.separator
-											+ new File( data.getDirectory( ) ).getName( )
-											+ ".lnk" );
-									FileUtil.writeToBinarayFile( file,
-											new FileInputStream( filePath ),
-											true );
-								}
-								catch ( FileNotFoundException e )
-								{
-									LogUtil.recordErrorMsg( e, false );
-								}
-							}
-						}
-					}
-				} );
-
+				cleanTempFiles( monitor, p, helper, step, stepDetail );
+				createShortcut( );
 				p.fireBuildFinished( null );
-
-				monitorAntProcess = false;
-
-				monitor.subTask( "" );
-				monitor.setTaskName( "Finished installing the BRDPro Development Environment" );
-
-				Display.getDefault( ).syncExec( new Runnable( ) {
-
-					public void run( )
-					{
-						if ( UIUtil.getShell( ).getMinimized( ) )
-							Windows.flashWindow( UIUtil.getShell( ).handle,
-									true );
-						StringBuffer buffer = new StringBuffer( );
-						buffer.append( "Install the Actuate BRDPro Development Environment sucessfully." );
-
-						if ( failedList.size( ) > 0 )
-						{
-							buffer.append( "\n\nDetails:\n" );
-							for ( int i = 0; i < failedList.size( ); i++ )
-							{
-								buffer.append( ( i + 1 )
-										+ ". Install the "
-										+ failedList.get( i ).getValue( )
-										+ " "
-										+ failedList.get( i )
-												.getType( )
-												.getValue( )
-										+ " failed.\n" );
-							}
-						}
-
-						MessageDialog.openInformation( null,
-								"Information",
-								buffer.toString( ) );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
-						StringBuffer uninstallBuffer = new StringBuffer( );
-						if ( installBuffer != null
-								&& installBuffer.length( ) > 0 )
-						{
-							uninstallBuffer.append( "[BRDPro]\n" );
-							uninstallBuffer.append( installBuffer );
-
-						}
-						if ( sourceBuffer != null && sourceBuffer.length( ) > 0 )
-						{
-							uninstallBuffer.append( "[Source]\n" );
-							uninstallBuffer.append( sourceBuffer );
-						}
-						if ( linkBuffer != null && linkBuffer.length( ) > 0 )
-						{
-							uninstallBuffer.append( "[Link]\n" );
-							uninstallBuffer.append( linkBuffer );
-						}
-
-						FileUtil.writeToFile( new File( data.getDirectory( ),
-								"uninstall.data" ), uninstallBuffer.toString( )
-								.trim( ) );
-					}
-				} );
+				finishTask( monitor, failedList );
 			}
 			else
 			{
-				monitorAntProcess = false;
-
-				Display.getDefault( ).syncExec( new Runnable( ) {
-
-					public void run( )
-					{
-						MessageDialog.openInformation( null,
-								"Information",
-								"Canceled installing the BRDPro Development Environment." );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
-					}
-				} );
+				cancelTask( );
 			}
 		}
 		catch ( final Exception e )
 		{
 			p.fireBuildFinished( e );
-
-			monitorAntProcess = false;
-
 			if ( monitor.isCanceled( ) )
 			{
-				Display.getDefault( ).syncExec( new Runnable( ) {
-
-					public void run( )
-					{
-						MessageDialog.openInformation( null,
-								"Information",
-								"Canceled installing the BRDPro Development Environment." );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
-					}
-				} );
+				cancelTask( );
 			}
 			else
 			{
-				Display.getDefault( ).syncExec( new Runnable( ) {
+				handleTaskError( step, stepDetail, e );
+			}
+		}
+	}
 
-					public void run( )
+	private void handleTaskError( final int[] step, final String[] stepDetail,
+			final Exception e )
+	{
+		monitorAntProcess = false;
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				if ( UIUtil.getShell( ).getMinimized( ) )
+					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+				LogUtil.recordErrorMsg( "Step "
+						+ step[0]
+						+ ": "
+						+ stepDetail[0]
+						+ " failed.", e, true );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+			}
+		} );
+	}
+
+	private void cancelTask( )
+	{
+		monitorAntProcess = false;
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				MessageDialog.openInformation( null,
+						"Information",
+						"Canceled installing the BRDPro Development Environment." );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+			}
+		} );
+	}
+
+	private void finishTask( final IProgressMonitor monitor,
+			final List<Module> failedList )
+	{
+		monitorAntProcess = false;
+		monitor.subTask( "" );
+		monitor.setTaskName( "Finished installing the BRDPro Development Environment" );
+
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				if ( UIUtil.getShell( ).getMinimized( ) )
+					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+				StringBuffer buffer = new StringBuffer( );
+				buffer.append( "Install the Actuate BRDPro Development Environment sucessfully." );
+
+				if ( failedList.size( ) > 0 )
+				{
+					buffer.append( "\n\nDetails:\n" );
+					for ( int i = 0; i < failedList.size( ); i++ )
 					{
-						if ( UIUtil.getShell( ).getMinimized( ) )
-							Windows.flashWindow( UIUtil.getShell( ).handle,
-									true );
-						LogUtil.recordErrorMsg( "Step "
-								+ step[0]
-								+ ": "
-								+ stepDetail[0]
-								+ " failed.", e, true );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
+						buffer.append( ( i + 1 )
+								+ ". Install the "
+								+ failedList.get( i ).getValue( )
+								+ " "
+								+ failedList.get( i ).getType( ).getValue( )
+								+ " failed.\n" );
 					}
-				} );
+				}
+
+				MessageDialog.openInformation( null,
+						"Information",
+						buffer.toString( ) );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+				StringBuffer uninstallBuffer = new StringBuffer( );
+				if ( installBuffer != null && installBuffer.length( ) > 0 )
+				{
+					uninstallBuffer.append( "[BRDPro]\n" );
+					uninstallBuffer.append( installBuffer );
+
+				}
+				if ( sourceBuffer != null && sourceBuffer.length( ) > 0 )
+				{
+					uninstallBuffer.append( "[Source]\n" );
+					uninstallBuffer.append( sourceBuffer );
+				}
+				if ( linkBuffer != null && linkBuffer.length( ) > 0 )
+				{
+					uninstallBuffer.append( "[Link]\n" );
+					uninstallBuffer.append( linkBuffer );
+				}
+
+				FileUtil.writeToFile( new File( data.getDirectory( ),
+						"uninstall.data" ), uninstallBuffer.toString( ).trim( ) );
+			}
+		} );
+	}
+
+	private void createShortcut( )
+	{
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				File eclipseFile = new File( data.getDirectory( ),
+						"\\eclipse\\eclipse.exe" );
+				String filePath = new File( eclipseFile.getParentFile( ),
+						"eclipse.lnk" ).getAbsolutePath( );
+				if ( eclipseFile.exists( ) )
+				{
+					ShellLink.createShortCut( eclipseFile.getAbsolutePath( ),
+							filePath );
+					ShellLink.setShortCutArguments( filePath,
+							data.getShortcutArguments( ) );
+					ShellLink.setShortCutDescription( filePath,
+							"Contributor:cchen@actuate.com" );
+					ShellLink.setShortCutWorkingDirectory( filePath,
+							eclipseFile.getParentFile( ).getAbsolutePath( ) );
+
+					if ( !data.isNotCreateShortcut( ) )
+					{
+						try
+						{
+							File file = new File( ShellFolder.DESKTOP.getAbsolutePath( 0 )
+									+ File.separator
+									+ new File( data.getDirectory( ) ).getName( )
+									+ ".lnk" );
+							FileUtil.writeToBinarayFile( file,
+									new FileInputStream( filePath ),
+									true );
+						}
+						catch ( FileNotFoundException e )
+						{
+							LogUtil.recordErrorMsg( e, false );
+						}
+					}
+				}
+			}
+		} );
+	}
+
+	private void cleanTempFiles( final IProgressMonitor monitor, Project p,
+			ProjectHelper helper, final int[] step, final String[] stepDetail )
+	{
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Cleaning the temporary files..." );
+		stepDetail[0] = "Clean the temporary files";
+		File cleanFile = getAntFile( "/templates/Clean.xml", true );
+		helper.parse( p, cleanFile );
+		p.executeTarget( "clean" );
+	}
+
+	private int executeUserTask( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail,
+			StringBuffer errorMessage ) throws IOException,
+			InterruptedException
+	{
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Executing the user custom task..." );
+		stepDetail[0] = "Execute the user custom task";
+		File customFile = getAntFile( FileSystem.getCurrentDirectory( )
+				+ "\\custom\\BRDPro_Task.xml", false );
+
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + customFile.getAbsolutePath( ) + "\"",
+				"custom"
+		} );
+
+		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+
+		int result = antProcess.waitFor( );
+		return result;
+	}
+
+	private String[] installBRDPro( final IProgressMonitor monitor, Project p,
+			ProjectHelper helper, final DefaultLogger consoleLogger,
+			boolean[] flag, final int[] step, final String[] stepDetail )
+	{
+		String[] subtaskName;
+		subtaskName = new String[]{
+			"[Step "
+					+ ++step[0]
+					+ "] Extracting and installing the BRDPro archive file..."
+		};
+		monitor.subTask( subtaskName[0] );
+		stepDetail[0] = "Extract and install the BRDPro archive file";
+		File extractFile = getConfigFile( "/templates/brdpro.ini",
+				"/templates/Extract.xml",
+				"/links/comOda.link" );
+
+		helper.parse( p, extractFile );
+
+		interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
+
+		p.executeTarget( "extract_brdpro" );
+		return subtaskName;
+	}
+
+	private void downloadBRDPro( final IProgressMonitor monitor,
+			boolean[] downloadFlag, final int[] step, final String[] stepDetail )
+			throws IOException, InterruptedException
+	{
+		File brdproFile = new File( data.getBrdproFile( ) );
+		long fileLength = brdproFile.length( );
+		String defaultTaskName = "[Step "
+				+ ++step[0]
+				+ "] Downloading the BRDPro archive file...";
+
+		monitorDownload( monitor,
+				downloadFlag,
+				defaultTaskName,
+				new File( data.getTempDir( ) + "\\brdpro\\zip",
+						brdproFile.getName( ) ),
+				fileLength );
+
+		monitor.subTask( defaultTaskName
+				+ "\t[ Size: "
+				+ FileUtils.byteCountToDisplaySize( fileLength )
+				+ " ] " );
+		stepDetail[0] = "Download the BRDPro archive file";
+		File downloadFile = getAntFile( "/templates/Download.xml", true );
+
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + downloadFile.getAbsolutePath( ) + "\"",
+				"download"
+		} );
+		antProcess.waitFor( );
+		antProcess = null;
+
+		if ( !monitor.isCanceled( ) )
+		{
+			downloadFlag[0] = true;
+			checkBRDProVersion( monitor );
+		}
+	}
+
+	private void initTask( final IProgressMonitor monitor, final int[] step,
+			final String[] stepDetail ) throws IOException,
+			InterruptedException
+	{
+		data.setTempDir( data.getDirectory( )
+				+ "\\temp"
+				+ System.currentTimeMillis( ) );
+		// data.clearDirectory = true;
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Initializing the installation task..." );
+		stepDetail[0] = "Initialize the installation task";
+
+		File logFile = new File( data.getDirectory( ), "uninstall.data" );
+		boolean useAntClean = !logFile.exists( );
+		if ( !useAntClean )
+		{
+			cleanInstallFile( monitor );
+		}
+		File initFile = getAntFile( "/templates/Init.xml", useAntClean );
+
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + initFile.getAbsolutePath( ) + "\"",
+				"init"
+		} );
+		antProcess.waitFor( );
+		antProcess = null;
+	}
+
+	private void closeRelationalDirectory( )
+	{
+		if ( !data.isNotCloseBRDPro( ) && data.getDirectory( ) != null )
+		{
+			try
+			{
+				String path = new File( data.getDirectory( ) ).getCanonicalPath( );
+				ProcessEntry[] entrys = Kernel.getSystemProcessesSnap( );
+				if ( entrys != null )
+				{
+					for ( int i = 0; i < entrys.length; i++ )
+					{
+						ProcessEntry entry = entrys[i];
+						String entryPath = new File( entry.getExePath( ) ).getCanonicalPath( );
+						if ( entryPath.startsWith( path ) )
+						{
+							Kernel.killProcess( entry.getProcessId( ) );
+						}
+					}
+				}
+
+				int[] handles = Windows.enumWindows( );
+				for ( int i = 0; i < handles.length; i++ )
+				{
+					String name = Windows.getWindowText( handles[i] );
+					if ( name.startsWith( path ) )
+					{
+						Windows.forceCloseWindow( handles[i] );
+					}
+				}
+			}
+			catch ( IOException e1 )
+			{
 			}
 		}
 	}
 
 	private void startMonitorProcess( final IProgressMonitor monitor )
 	{
+		monitorAntProcess = true;
 		Thread thread = new Thread( "Monitor Process" ) {
 
 			public void run( )
@@ -1109,7 +1156,7 @@ public class InstallBRDPro
 	private void interruptCustomTaskErrorMessage( final Process process,
 			final StringBuffer buffer )
 	{
-		Thread errThread = new Thread( ) {
+		Thread errThread = new Thread( "Monitor Custom Task" ) {
 
 			public void run( )
 			{
@@ -1142,7 +1189,7 @@ public class InstallBRDPro
 			linkBuffer.append( current[0].getName( ) ).append( "\n" );
 		}
 
-		outputThread = new Thread( ) {
+		outputThread = new Thread( "Monitor Output") {
 
 			public void run( )
 			{
@@ -1225,11 +1272,11 @@ public class InstallBRDPro
 
 	}
 
-	private void downloadMonitor( final IProgressMonitor monitor,
+	private void monitorDownload( final IProgressMonitor monitor,
 			final boolean[] flag, final String defaultTaskName,
 			final File file, final long size )
 	{
-		downloadThread = new Thread( ) {
+		downloadThread = new Thread( "Monitor Download" ) {
 
 			public void run( )
 			{
