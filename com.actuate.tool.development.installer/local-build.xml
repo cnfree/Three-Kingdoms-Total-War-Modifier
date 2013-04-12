@@ -50,6 +50,12 @@
 		<copy todir="${build.temp}/custom">
 			<fileset dir="custom" />
 		</copy>
+		<copy todir="${build.temp}/ext">
+			<fileset dir="ext" />
+		</copy>
+		<copy todir="${build.temp}/conf">
+			<fileset dir="conf" />
+		</copy>
 	</target>
 
 
@@ -69,7 +75,7 @@
          - - - - - - - - - - - - - - - - - -->
 	<target name="dist-development-toolkit-jar" depends="prepare">
 		<mkdir dir="${build.temp}/classes" />
-		<javac srcdir="${build.temp}/src" destdir="${build.temp}/classes" source="1.5" target="1.5" debug="true" debuglevel="source,lines" encoding="utf-8">
+		<javac srcdir="${build.temp}/src" destdir="${build.temp}/classes" source="1.5" target="1.5" debug="true" debuglevel="source,lines,vars" encoding="utf-8">
 			<classpath>
 				<fileset dir="lib" includes="*.jar" />
 			</classpath>
@@ -99,12 +105,20 @@
 		<copy todir="${build.temp}/builder-zip/custom">
 			<fileset dir="${build.temp}/custom" />
 		</copy>
+		<copy todir="${build.temp}/builder-zip/ext">
+			<fileset dir="${build.temp}/ext" />
+		</copy>
+		<copy todir="${build.temp}/builder-zip/conf">
+			<fileset dir="${build.temp}/conf" />
+		</copy>
 		<copy tofile="${dist.dir}/com.actuate.development.toolkit.jar">
 			<fileset file="${dist.jar}" />
 		</copy>
 		<rename dest="${build.temp}/builder-zip/com.actuate.development.toolkit.jar" src="${dist.jar}" />
 		<zip destfile="${dist.zip}">
 			<fileset dir="${build.temp}/builder-zip" includes="**/*.*" />
+			<fileset dir="${build.temp}/builder-zip" includes="**/ext" />
+			<fileset dir="${build.temp}/builder-zip" includes="**/ext/resources" />
 		</zip>
 		<delete dir="${build.temp}/builder-zip" />
 	</target>
