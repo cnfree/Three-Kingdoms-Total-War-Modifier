@@ -46,7 +46,6 @@ import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.ModuleType;
 import com.actuate.development.tool.model.ModuleVersion;
 import com.actuate.development.tool.model.PathConfig;
-import com.actuate.development.tool.util.BRDProAntTask;
 import com.actuate.development.tool.util.FileSorter;
 import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
@@ -128,7 +127,7 @@ public class InstallBRDPro
 		sourceBuffer = new StringBuffer( );
 		linkBuffer = new StringBuffer( );
 		monitor.beginTask( "Total "
-				+ ( 4 + ( data.getModules( ) == null ? 0
+				+ ( 5 + ( data.getModules( ) == null ? 0
 						: data.getModules( ).length ) ) + " steps",
 				IProgressMonitor.UNKNOWN );
 		if ( !data.isNotCloseBRDPro( ) && data.getDirectory( ) != null )
@@ -212,7 +211,7 @@ public class InstallBRDPro
 						System.getProperty( "java.home" ) + "/bin/java",
 						"-cp",
 						System.getProperty( "java.class.path" ),
-						BRDProAntTask.class.getName( ),
+						AntTask.class.getName( ),
 						"\"" + initFile.getAbsolutePath( ) + "\"",
 						"init"
 				} );
@@ -246,7 +245,7 @@ public class InstallBRDPro
 						System.getProperty( "java.home" ) + "/bin/java",
 						"-cp",
 						System.getProperty( "java.class.path" ),
-						BRDProAntTask.class.getName( ),
+						AntTask.class.getName( ),
 						"\"" + downloadFile.getAbsolutePath( ) + "\"",
 						"download"
 				} );
@@ -665,6 +664,9 @@ public class InstallBRDPro
 				}
 			}
 
+			flag[0] = true;
+			downloadFlag[0] = true;
+			
 			if ( !monitor.isCanceled( ) )
 			{
 				monitor.subTask( "[Step "
@@ -678,7 +680,7 @@ public class InstallBRDPro
 						System.getProperty( "java.home" ) + "/bin/java",
 						"-cp",
 						System.getProperty( "java.class.path" ),
-						BRDProAntTask.class.getName( ),
+						AntTask.class.getName( ),
 						"\"" + customFile.getAbsolutePath( ) + "\"",
 						"custom"
 				} );
@@ -692,9 +694,6 @@ public class InstallBRDPro
 					throw new Exception( buffer.toString( ) );
 				}
 			}
-
-			flag[0] = true;
-			downloadFlag[0] = true;
 
 			if ( !monitor.isCanceled( ) )
 			{
@@ -1272,6 +1271,7 @@ public class InstallBRDPro
 				}
 			}
 		};
+		downloadThread.setDaemon( true );
 		downloadThread.start( );
 	}
 

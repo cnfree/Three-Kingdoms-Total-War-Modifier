@@ -1,5 +1,5 @@
 
-package com.actuate.development.tool.util;
+package com.actuate.development.tool.task;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +11,12 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
 
-public class BRDProAntTask
+import com.actuate.development.tool.util.ClassPathUpdater;
+
+public class AntTask
 {
 
-	public BRDProAntTask( String file, String target )
+	public AntTask( String file, String target )
 	{
 		try
 		{
@@ -50,6 +52,6 @@ public class BRDProAntTask
 		if ( args.length != 2 )
 			return;
 		ClassPathUpdater.loadClasspath( );
-		new BRDProAntTask( args[0], args[1] );
+		new AntTask( args[0], args[1] );
 	}
 }
