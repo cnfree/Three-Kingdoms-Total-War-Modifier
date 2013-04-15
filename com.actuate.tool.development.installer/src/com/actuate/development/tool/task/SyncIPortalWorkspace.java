@@ -52,6 +52,8 @@ public class SyncIPortalWorkspace
 
 	private IPortalViewerData data;
 	private Thread downloadThread;
+	private Process antProcess;
+	private boolean monitorAntProcess;
 
 	public SyncIPortalWorkspace( IPortalViewerData data )
 	{
@@ -62,6 +64,9 @@ public class SyncIPortalWorkspace
 	{
 		if ( data == null )
 			return;
+
+		startMonitorProcess( monitor );
+
 		int total = 11;
 		if ( data.isSkipSync( ) )
 		{
@@ -78,6 +83,28 @@ public class SyncIPortalWorkspace
 		final int[] step = new int[1];
 		final String[] stepDetail = new String[1];
 		final String[] originRoot = new String[1];
+
+		Project p = new Project( );
+		p.setBasedir( FileSystem.getCurrentDirectory( ) );
+		p.fireBuildStarted( );
+		p.init( );
+
+		ProjectHelper helper = ProjectHelper.getProjectHelper( );
+
+		final DefaultLogger consoleLogger = new DefaultLogger( );
+		consoleLogger.setErrorPrintStream( System.err );
+		consoleLogger.setOutputPrintStream( System.out );
+		consoleLogger.setMessageOutputLevel( Project.MSG_INFO );
+		p.addBuildListener( consoleLogger );
+
+		final boolean[] unzipFlag = new boolean[]{
+			false
+		};
+
+		boolean[] downloadFlag = new boolean[]{
+			false
+		};
+
 		try
 		{
 			if ( !data.isSkipSync( ) )
@@ -161,227 +188,410 @@ public class SyncIPortalWorkspace
 				}
 			}
 
-			Project p = new Project( );
-			p.setBasedir( FileSystem.getCurrentDirectory( ) );
-
-			final DefaultLogger consoleLogger = new DefaultLogger( );
-			consoleLogger.setErrorPrintStream( System.err );
-			consoleLogger.setOutputPrintStream( System.out );
-			consoleLogger.setMessageOutputLevel( Project.MSG_INFO );
-			p.addBuildListener( consoleLogger );
-
 			if ( !monitor.isCanceled( ) )
 			{
-				monitor.subTask( "[Step "
-						+ ++step[0]
-						+ "] Initializing the iPortal Viewer workspace replacement task..." );
-				stepDetail[0] = "Initialize the iPortal Viewer workspace replacement task";
-
-				File initFile = getAntFile( "/templates/Init_IV.xml" );
-				p.fireBuildStarted( );
-				p.init( );
-				ProjectHelper helper = ProjectHelper.getProjectHelper( );
-				helper.parse( p, initFile );
-				p.executeTarget( "init" );
-
-				final boolean[] flag = new boolean[]{
-					false
-				};
-
-				if ( !monitor.isCanceled( ) )
-				{
-					String defaultTaskName = "[Step "
-							+ ++step[0]
-							+ "] Downloading the iPortal Viewer archive file...";
-
-					boolean[] downloadFlag = new boolean[]{
-						false
-					};
-
-					File warFile = new File( data.getBirtViewerFile( ) );
-					long fileLength = warFile.length( );
-					downloadMonitor( monitor,
-							downloadFlag,
-							defaultTaskName,
-							new File( data.getRoot( ) + "\\temp",
-									warFile.getName( ) ),
-							fileLength,
-							step );
-
-					if ( !monitor.isCanceled( ) )
-					{
-						monitor.subTask( defaultTaskName
-								+ "\t[ Size: "
-								+ FileUtils.byteCountToDisplaySize( fileLength )
-								+ " ] " );
-						stepDetail[0] = "Download the iPortal Viewer archive file";
-						File downloadFile = getAntFile( "/templates/Download_IV.xml" );
-						helper.parse( p, downloadFile );
-						p.executeTarget( "download" );
-
-						downloadFlag[0] = true;
-					}
-
-					if ( !monitor.isCanceled( ) )
-					{
-						String[] subtaskName = new String[]{
-							"[Step "
-									+ ++step[0]
-									+ "] Extracting the iPortal Viewer archive file..."
-						};
-						monitor.subTask( subtaskName[0] );
-						stepDetail[0] = "Extract the iPortal Viewer archive file";
-						String extractXML = "/templates/Extract_IV.xml";
-						if ( !warFile.getName( )
-								.toLowerCase( )
-								.endsWith( ".zip" ) )
-							extractXML = "/templates/Extract_IV_II.xml";
-						File extractFile = getAntFile( extractXML );
-						helper.parse( p, extractFile );
-
-						interruptOutput( monitor,
-								step,
-								consoleLogger,
-								flag,
-								subtaskName );
-
-						p.executeTarget( "unzip_webviewer" );
-					}
-				}
-
-				flag[0] = true;
-
-				if ( !monitor.isCanceled( ) )
-				{
-					Thread.sleep( 100 );
-
-					monitor.subTask( "[Step "
-							+ ++step[0]
-							+ "] Replacing the iPortal Viewer workspace files..." );
-					stepDetail[0] = "Replace the iPortal Viewer workspace files";
-					File reaplceFile = getAntFile( "/templates/Replace_IV.xml" );
-					helper.parse( p, reaplceFile );
-					p.executeTarget( "replace" );
-				}
-
-				if ( !monitor.isCanceled( ) )
-				{
-					monitor.subTask( "[Step "
-							+ ++step[0]
-							+ "] Executing user custom task..." );
-					stepDetail[0] = "Execute user custom task";
-					File reaplceFile = new File( FileSystem.getCurrentDirectory( )
-							+ "/custom/IV_Task.xml" );
-					if ( reaplceFile.exists( ) )
-					{
-						helper.parse( p, reaplceFile );
-						p.executeTarget( "custom" );
-					}
-				}
-
-				if ( !monitor.isCanceled( ) )
-				{
-					monitor.subTask( "[Step "
-							+ ++step[0]
-							+ "] Updating the iPortal Viewer workspace class path..." );
-					stepDetail[0] = "Update the iPortal Viewer workspace class path";
-					File classPathFile = new File( data.getRoot( )
-							+ File.separatorChar
-							+ data.getView( ), ".classpath" );
-					if ( classPathFile.exists( ) )
-					{
-						updateClassPath( classPathFile );
-					}
-
-					if ( data.getCustomProjectName( ) != null
-							&& data.getCustomProjectName( ).trim( ).length( ) > 0 )
-					{
-						File projectFile = new File( data.getRoot( )
-								+ File.separatorChar
-								+ data.getView( ), ".project" );
-						if ( projectFile.exists( ) )
-						{
-							updateProjetName( projectFile,
-									data.getCustomProjectName( ).trim( ) );
-						}
-					}
-				}
-
-				if ( !monitor.isCanceled( ) )
-				{
-					monitor.subTask( "[Step "
-							+ ++step[0]
-							+ "] Cleaning the temporary files..." );
-					stepDetail[0] = "Clean the temporary files";
-					File cleanFile = getAntFile( "/templates/Clean_IV.xml" );
-					helper.parse( p, cleanFile );
-					p.executeTarget( "clean" );
-				}
-
-				p.fireBuildFinished( null );
+				initTask( monitor, step, stepDetail );
 			}
 
 			if ( !monitor.isCanceled( ) )
 			{
-				monitor.subTask( "" );
-				monitor.setTaskName( "Finished synchronizing the iPortal Viewer workspace" );
+				downloadIPortal( monitor, step, stepDetail, downloadFlag );
+			}
 
-				Display.getDefault( ).syncExec( new Runnable( ) {
+			if ( !monitor.isCanceled( ) )
+			{
+				unzipWebViewer( monitor,
+						step,
+						stepDetail,
+						p,
+						helper,
+						consoleLogger,
+						unzipFlag );
+			}
 
-					public void run( )
-					{
-						if ( UIUtil.getShell( ).getMinimized( ) )
-							Windows.flashWindow( UIUtil.getShell( ).handle,
-									true );
-						StringBuffer buffer = new StringBuffer( );
-						buffer.append( "Synchronize the iPortal Viewer workspace sucessfully." );
-						MessageDialog.openInformation( null,
-								"Information",
-								buffer.toString( ) );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
-					}
-				} );
+			unzipFlag[0] = true;
 
+			if ( !monitor.isCanceled( ) )
+			{
+				Thread.sleep( 300 );
+				replaceIProtal( monitor, step, stepDetail );
+			}
+
+			if ( !monitor.isCanceled( ) )
+			{
+				StringBuffer buffer = new StringBuffer( );
+				int result = executeUserTask( monitor, step, stepDetail, buffer );
+				if ( result == -1 )
+				{
+					throw new Exception( buffer.toString( ) );
+				}
+			}
+
+			if ( !monitor.isCanceled( ) )
+			{
+				updateClassPath( monitor, step, stepDetail );
+			}
+
+			if ( !monitor.isCanceled( ) )
+			{
+				cleanTempFiles( monitor, step, stepDetail );
+			}
+
+			p.fireBuildFinished( null );
+
+			if ( !monitor.isCanceled( ) )
+			{
+				finishTask( monitor );
 			}
 			else
 			{
-				Display.getDefault( ).syncExec( new Runnable( ) {
-
-					public void run( )
-					{
-						MessageDialog.openInformation( null,
-								"Information",
-								"Canceled synchronizing the iPortal Viewer workspace." );
-						Windows.flashWindow( UIUtil.getShell( ).handle, false );
-					}
-				} );
+				cancelTask( );
 			}
-
 		}
 		catch ( final Exception e )
 		{
+			p.fireBuildFinished( e );
+
 			if ( originRoot[0] != null )
 			{
 				updateClientSpecification( FileUtil.getTempFile( "specification.txt",
 						".txt" ),
 						originRoot[0] );
 			}
-			Display.getDefault( ).syncExec( new Runnable( ) {
+			if ( monitor.isCanceled( ) )
+			{
+				cancelTask( );
+			}
+			else
+			{
+				handleTaskError( step, stepDetail, e );
+			}
 
-				public void run( )
-				{
-					if ( UIUtil.getShell( ).getMinimized( ) )
-						Windows.flashWindow( UIUtil.getShell( ).handle, true );
-					LogUtil.recordErrorMsg( "Step "
-							+ step[0]
-							+ ": "
-							+ stepDetail[0]
-							+ " failed.", e, true );
-					Windows.flashWindow( UIUtil.getShell( ).handle, false );
-				}
-			} );
 		}
 
+	}
+
+	private void updateClassPath( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail ) throws IOException
+	{
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Updating the iPortal Viewer workspace class path..." );
+		stepDetail[0] = "Update the iPortal Viewer workspace class path";
+		File classPathFile = new File( data.getRoot( )
+				+ File.separatorChar
+				+ data.getView( ), ".classpath" );
+		if ( classPathFile.exists( ) )
+		{
+			updateClassPath( classPathFile );
+		}
+
+		if ( data.getCustomProjectName( ) != null
+				&& data.getCustomProjectName( ).trim( ).length( ) > 0 )
+		{
+			File projectFile = new File( data.getRoot( )
+					+ File.separatorChar
+					+ data.getView( ), ".project" );
+			if ( projectFile.exists( ) )
+			{
+				updateProjetName( projectFile, data.getCustomProjectName( )
+						.trim( ) );
+			}
+		}
+	}
+
+	private void replaceIProtal( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail ) throws IOException,
+			InterruptedException
+	{
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Replacing the iPortal Viewer workspace files..." );
+		stepDetail[0] = "Replace the iPortal Viewer workspace files";
+		File reaplceFile = getAntFile( "/templates/Replace_IV.xml" );
+
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + reaplceFile.getAbsolutePath( ) + "\"",
+				"replace"
+		} );
+		antProcess.waitFor( );
+		antProcess = null;
+	}
+
+	private void unzipWebViewer( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail, Project p,
+			ProjectHelper helper, final DefaultLogger consoleLogger,
+			final boolean[] flag )
+	{
+		String[] subtaskName = new String[]{
+			"[Step "
+					+ ++step[0]
+					+ "] Extracting the iPortal Viewer archive file..."
+		};
+		monitor.subTask( subtaskName[0] );
+		stepDetail[0] = "Extract the iPortal Viewer archive file";
+		String extractXML = "/templates/Extract_IV.xml";
+		File warFile = new File( data.getBirtViewerFile( ) );
+		if ( !warFile.getName( ).toLowerCase( ).endsWith( ".zip" ) )
+			extractXML = "/templates/Extract_IV_II.xml";
+		File extractFile = getAntFile( extractXML );
+		helper.parse( p, extractFile );
+
+		interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
+
+		p.executeTarget( "unzip_webviewer" );
+	}
+
+	private void downloadIPortal( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail, boolean[] downloadFlag )
+			throws IOException, InterruptedException
+	{
+		String defaultTaskName = "[Step "
+				+ ++step[0]
+				+ "] Downloading the iPortal Viewer archive file...";
+
+		File warFile = new File( data.getBirtViewerFile( ) );
+		long fileLength = warFile.length( );
+		downloadMonitor( monitor,
+				downloadFlag,
+				defaultTaskName,
+				new File( data.getRoot( ) + "\\temp", warFile.getName( ) ),
+				fileLength,
+				step );
+
+		monitor.subTask( defaultTaskName
+				+ "\t[ Size: "
+				+ FileUtils.byteCountToDisplaySize( fileLength )
+				+ " ] " );
+		stepDetail[0] = "Download the iPortal Viewer archive file";
+		File downloadFile = getAntFile( "/templates/Download_IV.xml" );
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + downloadFile.getAbsolutePath( ) + "\"",
+				"download"
+		} );
+		antProcess.waitFor( );
+		antProcess = null;
+
+		downloadFlag[0] = true;
+	}
+
+	private void initTask( final IProgressMonitor monitor, final int[] step,
+			final String[] stepDetail ) throws IOException,
+			InterruptedException
+	{
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Initializing the iPortal Viewer workspace replacement task..." );
+		stepDetail[0] = "Initialize the iPortal Viewer workspace replacement task";
+
+		File initFile = getAntFile( "/templates/Init_IV.xml" );
+
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + initFile.getAbsolutePath( ) + "\"",
+				"init"
+		} );
+		antProcess.waitFor( );
+		antProcess = null;
+	}
+
+	private void handleTaskError( final int[] step, final String[] stepDetail,
+			final Exception e )
+	{
+		monitorAntProcess = false;
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				if ( UIUtil.getShell( ).getMinimized( ) )
+					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+				LogUtil.recordErrorMsg( "Step "
+						+ step[0]
+						+ ": "
+						+ stepDetail[0]
+						+ " failed.", e, true );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+			}
+		} );
+	}
+
+	private void cancelTask( )
+	{
+		monitorAntProcess = false;
+
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				MessageDialog.openInformation( null,
+						"Information",
+						"Canceled synchronizing the iPortal Viewer workspace." );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+			}
+		} );
+	}
+
+	private void finishTask( final IProgressMonitor monitor )
+	{
+		monitor.subTask( "" );
+		monitor.setTaskName( "Finished synchronizing the iPortal Viewer workspace" );
+
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				if ( UIUtil.getShell( ).getMinimized( ) )
+					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+				StringBuffer buffer = new StringBuffer( );
+				buffer.append( "Synchronize the iPortal Viewer workspace sucessfully." );
+				MessageDialog.openInformation( null,
+						"Information",
+						buffer.toString( ) );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+			}
+		} );
+	}
+
+	private void cleanTempFiles( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail ) throws IOException,
+			InterruptedException
+	{
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Cleaning the temporary files..." );
+		stepDetail[0] = "Clean the temporary files";
+		File cleanFile = getAntFile( "/templates/Clean_IV.xml" );
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + cleanFile.getAbsolutePath( ) + "\"",
+				"clean"
+		} );
+		antProcess.waitFor( );
+		antProcess = null;
+	}
+
+	private int executeUserTask( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail,
+			StringBuffer errorMessage ) throws IOException,
+			InterruptedException
+	{
+		monitor.subTask( "[Step "
+				+ ++step[0]
+				+ "] Executing the user custom task..." );
+		stepDetail[0] = "Execute the user custom task";
+		File customFile = getAntFile( FileSystem.getCurrentDirectory( )
+				+ "\\custom\\IV_Task.xml" );
+
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + customFile.getAbsolutePath( ) + "\"",
+				"custom"
+		} );
+
+		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+
+		int result = antProcess.waitFor( );
+		antProcess = null;
+		return result;
+	}
+
+	private void interruptCustomTaskErrorMessage( final Process process,
+			final StringBuffer buffer )
+	{
+		Thread errThread = new Thread( "Monitor Custom Task" ) {
+
+			public void run( )
+			{
+				try
+				{
+					BufferedReader input = new BufferedReader( new InputStreamReader( process.getErrorStream( ) ) );
+					String line;
+					while ( ( line = input.readLine( ) ) != null )
+					{
+						buffer.append( line ).append( "\r\n" );
+					}
+					input.close( );
+				}
+				catch ( Exception e )
+				{
+				}
+			}
+		};
+		errThread.setDaemon( true );
+		errThread.start( );
+	}
+
+	private void startMonitorProcess( final IProgressMonitor monitor )
+	{
+		monitorAntProcess = true;
+		Thread thread = new Thread( "Monitor Process" ) {
+
+			public void run( )
+			{
+				while ( monitorAntProcess )
+				{
+					if ( monitor.isCanceled( ) )
+					{
+						if ( antProcess != null )
+						{
+							antProcess.destroy( );
+						}
+
+						try
+						{
+							String path = new File( FileSystem.getCurrentDirectory( ) ).getCanonicalPath( );
+							ProcessEntry[] entrys = Kernel.getSystemProcessesSnap( );
+							if ( entrys != null )
+							{
+								for ( int i = 0; i < entrys.length; i++ )
+								{
+									ProcessEntry entry = entrys[i];
+									if ( entry.getProcessName( )
+											.toLowerCase( )
+											.startsWith( "7z" ) )
+									{
+										String entryPath = new File( entry.getExePath( ) ).getCanonicalPath( );
+										if ( entryPath.startsWith( path ) )
+										{
+											Kernel.killProcess( entry.getProcessId( ) );
+										}
+									}
+								}
+							}
+						}
+						catch ( IOException e )
+						{
+						}
+					}
+					try
+					{
+						Thread.sleep( 100 );
+					}
+					catch ( InterruptedException e )
+					{
+					}
+				}
+			}
+		};
+		thread.setDaemon( true );
+		thread.start( );
 	}
 
 	private void updateProjetName( File projectFile, String projectName )
@@ -487,7 +697,7 @@ public class SyncIPortalWorkspace
 			final boolean[] flag, final String[] defaultTaskName )
 	{
 
-		Thread outputThread = new Thread( ) {
+		Thread outputThread = new Thread( "Monitor Output" ) {
 
 			public void run( )
 			{
@@ -537,9 +747,30 @@ public class SyncIPortalWorkspace
 
 	private File getAntFile( String fileName )
 	{
-		File templateFile = FileUtil.getTempFile( fileName );
-		FileUtil.writeToBinarayFile( templateFile, this.getClass( )
-				.getResourceAsStream( fileName ), true );
+		File templateFile = null;
+		File xmlFile = new File( fileName );
+		if ( xmlFile.exists( ) )
+		{
+			try
+			{
+				templateFile = FileUtil.getTempFile( xmlFile.getName( ) );
+				FileInputStream fis = new FileInputStream( fileName );
+				FileUtil.writeToBinarayFile( templateFile, fis, true );
+				fis.close( );
+				fileName = xmlFile.getName( );
+			}
+			catch ( IOException e )
+			{
+				Logger.getLogger( this.getClass( ).getName( ) )
+						.log( Level.WARNING, "Read file failed.", e );
+			}
+		}
+		else
+		{
+			templateFile = FileUtil.getTempFile( fileName );
+			FileUtil.writeToBinarayFile( templateFile, this.getClass( )
+					.getResourceAsStream( fileName ), true );
+		}
 
 		VelocityEngine velocityEngine = new VelocityEngine( );
 		velocityEngine.setProperty( VelocityEngine.FILE_RESOURCE_LOADER_PATH,
@@ -549,6 +780,18 @@ public class SyncIPortalWorkspace
 		velocityEngine.init( );
 
 		VelocityContext context = new VelocityContext( );
+		setVolocitryContext( context );
+		Template template = velocityEngine.getTemplate( templateFile.getName( ) );
+		StringWriter sw = new StringWriter( );
+		template.merge( context, sw );
+		File tempFile = FileUtil.getTempFile( fileName );
+		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
+
+		return tempFile;
+	}
+
+	private void setVolocitryContext( VelocityContext context )
+	{
 		context.put( "p4Root", data.getRoot( ) );
 		context.put( "p4View", data.getView( ) );
 		File file = new File( data.getBirtViewerFile( ) );
@@ -563,13 +806,6 @@ public class SyncIPortalWorkspace
 		context.put( "replacePath", file.getParentFile( ).getAbsolutePath( ) );
 		context.put( "replaceFile", file.getName( ) );
 		context.put( "runtime", FileSystem.getCurrentDirectory( ) );
-		Template template = velocityEngine.getTemplate( templateFile.getName( ) );
-		StringWriter sw = new StringWriter( );
-		template.merge( context, sw );
-		File tempFile = FileUtil.getTempFile( fileName );
-		FileUtil.writeToFile( tempFile, sw.toString( ).trim( ) );
-
-		return tempFile;
 	}
 
 	private void synciPortal( final IProgressMonitor monitor, final int[] step )
@@ -601,7 +837,7 @@ public class SyncIPortalWorkspace
 													: "" ) )
 					} );
 
-			Thread errThread = new Thread( ) {
+			Thread errThread = new Thread( "Monitor Error Stream" ) {
 
 				public void run( )
 				{
@@ -639,7 +875,7 @@ public class SyncIPortalWorkspace
 			errThread.setDaemon( true );
 			errThread.start( );
 
-			Thread inThread = new Thread( ) {
+			Thread inThread = new Thread( "Monitor Input Stream" ) {
 
 				public void run( )
 				{
@@ -677,7 +913,7 @@ public class SyncIPortalWorkspace
 				false
 			};
 
-			Thread cancelThread = new Thread( ) {
+			Thread cancelThread = new Thread( "Monitor P4 Process" ) {
 
 				public void run( )
 				{
@@ -693,7 +929,8 @@ public class SyncIPortalWorkspace
 								for ( int i = 0; i < entrys.length; i++ )
 								{
 									ProcessEntry entry = entrys[i];
-									if ( entry.getProcessName( ).equalsIgnoreCase( "p4.exe" ) )
+									if ( entry.getProcessName( )
+											.equalsIgnoreCase( "p4.exe" ) )
 									{
 										Kernel.killProcess( entry.getProcessId( ) );
 									}
@@ -771,7 +1008,7 @@ public class SyncIPortalWorkspace
 									+ "/..."
 					} );
 
-			Thread errThread = new Thread( ) {
+			Thread errThread = new Thread( "Monitor Error Stream" ) {
 
 				public void run( )
 				{
@@ -809,7 +1046,7 @@ public class SyncIPortalWorkspace
 			errThread.setDaemon( true );
 			errThread.start( );
 
-			Thread inThread = new Thread( ) {
+			Thread inThread = new Thread( "Monitor Input Stream" ) {
 
 				public void run( )
 				{
@@ -912,7 +1149,7 @@ public class SyncIPortalWorkspace
 											+ "\""
 							} );
 
-					Thread thread = new Thread( ) {
+					Thread thread = new Thread( "Monitor Error Stream" ) {
 
 						public void run( )
 						{
@@ -988,7 +1225,7 @@ public class SyncIPortalWorkspace
 														+ "\""
 										} );
 
-								thread = new Thread( ) {
+								thread = new Thread( "Monitor Error Stream" ) {
 
 									public void run( )
 									{
@@ -1072,7 +1309,7 @@ public class SyncIPortalWorkspace
 					+ " clients -u "
 					+ data.getUser( ) );
 
-			Thread thread = new Thread( ) {
+			Thread thread = new Thread( "Monitor Error Stream" ) {
 
 				public void run( )
 				{
@@ -1146,7 +1383,7 @@ public class SyncIPortalWorkspace
 			final boolean[] flag, final String defaultTaskName,
 			final File file, final long size, final int[] step )
 	{
-		downloadThread = new Thread( ) {
+		downloadThread = new Thread( "Monitor Download" ) {
 
 			public void run( )
 			{

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Actuate iPortal Viewer Development Environment Build Custom Task">
-	
-	<!-- 
+<project
+	name="Actuate iPortal Viewer Development Environment Build Custom Task">
+
+	<target name="init">
 		<property name="p4.root" value="$p4Root" />
 		<property name="p4.view" value="$p4View" />
 		<property name="ActuateBIRTJavaComponent.dir" value="WL_TOMCAT_ActuateBIRTJavaComponent" />
@@ -12,10 +13,10 @@
 		<property name="p4.replace.file" value="$replaceFile" />
 		<property name="runtime" value="$runtime" />
 		<property name="p4.temp" value="${p4.root}/temp" />
-	 -->
-	
-	<target name="custom">
-	
 	</target>
-	
+
+	<target name="custom" depends="init">
+
+	</target>
+
 </project>

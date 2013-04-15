@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Extract">
 
-	<!--
-         - - - - - - - - - - - - - - - - - 
-	          target: unzip_webviewer                      
-	         - - - - - - - - - - - - - - - - -
-    -->
+	<target name="init">
+		<property name="p4.root" value="$p4Root" />
+		<property name="p4.view" value="$p4View" />
+		<property name="ActuateBIRTJavaComponent.dir" value="WL_TOMCAT_ActuateBIRTJavaComponent" />
+		<property name="ActuateBIRTJavaComponent.file" value="$warFile" />
+		<property name="build.path" value="$buildPath" />
+		<property name="build.file" value="$buildFile" />
+		<property name="p4.replace.path" value="$replacePath" />
+		<property name="p4.replace.file" value="$replaceFile" />
+		<property name="runtime" value="$runtime" />
+		<property name="p4.temp" value="${p4.root}/temp" />
+	</target>
 
-	<target name="unzip_webviewer">
-		<mkdir dir="${p4.temp}/ActuateBirtViewer"/>
+	<target name="unzip_webviewer" depends="init">
+		<mkdir dir="${p4.temp}/ActuateBirtViewer" />
 		<exec dir="tool" executable="${runtime}\tool\7z.exe" failonerror="true">
 			<arg line="x &quot;${p4.temp}/${ActuateBIRTJavaComponent.file}&quot; -o&quot;${p4.temp}/ActuateBirtViewer/${ActuateBIRTJavaComponent.dir}&quot; -aoa" />
 		</exec>

@@ -144,7 +144,7 @@ public class InstallBRDPro
 		boolean[] downloadFlag = new boolean[]{
 			false
 		};
-		boolean[] flag = new boolean[]{
+		boolean[] unzipFlag = new boolean[]{
 			false
 		};
 		String[] subtaskName = new String[1];
@@ -170,16 +170,16 @@ public class InstallBRDPro
 
 			if ( !monitor.isCanceled( ) )
 			{
-				subtaskName = installBRDPro( monitor,
+				installBRDPro( monitor,
 						p,
 						helper,
 						consoleLogger,
-						flag,
+						unzipFlag,
 						step,
 						stepDetail );
 			}
 
-			flag[0] = true;
+			unzipFlag[0] = true;
 
 			final List<Module> failedList = new ArrayList<Module>( );
 
@@ -200,7 +200,7 @@ public class InstallBRDPro
 
 				for ( Module module : data.getModules( ) )
 				{
-					flag = new boolean[]{
+					unzipFlag = new boolean[]{
 						false
 					};
 					downloadFlag = new boolean[]{
@@ -250,7 +250,7 @@ public class InstallBRDPro
 									step,
 									consoleLogger,
 									subtaskName,
-									flag,
+									unzipFlag,
 									file );
 							handleEclipseSDK( p, helper, file );
 							continue;
@@ -283,7 +283,7 @@ public class InstallBRDPro
 										step,
 										consoleLogger,
 										subtaskName,
-										flag,
+										unzipFlag,
 										file );
 								handleGEFSDK( p, helper, file );
 								continue;
@@ -317,7 +317,7 @@ public class InstallBRDPro
 										step,
 										consoleLogger,
 										subtaskName,
-										flag,
+										unzipFlag,
 										file );
 								handleEMFSDK( p, helper, file );
 								continue;
@@ -352,7 +352,7 @@ public class InstallBRDPro
 										step,
 										consoleLogger,
 										subtaskName,
-										flag,
+										unzipFlag,
 										file );
 								handleWTPSDK( p, helper, file );
 								continue;
@@ -384,7 +384,7 @@ public class InstallBRDPro
 										step,
 										consoleLogger,
 										subtaskName,
-										flag,
+										unzipFlag,
 										file );
 								handleDTPSDK( p, helper, file );
 								continue;
@@ -411,7 +411,7 @@ public class InstallBRDPro
 									step,
 									consoleLogger,
 									subtaskName,
-									flag,
+									unzipFlag,
 									file );
 							handlePlugin( p, helper, file, Module.perforce );
 							continue;
@@ -437,7 +437,7 @@ public class InstallBRDPro
 									step,
 									consoleLogger,
 									subtaskName,
-									flag,
+									unzipFlag,
 									file );
 							handlePlugin( p, helper, file, Module.git );
 							continue;
@@ -466,7 +466,7 @@ public class InstallBRDPro
 										step,
 										consoleLogger,
 										subtaskName,
-										flag,
+										unzipFlag,
 										file );
 								handlePlugin( p, helper, file, Module.emfsdk );
 								continue;
@@ -496,7 +496,7 @@ public class InstallBRDPro
 										step,
 										consoleLogger,
 										subtaskName,
-										flag,
+										unzipFlag,
 										file );
 								handlePlugin( p, helper, file, Module.gefsdk );
 								continue;
@@ -526,7 +526,7 @@ public class InstallBRDPro
 										step,
 										consoleLogger,
 										subtaskName,
-										flag,
+										unzipFlag,
 										file );
 								handlePlugin( p, helper, file, Module.wtpsdk );
 								continue;
@@ -550,7 +550,7 @@ public class InstallBRDPro
 									step,
 									consoleLogger,
 									subtaskName,
-									flag,
+									unzipFlag,
 									file );
 							handlePlugin( p, helper, file, module );
 							continue;
@@ -560,7 +560,7 @@ public class InstallBRDPro
 				}
 			}
 
-			flag[0] = true;
+			unzipFlag[0] = true;
 			downloadFlag[0] = true;
 
 			if ( !monitor.isCanceled( ) )
@@ -575,9 +575,14 @@ public class InstallBRDPro
 
 			if ( !monitor.isCanceled( ) )
 			{
-				cleanTempFiles( monitor, p, helper, step, stepDetail );
+				cleanTempFiles( monitor, step, stepDetail );
+			}
+
+			p.fireBuildFinished( null );
+
+			if ( !monitor.isCanceled( ) )
+			{
 				createShortcut( );
-				p.fireBuildFinished( null );
 				finishTask( monitor, failedList );
 			}
 			else
@@ -735,16 +740,26 @@ public class InstallBRDPro
 		} );
 	}
 
-	private void cleanTempFiles( final IProgressMonitor monitor, Project p,
-			ProjectHelper helper, final int[] step, final String[] stepDetail )
+	private void cleanTempFiles( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail ) throws IOException,
+			InterruptedException
 	{
 		monitor.subTask( "[Step "
 				+ ++step[0]
 				+ "] Cleaning the temporary files..." );
 		stepDetail[0] = "Clean the temporary files";
 		File cleanFile = getAntFile( "/templates/Clean.xml", true );
-		helper.parse( p, cleanFile );
-		p.executeTarget( "clean" );
+
+		antProcess = Runtime.getRuntime( ).exec( new String[]{
+				System.getProperty( "java.home" ) + "/bin/java",
+				"-cp",
+				System.getProperty( "java.class.path" ),
+				AntTask.class.getName( ),
+				"\"" + cleanFile.getAbsolutePath( ) + "\"",
+				"custom"
+		} );
+		antProcess.waitFor( );
+		antProcess = null;
 	}
 
 	private int executeUserTask( final IProgressMonitor monitor,
@@ -771,15 +786,15 @@ public class InstallBRDPro
 		interruptCustomTaskErrorMessage( antProcess, errorMessage );
 
 		int result = antProcess.waitFor( );
+		antProcess = null;
 		return result;
 	}
 
-	private String[] installBRDPro( final IProgressMonitor monitor, Project p,
+	private void installBRDPro( final IProgressMonitor monitor, Project p,
 			ProjectHelper helper, final DefaultLogger consoleLogger,
 			boolean[] flag, final int[] step, final String[] stepDetail )
 	{
-		String[] subtaskName;
-		subtaskName = new String[]{
+		String[] subtaskName = new String[]{
 			"[Step "
 					+ ++step[0]
 					+ "] Extracting and installing the BRDPro archive file..."
@@ -794,8 +809,6 @@ public class InstallBRDPro
 
 		interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
 
-		p.executeTarget( "extract_brdpro" );
-		return subtaskName;
 	}
 
 	private void downloadBRDPro( final IProgressMonitor monitor,
@@ -1189,7 +1202,7 @@ public class InstallBRDPro
 			linkBuffer.append( current[0].getName( ) ).append( "\n" );
 		}
 
-		outputThread = new Thread( "Monitor Output") {
+		outputThread = new Thread( "Monitor Output" ) {
 
 			public void run( )
 			{
