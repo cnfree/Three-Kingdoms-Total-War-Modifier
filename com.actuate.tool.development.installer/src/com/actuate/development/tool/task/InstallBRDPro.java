@@ -199,18 +199,26 @@ public class InstallBRDPro
 						step,
 						stepDetail );
 			}
-
 			unzipFlag[0] = true;
 
 			if ( !monitor.isCanceled( ) )
 			{
+				unzipFlag[0] = false;
 				StringBuffer buffer = new StringBuffer( );
-				int result = installBRDPro( monitor, step, stepDetail, buffer );
+				int result = installBRDPro( monitor,
+						p,
+						helper,
+						consoleLogger,
+						unzipFlag,
+						step,
+						stepDetail,
+						buffer );
 				if ( result == -1 )
 				{
 					throw new Exception( buffer.toString( ) );
 				}
 			}
+			unzipFlag[0] = true;
 
 			final List<Module> failedList = new ArrayList<Module>( );
 
@@ -796,7 +804,7 @@ public class InstallBRDPro
 				"clean"
 		} );
 
-		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
 
 		int result = antProcess.waitFor( );
 		antProcess = null;
@@ -833,7 +841,7 @@ public class InstallBRDPro
 				"custom"
 		} );
 
-		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
 
 		int result = antProcess.waitFor( );
 		antProcess = null;
@@ -855,8 +863,9 @@ public class InstallBRDPro
 		p.executeTarget( "unzip_brdpro" );
 	}
 
-	private int installBRDPro( final IProgressMonitor monitor,
-			final int[] step, final String[] stepDetail,
+	private int installBRDPro( final IProgressMonitor monitor, Project p,
+			ProjectHelper helper, final DefaultLogger consoleLogger,
+			boolean[] flag, final int[] step, final String[] stepDetail,
 			StringBuffer errorMessage ) throws IOException,
 			InterruptedException
 	{
@@ -870,19 +879,30 @@ public class InstallBRDPro
 				"/templates/Install.xml",
 				"/links/comOda.link" );
 
-		antProcess = Runtime.getRuntime( ).exec( new String[]{
-				System.getProperty( "java.home" ) + "/bin/java",
-				"-cp",
-				System.getProperty( "java.class.path" ),
-				AntTask.class.getName( ),
-				"\"" + installFile.getAbsolutePath( ) + "\"",
-				"extract_brdpro"
-		} );
-		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+		if ( data.isInstallShield( ) )
+		{
+			Thread.sleep( 300 );
+			helper.parse( p, installFile );
+			interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
+			p.executeTarget( "extract_brdpro" );
+			return 0;
+		}
+		else
+		{
+			antProcess = Runtime.getRuntime( ).exec( new String[]{
+					System.getProperty( "java.home" ) + "/bin/java",
+					"-cp",
+					System.getProperty( "java.class.path" ),
+					AntTask.class.getName( ),
+					"\"" + installFile.getAbsolutePath( ) + "\"",
+					"extract_brdpro"
+			} );
+			interruptAntTaskErrorMessage( antProcess, errorMessage );
 
-		int result = antProcess.waitFor( );
-		antProcess = null;
-		return result;
+			int result = antProcess.waitFor( );
+			antProcess = null;
+			return result;
+		}
 	}
 
 	private int downloadBRDPro( final IProgressMonitor monitor,
@@ -918,7 +938,7 @@ public class InstallBRDPro
 				"\"" + downloadFile.getAbsolutePath( ) + "\"",
 				"download"
 		} );
-		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
 
 		int result = antProcess.waitFor( );
 		antProcess = null;
@@ -955,7 +975,7 @@ public class InstallBRDPro
 				"\"" + initFile.getAbsolutePath( ) + "\"",
 				"init"
 		} );
-		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
 
 		int result = antProcess.waitFor( );
 		antProcess = null;
@@ -1242,10 +1262,10 @@ public class InstallBRDPro
 		monitor.subTask( subtaskName[0] );
 	}
 
-	private void interruptCustomTaskErrorMessage( final Process process,
+	private void interruptAntTaskErrorMessage( final Process process,
 			final StringBuffer buffer )
 	{
-		Thread errThread = new Thread( "Monitor Custom Task" ) {
+		Thread errThread = new Thread( "Monitor Ant Task" ) {
 
 			public void run( )
 			{
