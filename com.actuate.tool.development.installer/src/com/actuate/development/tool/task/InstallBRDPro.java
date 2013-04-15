@@ -177,6 +177,8 @@ public class InstallBRDPro
 						stepDetail,
 						buffer );
 
+				downloadFlag[0] = true;
+
 				if ( result == -1 )
 				{
 					throw new Exception( buffer.toString( ) );
@@ -184,7 +186,6 @@ public class InstallBRDPro
 
 				if ( !monitor.isCanceled( ) )
 				{
-					downloadFlag[0] = true;
 					checkBRDProVersion( monitor );
 				}
 			}

@@ -190,12 +190,29 @@ public class SyncIPortalWorkspace
 
 			if ( !monitor.isCanceled( ) )
 			{
-				initTask( monitor, step, stepDetail );
+				StringBuffer buffer = new StringBuffer( );
+				int result = initTask( monitor, step, stepDetail, buffer );
+				if ( result == -1 )
+				{
+					throw new Exception( buffer.toString( ) );
+				}
 			}
 
 			if ( !monitor.isCanceled( ) )
 			{
-				downloadIPortal( monitor, step, stepDetail, downloadFlag );
+				StringBuffer buffer = new StringBuffer( );
+				int result = downloadIPortal( monitor,
+						step,
+						stepDetail,
+						downloadFlag,
+						buffer );
+
+				downloadFlag[0] = true;
+
+				if ( result == -1 )
+				{
+					throw new Exception( buffer.toString( ) );
+				}
 			}
 
 			if ( !monitor.isCanceled( ) )
@@ -214,7 +231,12 @@ public class SyncIPortalWorkspace
 			if ( !monitor.isCanceled( ) )
 			{
 				Thread.sleep( 300 );
-				replaceIProtal( monitor, step, stepDetail );
+				StringBuffer buffer = new StringBuffer( );
+				int result = replaceIProtal( monitor, step, stepDetail, buffer );
+				if ( result == -1 )
+				{
+					throw new Exception( buffer.toString( ) );
+				}
 			}
 
 			if ( !monitor.isCanceled( ) )
@@ -234,7 +256,12 @@ public class SyncIPortalWorkspace
 
 			if ( !monitor.isCanceled( ) )
 			{
-				cleanTempFiles( monitor, step, stepDetail );
+				StringBuffer buffer = new StringBuffer( );
+				int result = cleanTempFiles( monitor, step, stepDetail, buffer );
+				if ( result == -1 )
+				{
+					throw new Exception( buffer.toString( ) );
+				}
 			}
 
 			p.fireBuildFinished( null );
@@ -300,8 +327,9 @@ public class SyncIPortalWorkspace
 		}
 	}
 
-	private void replaceIProtal( final IProgressMonitor monitor,
-			final int[] step, final String[] stepDetail ) throws IOException,
+	private int replaceIProtal( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail,
+			StringBuffer errorMessage ) throws IOException,
 			InterruptedException
 	{
 		monitor.subTask( "[Step "
@@ -318,8 +346,11 @@ public class SyncIPortalWorkspace
 				"\"" + reaplceFile.getAbsolutePath( ) + "\"",
 				"replace"
 		} );
-		antProcess.waitFor( );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
+
+		int result = antProcess.waitFor( );
 		antProcess = null;
+		return result;
 	}
 
 	private void unzipWebViewer( final IProgressMonitor monitor,
@@ -346,8 +377,9 @@ public class SyncIPortalWorkspace
 		p.executeTarget( "unzip_webviewer" );
 	}
 
-	private void downloadIPortal( final IProgressMonitor monitor,
-			final int[] step, final String[] stepDetail, boolean[] downloadFlag )
+	private int downloadIPortal( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail,
+			boolean[] downloadFlag, StringBuffer errorMessage )
 			throws IOException, InterruptedException
 	{
 		String defaultTaskName = "[Step "
@@ -377,15 +409,16 @@ public class SyncIPortalWorkspace
 				"\"" + downloadFile.getAbsolutePath( ) + "\"",
 				"download"
 		} );
-		antProcess.waitFor( );
-		antProcess = null;
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
 
-		downloadFlag[0] = true;
+		int result = antProcess.waitFor( );
+		antProcess = null;
+		return result;
 	}
 
-	private void initTask( final IProgressMonitor monitor, final int[] step,
-			final String[] stepDetail ) throws IOException,
-			InterruptedException
+	private int initTask( final IProgressMonitor monitor, final int[] step,
+			final String[] stepDetail, StringBuffer errorMessage )
+			throws IOException, InterruptedException
 	{
 		monitor.subTask( "[Step "
 				+ ++step[0]
@@ -402,8 +435,11 @@ public class SyncIPortalWorkspace
 				"\"" + initFile.getAbsolutePath( ) + "\"",
 				"init"
 		} );
-		antProcess.waitFor( );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
+
+		int result = antProcess.waitFor( );
 		antProcess = null;
+		return result;
 	}
 
 	private void handleTaskError( final int[] step, final String[] stepDetail,
@@ -463,8 +499,9 @@ public class SyncIPortalWorkspace
 		} );
 	}
 
-	private void cleanTempFiles( final IProgressMonitor monitor,
-			final int[] step, final String[] stepDetail ) throws IOException,
+	private int cleanTempFiles( final IProgressMonitor monitor,
+			final int[] step, final String[] stepDetail,
+			StringBuffer errorMessage ) throws IOException,
 			InterruptedException
 	{
 		monitor.subTask( "[Step "
@@ -480,8 +517,11 @@ public class SyncIPortalWorkspace
 				"\"" + cleanFile.getAbsolutePath( ) + "\"",
 				"clean"
 		} );
-		antProcess.waitFor( );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
+
+		int result = antProcess.waitFor( );
 		antProcess = null;
+		return result;
 	}
 
 	private int executeUserTask( final IProgressMonitor monitor,
@@ -514,17 +554,17 @@ public class SyncIPortalWorkspace
 				"custom"
 		} );
 
-		interruptCustomTaskErrorMessage( antProcess, errorMessage );
+		interruptAntTaskErrorMessage( antProcess, errorMessage );
 
 		int result = antProcess.waitFor( );
 		antProcess = null;
 		return result;
 	}
 
-	private void interruptCustomTaskErrorMessage( final Process process,
+	private void interruptAntTaskErrorMessage( final Process process,
 			final StringBuffer buffer )
 	{
-		Thread errThread = new Thread( "Monitor Custom Task" ) {
+		Thread errThread = new Thread( "Monitor Ant Task" ) {
 
 			public void run( )
 			{
