@@ -771,8 +771,17 @@ public class InstallBRDPro
 				+ ++step[0]
 				+ "] Executing the user custom task..." );
 		stepDetail[0] = "Execute the user custom task";
-		File customFile = getAntFile( FileSystem.getCurrentDirectory( )
-				+ "\\custom\\BRDPro_Task.xml", false );
+
+		File antFile = new File( FileSystem.getCurrentDirectory( )
+				+ "\\custom\\BRDPro_Task.xml" );
+		if ( !antFile.exists( ) )
+		{
+			FileUtil.writeToBinarayFile( antFile,
+					InstallBRDPro.class.getResourceAsStream( "/custom/BRDPro_Task.xml" ),
+					true );
+		}
+
+		File customFile = getAntFile( antFile.getAbsolutePath( ), false );
 
 		antProcess = Runtime.getRuntime( ).exec( new String[]{
 				System.getProperty( "java.home" ) + "/bin/java",
