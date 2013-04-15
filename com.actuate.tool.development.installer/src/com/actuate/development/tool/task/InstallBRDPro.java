@@ -818,6 +818,7 @@ public class InstallBRDPro
 
 		interruptOutput( monitor, step, consoleLogger, flag, subtaskName );
 
+		p.executeTarget( "extract_brdpro" );
 	}
 
 	private void downloadBRDPro( final IProgressMonitor monitor,
