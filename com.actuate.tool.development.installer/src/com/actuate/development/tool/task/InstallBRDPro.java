@@ -759,7 +759,7 @@ public class InstallBRDPro
 					ShellLink.setShortCutArguments( filePath,
 							data.getShortcutArguments( ) );
 					ShellLink.setShortCutDescription( filePath,
-							"Contributor:cchen@actuate.com" );
+							"Created by Tooklit" );
 					ShellLink.setShortCutWorkingDirectory( filePath,
 							eclipseFile.getParentFile( ).getAbsolutePath( ) );
 
