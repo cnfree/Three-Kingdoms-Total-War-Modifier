@@ -42,7 +42,8 @@ public class AntTask
 			catch ( IOException e1 )
 			{
 			}
-			System.err.println( writer.toString( ) );
+			String errorMessage = writer.toString( );
+			System.err.println( errorMessage );
 			System.exit( -1 );
 		}
 	}

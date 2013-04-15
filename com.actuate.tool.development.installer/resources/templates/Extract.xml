@@ -6,41 +6,11 @@
 		<property name="brdpro.zip" value="$brdproFile" />
 	</target>
 
-	<target name="unzip_brdpro" >
+	<target name="unzip_brdpro" depends="init">
 		<exec dir="tool" executable="${runtime}\tool\7z.exe" failonerror="true">
 			<arg
 				line="x &quot;${build.temp}\brdpro\zip\*.zip&quot; -o&quot;${build.temp}\brdpro\install&quot; -aoa" />
 		</exec>
 	</target>
-
-	#if($isInstallShield)
-	<target name="extract_brdpro" depends="init, unzip_brdpro">
-		<mkdir dir="${build.temp}\7z" />
-		<mkdir dir="${build.path}\resources" />
-		<exec dir="tool" executable="${runtime}\tool\ISCAB.exe"
-			failonerror="true">
-			<arg
-				line="&quot;${build.temp}\brdpro\install\Disk Images\Disk1\data1.cab&quot; -i&quot;${config}&quot; -x" />
-		</exec>
-		<exec dir="tool" executable="${runtime}\tool\7z.exe" failonerror="true">
-			<arg
-				line="x &quot;${build.temp}\7z\brdpro&quot; -o&quot;${build.path}&quot; -aoa" />
-		</exec>
-		<exec dir="tool" executable="${runtime}\tool\7z.exe" failonerror="true">
-			<arg
-				line="x &quot;${build.temp}\7z\oda&quot; -o&quot;${build.path}\oda&quot; -aoa" />
-		</exec>
-		<delete file="${build.path}\eclipse\links\customPlugins.link" />
-		<copy todir="${build.path}\eclipse\links">
-			<fileset file="${odaLinkPath}" />
-		</copy>
-	</target>
-	#else
-	<target name="extract_brdpro" depends="init, unzip_brdpro">
-		<move todir="${build.path}">
-			<fileset dir="${build.temp}\brdpro\install\BRDPro" includes="**/*.*" />
-		</move>
-	</target>
-	#end
 
 </project>
