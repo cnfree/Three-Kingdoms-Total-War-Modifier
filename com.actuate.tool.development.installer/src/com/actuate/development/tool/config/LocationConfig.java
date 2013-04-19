@@ -1,5 +1,5 @@
 
-package com.actuate.development.tool.model.config;
+package com.actuate.development.tool.config;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -15,7 +15,7 @@ import org.sf.feeling.swt.win32.extension.jna.win32.Shell32;
 import org.sf.feeling.swt.win32.extension.jna.win32.structure.SHELLEXECUTEINFO;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
-import com.actuate.development.tool.model.config.PathConfig;
+import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.util.ClassPathUpdater;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.wizard.ToolkitWizard;

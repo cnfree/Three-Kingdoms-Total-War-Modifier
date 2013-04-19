@@ -10,7 +10,7 @@ import java.util.Map;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import com.actuate.development.tool.model.config.UserDataConfig;
+import com.actuate.development.tool.config.UserDataConfig;
 import com.actuate.development.tool.wizard.ToolkitConstants;
 
 public class ToolFeatureData

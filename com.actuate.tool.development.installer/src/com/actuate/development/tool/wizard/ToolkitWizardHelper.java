@@ -12,12 +12,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.IPortalViewerData;
 import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Modules;
 import com.actuate.development.tool.model.ToolFeatureData;
-import com.actuate.development.tool.model.config.PathConfig;
 import com.actuate.development.tool.util.LogUtil;
 
 public class ToolkitWizardHelper
