@@ -13,9 +13,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import com.actuate.development.tool.model.LocationConfig;
 import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
+import com.actuate.development.tool.model.config.LocationConfig;
 
 public class ToolFeaturePage extends WizardPage
 {

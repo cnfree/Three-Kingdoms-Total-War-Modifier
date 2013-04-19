@@ -10,7 +10,7 @@ import java.util.Map;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import com.actuate.development.tool.wizard.ToolkitWizard;
+import com.actuate.development.tool.model.config.UserDataConfig;
 import com.actuate.development.tool.wizard.ToolkitConstants;
 
 public class ToolFeatureData
@@ -21,9 +21,9 @@ public class ToolFeatureData
 	private List<IPortalViewerData> iPortalViewerDatas = new ArrayList<IPortalViewerData>( );
 	private CloneWorkspaceData cloneWorkspaceData;
 	private String currentBRDProProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_BRDPRO_PROJECT,
-			"A11SP4" );
+			"AugustaR1" );
 	private String currentIVProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_IPORTAL_PROJECT,
-			"A11SP4" );
+			"AugustaR1" );
 
 	public String getCurrentIVProject( )
 	{

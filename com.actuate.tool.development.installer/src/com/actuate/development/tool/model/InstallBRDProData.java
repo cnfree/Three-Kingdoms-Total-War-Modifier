@@ -1,6 +1,8 @@
 
 package com.actuate.development.tool.model;
 
+import com.actuate.development.tool.model.config.UserDataConfig;
+
 public class InstallBRDProData
 {
 
