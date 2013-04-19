@@ -11,6 +11,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import com.actuate.development.tool.wizard.ToolkitWizard;
+import com.actuate.development.tool.wizard.ToolkitConstants;
 
 public class ToolFeatureData
 {
@@ -38,7 +39,7 @@ public class ToolFeatureData
 				&& !currentIVProject.equals( oldProject ) )
 		{
 			PropertyChangeEvent event = new PropertyChangeEvent( this,
-					ToolkitWizard.CURRENT_IV_PROJECT,
+					ToolkitConstants.CURRENT_IV_PROJECT,
 					oldProject,
 					currentIVProject );
 			for ( IPropertyChangeListener listener : listeners )
@@ -75,7 +76,7 @@ public class ToolFeatureData
 				&& !currentProject.equals( oldProject ) )
 		{
 			PropertyChangeEvent event = new PropertyChangeEvent( this,
-					ToolkitWizard.CURRENT_BRDPRO_PROJECT,
+					ToolkitConstants.CURRENT_BRDPRO_PROJECT,
 					oldProject,
 					currentProject );
 			for ( IPropertyChangeListener listener : listeners )

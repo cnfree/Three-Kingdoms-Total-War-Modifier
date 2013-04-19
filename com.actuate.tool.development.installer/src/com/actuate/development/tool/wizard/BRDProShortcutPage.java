@@ -134,7 +134,7 @@ public class BRDProShortcutPage extends WizardPage implements IPropertyChangeLis
 
 	public void propertyChange( PropertyChangeEvent event )
 	{
-		if ( ToolkitWizard.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
+		if ( ToolkitConstants.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
 	}
 }

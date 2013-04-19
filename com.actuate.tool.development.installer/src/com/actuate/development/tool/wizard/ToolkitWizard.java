@@ -47,56 +47,6 @@ import com.actuate.development.tool.util.UIUtil;
 public class ToolkitWizard extends Wizard
 {
 
-	private static final String MAXIMIZED = "Maximized";
-
-	private static final String HEIGHT = "Height";
-
-	private static final String WIDTH = "Width";
-
-	private static final String POS_Y = "PosY";
-
-	private static final String POS_X = "PosX";
-
-	public static final String PROJECT = "Project";
-
-	public static final String CURRENT_BRDPRO_PROJECT = "CurrentBRDProProject";
-
-	public static final String CURRENT_IV_PROJECT = "CurrentIVProject";
-
-	public static final String DIRECTORY = "Directory";
-
-	public static final String MODULES = "Modules";
-
-	public static final String CLEARDIRECTORY = "ClearDirectory";
-
-	public static final String CLOSEBRDPRO = "CloseBRDPro";
-
-	public static final String CREATESHORTCUT = "CreateShortcut";
-
-	public static final String SHORTCUTARGUMENTS = "ShortcutArguments";
-
-	private static final String DIALOG_SETTING_FILE = new File( System.getProperties( )
-			.getProperty( "user.home" )
-			+ "\\.brdpro_toolkit\\userInfo.xml" ).getAbsolutePath( );
-
-	private static final String P4ROOT = "P4Root";
-
-	private static final String P4VIEW = "P4View";
-
-	private static final String CUSTOMPROJECTNAME = "CustomProjectName";
-
-	private static final String FORCEOPERATION = "ForceOperation";
-
-	private static final String REVERTFILES = "RevertFiles";
-
-	private static final String P4SERVER = "P4Server";
-
-	private static final String P4USER = "P4User";
-
-	private static final String P4PASSWORD = "P4Password";
-
-	private static final String P4CLIENT = "P4Client";
-
 	// the model object.
 	private ToolFeatureData data = new ToolFeatureData( );
 
@@ -104,12 +54,17 @@ public class ToolkitWizard extends Wizard
 	{
 		setWindowTitle( "Actuate BRDPro Development Toolkit" );
 		setNeedsProgressMonitor( true );
+		initDialogSettings( );
+		initConfig( );
+	}
 
+	private void initDialogSettings( )
+	{
 		final DialogSettings dialogSettings = new DialogSettings( "userInfo" );
 		try
 		{
-			if ( new File( DIALOG_SETTING_FILE ).exists( ) )
-				dialogSettings.load( DIALOG_SETTING_FILE );
+			if ( new File( ToolkitConstants.DIALOG_SETTING_FILE ).exists( ) )
+				dialogSettings.load( ToolkitConstants.DIALOG_SETTING_FILE );
 
 		}
 		catch ( IOException e )
@@ -118,7 +73,10 @@ public class ToolkitWizard extends Wizard
 		}
 
 		setDialogSettings( dialogSettings );
+	}
 
+	private void initConfig( )
+	{
 		IDialogSettings[] settings = getDialogSettings( ).getSections( );
 		if ( settings != null )
 		{
@@ -127,14 +85,17 @@ public class ToolkitWizard extends Wizard
 				InstallBRDProData installData = new InstallBRDProData( );
 				data.addInstallBRDProData( installData );
 				installData.setProject( setting.getName( ) );
-				if ( setting.get( DIRECTORY ) != null )
+				if ( setting.get( ToolkitConstants.DIRECTORY ) != null )
 				{
-					installData.setDirectory( setting.get( DIRECTORY ) );
+					installData.setDirectory( setting.get( ToolkitConstants.DIRECTORY ) );
 				}
-				if ( setting.get( MODULES ) != null
-						&& setting.get( MODULES ).trim( ).length( ) > 0 )
+				if ( setting.get( ToolkitConstants.MODULES ) != null
+						&& setting.get( ToolkitConstants.MODULES )
+								.trim( )
+								.length( ) > 0 )
 				{
-					String[] moduleNames = setting.get( MODULES ).split( ";" );
+					String[] moduleNames = setting.get( ToolkitConstants.MODULES )
+							.split( ";" );
 					Module[] modules = new Module[moduleNames.length];
 					for ( int i = 0; i < modules.length; i++ )
 					{
@@ -143,75 +104,74 @@ public class ToolkitWizard extends Wizard
 					}
 					installData.setModules( modules );
 				}
-				if ( setting.get( CLEARDIRECTORY ) != null )
+				if ( setting.get( ToolkitConstants.CLEARDIRECTORY ) != null )
 				{
-					installData.setNotClearDirectory( setting.getBoolean( CLEARDIRECTORY ) );
+					installData.setNotClearDirectory( setting.getBoolean( ToolkitConstants.CLEARDIRECTORY ) );
 				}
-				if ( setting.get( CLOSEBRDPRO ) != null )
+				if ( setting.get( ToolkitConstants.CLOSEBRDPRO ) != null )
 				{
-					installData.setNotCloseBRDPro( setting.getBoolean( CLOSEBRDPRO ) );
+					installData.setNotCloseBRDPro( setting.getBoolean( ToolkitConstants.CLOSEBRDPRO ) );
 				}
-				if ( setting.get( SHORTCUTARGUMENTS ) != null )
+				if ( setting.get( ToolkitConstants.SHORTCUTARGUMENTS ) != null )
 				{
-					installData.setShortcutArguments( setting.get( SHORTCUTARGUMENTS ) );
+					installData.setShortcutArguments( setting.get( ToolkitConstants.SHORTCUTARGUMENTS ) );
 				}
-				if ( setting.get( CREATESHORTCUT ) != null )
+				if ( setting.get( ToolkitConstants.CREATESHORTCUT ) != null )
 				{
-					installData.setNotCreateShortcut( setting.getBoolean( CREATESHORTCUT ) );
+					installData.setNotCreateShortcut( setting.getBoolean( ToolkitConstants.CREATESHORTCUT ) );
 				}
 
 				IPortalViewerData ivData = new IPortalViewerData( );
 				ivData.setProject( setting.getName( ) );
-				if ( setting.get( P4ROOT ) != null )
+				if ( setting.get( ToolkitConstants.P4ROOT ) != null )
 				{
-					ivData.setRoot( setting.get( P4ROOT ) );
+					ivData.setRoot( setting.get( ToolkitConstants.P4ROOT ) );
 				}
-				if ( setting.get( P4VIEW ) != null )
+				if ( setting.get( ToolkitConstants.P4VIEW ) != null )
 				{
-					ivData.setView( setting.get( P4VIEW ) );
+					ivData.setView( setting.get( ToolkitConstants.P4VIEW ) );
 				}
-				if ( setting.get( CUSTOMPROJECTNAME ) != null )
+				if ( setting.get( ToolkitConstants.CUSTOMPROJECTNAME ) != null )
 				{
-					ivData.setCustomProjectName( setting.get( CUSTOMPROJECTNAME ) );
+					ivData.setCustomProjectName( setting.get( ToolkitConstants.CUSTOMPROJECTNAME ) );
 				}
-				if ( setting.get( FORCEOPERATION ) != null )
+				if ( setting.get( ToolkitConstants.FORCEOPERATION ) != null )
 				{
-					ivData.setForceOperation( setting.getBoolean( FORCEOPERATION ) );
+					ivData.setForceOperation( setting.getBoolean( ToolkitConstants.FORCEOPERATION ) );
 				}
-				if ( setting.get( REVERTFILES ) != null )
+				if ( setting.get( ToolkitConstants.REVERTFILES ) != null )
 				{
-					ivData.setRevertFiles( setting.getBoolean( REVERTFILES ) );
+					ivData.setRevertFiles( setting.getBoolean( ToolkitConstants.REVERTFILES ) );
 				}
-				if ( setting.get( P4SERVER ) != null )
+				if ( setting.get( ToolkitConstants.P4SERVER ) != null )
 				{
-					ivData.setServer( setting.get( P4SERVER ) );
+					ivData.setServer( setting.get( ToolkitConstants.P4SERVER ) );
 				}
-				if ( setting.get( P4USER ) != null )
+				if ( setting.get( ToolkitConstants.P4USER ) != null )
 				{
-					ivData.setUser( setting.get( P4USER ) );
+					ivData.setUser( setting.get( ToolkitConstants.P4USER ) );
 				}
-				if ( setting.get( P4PASSWORD ) != null )
+				if ( setting.get( ToolkitConstants.P4PASSWORD ) != null )
 				{
-					ivData.setPassword( setting.get( P4PASSWORD ) );
+					ivData.setPassword( setting.get( ToolkitConstants.P4PASSWORD ) );
 				}
-				if ( setting.get( P4CLIENT ) != null )
+				if ( setting.get( ToolkitConstants.P4CLIENT ) != null )
 				{
-					ivData.setClient( setting.get( P4CLIENT ) );
+					ivData.setClient( setting.get( ToolkitConstants.P4CLIENT ) );
 				}
 				data.addIPortalViewerData( ivData );
 			}
 		}
 
-		if ( getDialogSettings( ).get( CURRENT_BRDPRO_PROJECT ) != null )
+		if ( getDialogSettings( ).get( ToolkitConstants.CURRENT_BRDPRO_PROJECT ) != null )
 		{
-			data.setCurrentBRDProProject( getDialogSettings( ).get( CURRENT_BRDPRO_PROJECT ) );
+			data.setCurrentBRDProProject( getDialogSettings( ).get( ToolkitConstants.CURRENT_BRDPRO_PROJECT ) );
 		}
 
-		if ( getDialogSettings( ).get( CURRENT_IV_PROJECT ) != null )
+		if ( getDialogSettings( ).get( ToolkitConstants.CURRENT_IV_PROJECT ) != null )
 		{
-			data.setCurrentIVProject( getDialogSettings( ).get( CURRENT_IV_PROJECT ) );
+			data.setCurrentIVProject( getDialogSettings( ).get( ToolkitConstants.CURRENT_IV_PROJECT ) );
 		}
-
 	}
 
 	/*
@@ -242,18 +202,18 @@ public class ToolkitWizard extends Wizard
 				ImageCache.getImage( "/icons/actuate_32.png" ),
 				ImageCache.getImage( "/icons/actuate_48.png" )
 		} );
-		if ( getDialogSettings( ).get( WIDTH ) != null
-				&& getDialogSettings( ).get( HEIGHT ) != null )
-			this.getShell( ).setSize( getDialogSettings( ).getInt( WIDTH ),
-					getDialogSettings( ).getInt( HEIGHT ) );
+		if ( getDialogSettings( ).get( ToolkitConstants.DIALOG_SETTING_WIDTH ) != null
+				&& getDialogSettings( ).get( ToolkitConstants.DIALOG_SETTING_HEIGHT ) != null )
+			this.getShell( ).setSize( getDialogSettings( ).getInt( ToolkitConstants.DIALOG_SETTING_WIDTH ),
+					getDialogSettings( ).getInt( ToolkitConstants.DIALOG_SETTING_HEIGHT ) );
 		else
 		{
 			this.getShell( ).setSize( 700, 600 );
 		}
-		if ( getDialogSettings( ).get( POS_X ) != null
-				&& getDialogSettings( ).get( POS_Y ) != null )
-			this.getShell( ).setLocation( getDialogSettings( ).getInt( POS_X ),
-					getDialogSettings( ).getInt( POS_Y ) );
+		if ( getDialogSettings( ).get( ToolkitConstants.DIALOG_SETTING_POS_X ) != null
+				&& getDialogSettings( ).get( ToolkitConstants.DIALOG_SETTING_POS_Y ) != null )
+			this.getShell( ).setLocation( getDialogSettings( ).getInt( ToolkitConstants.DIALOG_SETTING_POS_X ),
+					getDialogSettings( ).getInt( ToolkitConstants.DIALOG_SETTING_POS_Y ) );
 		else
 		{
 			int width = this.getShell( ).getMonitor( ).getClientArea( ).width;
@@ -263,9 +223,9 @@ public class ToolkitWizard extends Wizard
 			this.getShell( )
 					.setLocation( ( width - x ) / 2, ( height - y ) / 2 );
 		}
-		if ( getDialogSettings( ).get( MAXIMIZED ) != null )
+		if ( getDialogSettings( ).get( ToolkitConstants.DIALOG_SETTING_MAXIMIZED ) != null )
 			this.getShell( )
-					.setMaximized( getDialogSettings( ).getBoolean( MAXIMIZED ) );
+					.setMaximized( getDialogSettings( ).getBoolean( ToolkitConstants.DIALOG_SETTING_MAXIMIZED ) );
 
 		this.getShell( ).addControlListener( new ControlListener( ) {
 
@@ -289,19 +249,19 @@ public class ToolkitWizard extends Wizard
 					Point location = ToolkitWizard.this.getShell( )
 							.getLocation( );
 					Point size = ToolkitWizard.this.getShell( ).getSize( );
-					getDialogSettings( ).put( POS_X, location.x );
-					getDialogSettings( ).put( POS_Y, location.y );
-					getDialogSettings( ).put( WIDTH, size.x );
-					getDialogSettings( ).put( HEIGHT, size.y );
+					getDialogSettings( ).put( ToolkitConstants.DIALOG_SETTING_POS_X, location.x );
+					getDialogSettings( ).put( ToolkitConstants.DIALOG_SETTING_POS_Y, location.y );
+					getDialogSettings( ).put( ToolkitConstants.DIALOG_SETTING_WIDTH, size.x );
+					getDialogSettings( ).put( ToolkitConstants.DIALOG_SETTING_HEIGHT, size.y );
 				}
 
 				if ( ToolkitWizard.this.getShell( ).getMaximized( ) )
 				{
-					getDialogSettings( ).put( MAXIMIZED, true );
+					getDialogSettings( ).put( ToolkitConstants.DIALOG_SETTING_MAXIMIZED, true );
 				}
 				else
 				{
-					getDialogSettings( ).put( MAXIMIZED, false );
+					getDialogSettings( ).put( ToolkitConstants.DIALOG_SETTING_MAXIMIZED, false );
 				}
 			}
 
@@ -358,55 +318,7 @@ public class ToolkitWizard extends Wizard
 				{
 					monitor.beginTask( "Collecting Actuate Build Projects...",
 							IProgressMonitor.UNKNOWN );
-					final String[][] fileNames = new String[1][];
-
-					String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
-							"\\\\qaant\\ActuateBuild" );
-					File file = new File( buildDir );
-					fileNames[0] = file.list( new FilenameFilter( ) {
-
-						public boolean accept( File dir, String name )
-						{
-							File file = new File( dir, name );
-							monitor.subTask( "Scanning "
-									+ file.getAbsolutePath( ) );
-							List<File> brdproFiles = new ArrayList<File>( );
-							List<File> iportalViewerFiles = new ArrayList<File>( );
-
-							checkActuateBuildFile( file,
-									brdproFiles,
-									iportalViewerFiles );
-
-							if ( brdproFiles.size( ) > 0 )
-							{
-								if ( !data.getBrdproMap( ).containsKey( name ) )
-									data.getBrdproMap( ).put( name,
-											new ArrayList<File>( ) );
-								data.getBrdproMap( )
-										.get( name )
-										.addAll( brdproFiles );
-							}
-							if ( iportalViewerFiles.size( ) > 0
-									&& Modules.getInstance( )
-											.getIPortalProjects( )
-											.contains( name ) )
-							{
-								if ( !data.getIportalViewMap( )
-										.containsKey( name ) )
-									data.getIportalViewMap( ).put( name,
-											new ArrayList<File>( ) );
-								data.getIportalViewMap( )
-										.get( name )
-										.addAll( iportalViewerFiles );
-							}
-							if ( brdproFiles.size( ) > 0
-									|| iportalViewerFiles.size( ) > 0 )
-								return true;
-							return false;
-						}
-
-					} );
-
+					initInstallationFiles( monitor );
 					monitor.done( );
 				}
 			} );
@@ -566,13 +478,13 @@ public class ToolkitWizard extends Wizard
 	{
 		try
 		{
-			File file = new File( DIALOG_SETTING_FILE );
+			File file = new File( ToolkitConstants.DIALOG_SETTING_FILE );
 			if ( !file.exists( ) )
 			{
 				if ( !file.getParentFile( ).exists( ) )
 					file.getParentFile( ).mkdirs( );
 			}
-			getDialogSettings( ).save( DIALOG_SETTING_FILE );
+			getDialogSettings( ).save( ToolkitConstants.DIALOG_SETTING_FILE );
 		}
 		catch ( IOException e1 )
 		{
@@ -584,7 +496,7 @@ public class ToolkitWizard extends Wizard
 	{
 		if ( data.getCurrentBRDProProject( ) != null )
 		{
-			getDialogSettings( ).put( CURRENT_BRDPRO_PROJECT,
+			getDialogSettings( ).put( ToolkitConstants.CURRENT_BRDPRO_PROJECT,
 					data.getCurrentBRDProProject( ) );
 			IDialogSettings projectSetting = getDialogSettings( ).getSection( data.getCurrentBRDProProject( ) );
 			if ( projectSetting == null )
@@ -592,15 +504,15 @@ public class ToolkitWizard extends Wizard
 				projectSetting = getDialogSettings( ).addNewSection( data.getCurrentBRDProProject( ) );
 			}
 
-			projectSetting.put( DIRECTORY, data.getCurrentInstallBRDProData( )
+			projectSetting.put( ToolkitConstants.DIRECTORY, data.getCurrentInstallBRDProData( )
 					.getDirectory( ) );
-			projectSetting.put( CLEARDIRECTORY,
+			projectSetting.put( ToolkitConstants.CLEARDIRECTORY,
 					data.getCurrentInstallBRDProData( ).isNotClearDirectory( ) );
-			projectSetting.put( CLOSEBRDPRO, data.getCurrentInstallBRDProData( )
+			projectSetting.put( ToolkitConstants.CLOSEBRDPRO, data.getCurrentInstallBRDProData( )
 					.isNotCloseBRDPro( ) );
-			projectSetting.put( CREATESHORTCUT,
+			projectSetting.put( ToolkitConstants.CREATESHORTCUT,
 					data.getCurrentInstallBRDProData( ).isNotCreateShortcut( ) );
-			projectSetting.put( SHORTCUTARGUMENTS,
+			projectSetting.put( ToolkitConstants.SHORTCUTARGUMENTS,
 					data.getCurrentInstallBRDProData( ).getShortcutArguments( ) );
 			if ( data.getCurrentInstallBRDProData( ).getModules( ) != null )
 			{
@@ -618,17 +530,17 @@ public class ToolkitWizard extends Wizard
 							buffer.append( ";" );
 					}
 				}
-				projectSetting.put( MODULES, buffer.toString( ) );
+				projectSetting.put( ToolkitConstants.MODULES, buffer.toString( ) );
 			}
 			else
 			{
-				projectSetting.put( MODULES, (String) null );
+				projectSetting.put( ToolkitConstants.MODULES, (String) null );
 			}
 		}
 
 		if ( data.getCurrentIVProject( ) != null )
 		{
-			getDialogSettings( ).put( CURRENT_IV_PROJECT,
+			getDialogSettings( ).put( ToolkitConstants.CURRENT_IV_PROJECT,
 					data.getCurrentIVProject( ) );
 			IDialogSettings projectSetting = getDialogSettings( ).getSection( data.getCurrentIVProject( ) );
 			if ( projectSetting == null )
@@ -636,26 +548,70 @@ public class ToolkitWizard extends Wizard
 				projectSetting = getDialogSettings( ).addNewSection( data.getCurrentIVProject( ) );
 			}
 
-			projectSetting.put( P4ROOT, data.getCurrentIportalViewerData( )
+			projectSetting.put( ToolkitConstants.P4ROOT, data.getCurrentIportalViewerData( )
 					.getRoot( ) );
-			projectSetting.put( P4VIEW, data.getCurrentIportalViewerData( )
+			projectSetting.put( ToolkitConstants.P4VIEW, data.getCurrentIportalViewerData( )
 					.getView( ) );
-			projectSetting.put( CUSTOMPROJECTNAME,
+			projectSetting.put( ToolkitConstants.CUSTOMPROJECTNAME,
 					data.getCurrentIportalViewerData( ).getCustomProjectName( ) );
-			projectSetting.put( FORCEOPERATION,
+			projectSetting.put( ToolkitConstants.FORCEOPERATION,
 					data.getCurrentIportalViewerData( ).isForceOperation( ) );
-			projectSetting.put( REVERTFILES, data.getCurrentIportalViewerData( )
+			projectSetting.put( ToolkitConstants.REVERTFILES, data.getCurrentIportalViewerData( )
 					.isRevertFiles( ) );
-			projectSetting.put( P4SERVER, data.getCurrentIportalViewerData( )
+			projectSetting.put( ToolkitConstants.P4SERVER, data.getCurrentIportalViewerData( )
 					.getServer( ) );
-			projectSetting.put( P4USER, data.getCurrentIportalViewerData( )
+			projectSetting.put( ToolkitConstants.P4USER, data.getCurrentIportalViewerData( )
 					.getUser( ) );
-			projectSetting.put( P4PASSWORD, data.getCurrentIportalViewerData( )
+			projectSetting.put( ToolkitConstants.P4PASSWORD, data.getCurrentIportalViewerData( )
 					.getPassword( ) );
-			projectSetting.put( P4CLIENT, data.getCurrentIportalViewerData( )
+			projectSetting.put( ToolkitConstants.P4CLIENT, data.getCurrentIportalViewerData( )
 					.getClient( ) );
 		}
 
 		saveDialogSettings( );
+	}
+
+	private void initInstallationFiles( final IProgressMonitor monitor )
+	{
+		final String[][] fileNames = new String[1][];
+
+		String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
+				"\\\\qaant\\ActuateBuild" );
+		File file = new File( buildDir );
+		fileNames[0] = file.list( new FilenameFilter( ) {
+
+			public boolean accept( File dir, String name )
+			{
+				File file = new File( dir, name );
+				monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
+				List<File> brdproFiles = new ArrayList<File>( );
+				List<File> iportalViewerFiles = new ArrayList<File>( );
+
+				checkActuateBuildFile( file, brdproFiles, iportalViewerFiles );
+
+				if ( brdproFiles.size( ) > 0 )
+				{
+					if ( !data.getBrdproMap( ).containsKey( name ) )
+						data.getBrdproMap( ).put( name, new ArrayList<File>( ) );
+					data.getBrdproMap( ).get( name ).addAll( brdproFiles );
+				}
+				if ( iportalViewerFiles.size( ) > 0
+						&& Modules.getInstance( )
+								.getIPortalProjects( )
+								.contains( name ) )
+				{
+					if ( !data.getIportalViewMap( ).containsKey( name ) )
+						data.getIportalViewMap( ).put( name,
+								new ArrayList<File>( ) );
+					data.getIportalViewMap( )
+							.get( name )
+							.addAll( iportalViewerFiles );
+				}
+				if ( brdproFiles.size( ) > 0 || iportalViewerFiles.size( ) > 0 )
+					return true;
+				return false;
+			}
+
+		} );
 	}
 }

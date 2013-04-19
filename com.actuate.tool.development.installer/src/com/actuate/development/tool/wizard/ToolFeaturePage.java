@@ -8,8 +8,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
+import com.actuate.development.tool.model.LocationConfig;
 import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
 
@@ -32,15 +36,58 @@ public class ToolFeaturePage extends WizardPage
 	public void createControl( Composite parent )
 	{
 		Composite composite = new Composite( parent, SWT.NULL );
-		GridLayout gridLayout = new GridLayout( 1, false );
+		GridLayout gridLayout = new GridLayout( 2, false );
 		gridLayout.marginWidth = 10;
 		gridLayout.marginHeight = 20;
+		gridLayout.verticalSpacing = 20;
 		composite.setLayout( gridLayout );
 
-		brdproButton = new Button( composite, SWT.RADIO );
+		Label locationLabel = new Label( composite, SWT.NONE );
+		locationLabel.setText( "&Location: " );
+		final Combo locationCombo = new Combo( composite, SWT.READ_ONLY
+				| SWT.BORDER
+				| SWT.SINGLE );
+		locationCombo.setItems( new String[]{
+				"Corporate Headquarter", "Shangai R&D Center"
+		} );
+		if ( LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) ) )
+			locationCombo.select( 0 );
+		else
+			locationCombo.select( 1 );
+
+		locationCombo.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( locationCombo.getSelectionIndex( ) == 0 )
+				{
+					LocationConfig.setLocation( LocationConfig.HEADQUARTER );
+				}
+				else if ( locationCombo.getSelectionIndex( ) == 1 )
+				{
+					LocationConfig.setLocation( LocationConfig.SHANGHAI );
+				}
+			}
+		} );
+
+		GridData gd = new GridData( );
+		gd.widthHint = 250;
+		gd.horizontalAlignment = SWT.FILL;
+		locationCombo.setLayoutData( gd );
+
+		Group group = new Group( composite, SWT.NONE );
+		group.setText( "Installation Feature" );
+		gridLayout = new GridLayout( 2, false );
+		group.setLayout( gridLayout );
+		gd = new GridData( );
+		gd.horizontalSpan = 2;
+		group.setLayoutData( gd );
+
+		brdproButton = new Button( group, SWT.RADIO );
 		brdproButton.setText( "&Install the BRDPro development environment" );
 		brdproButton.setSelection( true );
-		GridData gd = new GridData( );
+		gd = new GridData( );
+		gd.horizontalSpan = 2;
 		brdproButton.setLayoutData( gd );
 		brdproButton.addSelectionListener( new SelectionAdapter( ) {
 
@@ -56,9 +103,10 @@ public class ToolFeaturePage extends WizardPage
 			}
 		} );
 
-		iportalSyncButton = new Button( composite, SWT.RADIO );
+		iportalSyncButton = new Button( group, SWT.RADIO );
 		iportalSyncButton.setText( "Synchronize the iPortal Viewer &workspace" );
 		gd = new GridData( );
+		gd.horizontalSpan = 2;
 		iportalSyncButton.setLayoutData( gd );
 		iportalSyncButton.addSelectionListener( new SelectionAdapter( ) {
 
@@ -73,9 +121,10 @@ public class ToolFeaturePage extends WizardPage
 			}
 		} );
 
-		workspaceCloneButton = new Button( composite, SWT.RADIO );
+		workspaceCloneButton = new Button( group, SWT.RADIO );
 		workspaceCloneButton.setText( "Clone &settings from an old workspace to a new workspace" );
 		gd = new GridData( );
+		gd.horizontalSpan = 2;
 		workspaceCloneButton.setLayoutData( gd );
 		workspaceCloneButton.addSelectionListener( new SelectionAdapter( ) {
 
@@ -89,7 +138,7 @@ public class ToolFeaturePage extends WizardPage
 				setPageComplete( isPageComplete( ) );
 			}
 		} );
-		
+
 		checkInstallType( );
 		setControl( composite );
 	}

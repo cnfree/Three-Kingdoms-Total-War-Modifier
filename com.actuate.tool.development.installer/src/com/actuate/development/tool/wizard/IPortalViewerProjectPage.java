@@ -1547,7 +1547,7 @@ public class IPortalViewerProjectPage extends WizardPage implements
 
 	public void propertyChange( PropertyChangeEvent event )
 	{
-		if ( ToolkitWizard.CURRENT_IV_PROJECT.equals( event.getProperty( ) ) )
+		if ( ToolkitConstants.CURRENT_IV_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
 	}
 

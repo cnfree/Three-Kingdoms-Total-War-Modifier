@@ -336,7 +336,7 @@ public class BRDProSettingPage extends WizardPage implements IPropertyChangeList
 
 	public void propertyChange( PropertyChangeEvent event )
 	{
-		if ( ToolkitWizard.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
+		if ( ToolkitConstants.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
 	}
 

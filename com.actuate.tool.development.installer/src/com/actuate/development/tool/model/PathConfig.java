@@ -17,6 +17,12 @@ import com.actuate.development.tool.util.FileUtil;
 public class PathConfig
 {
 
+	private static final String PATH_CONF = "/conf/";
+
+	private static final String PATH_SH_INI = "path_sh.ini";
+
+	private static final String PATH_HQ_INI = "path_hq.ini";
+
 	// Toolkit server
 	public final static String SERVER = "server";
 
@@ -54,12 +60,23 @@ public class PathConfig
 	private static Properties props = new Properties( );
 	static
 	{
+		String location = LocationConfig.getLocation( );
+		String path;
+		if ( LocationConfig.HEADQUARTER.equals( location ) )
+		{
+			path = PATH_HQ_INI;
+		}
+		else
+		{
+			path = PATH_SH_INI;
+		}
 		File config = new File( FileSystem.getCurrentDirectory( )
-				+ "/conf/path.ini" );
+				+ PATH_CONF
+				+ path );
 		if ( !config.exists( ) )
 		{
 			FileUtil.writeToBinarayFile( config,
-					PathConfig.class.getResourceAsStream( "/conf/path.ini" ),
+					PathConfig.class.getResourceAsStream( PATH_CONF + path ),
 					true );
 		}
 		try
@@ -73,7 +90,8 @@ public class PathConfig
 			}
 			else
 			{
-				InputStream in = PathConfig.class.getResourceAsStream( "/conf/path.ini" );
+				InputStream in = PathConfig.class.getResourceAsStream( PATH_CONF
+						+ path );
 				props.load( in );
 				in.close( );
 			}
