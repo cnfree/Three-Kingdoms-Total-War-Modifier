@@ -3,7 +3,9 @@ package com.actuate.development.tool.model;
 
 public enum ToolFeature {
 	installBRDPro("Install BRDPro"), cloneWorkspaceSettings(
-			"Clone Workspace Settings"), synciPortalWorkspace("Synchronize iPortal Workspace");
+			"Clone Workspace Settings"), synciPortalWorkspace(
+			"Synchronize iPortal Workspace"), syncBRDProResources(
+			"Synchronize BRDPro Resources");
 
 	private String value;
 

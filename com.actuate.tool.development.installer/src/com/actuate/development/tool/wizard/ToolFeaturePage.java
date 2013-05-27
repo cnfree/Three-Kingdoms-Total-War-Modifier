@@ -24,6 +24,7 @@ public class ToolFeaturePage extends WizardPage
 	private Button brdproButton;
 	private Button workspaceCloneButton;
 	private Button iportalSyncButton;
+	private Button syncResourceButton;
 
 	ToolFeaturePage( ToolFeatureData data )
 	{
@@ -67,6 +68,7 @@ public class ToolFeaturePage extends WizardPage
 				{
 					LocationConfig.setLocation( LocationConfig.SHANGHAI );
 				}
+				updateSyncButtonStatus( );
 			}
 		} );
 
@@ -97,6 +99,7 @@ public class ToolFeaturePage extends WizardPage
 				{
 					workspaceCloneButton.setSelection( false );
 					iportalSyncButton.setSelection( false );
+					syncResourceButton.setSelection( false );
 				}
 				checkInstallType( );
 				setPageComplete( isPageComplete( ) );
@@ -116,6 +119,7 @@ public class ToolFeaturePage extends WizardPage
 				{
 					brdproButton.setSelection( false );
 					workspaceCloneButton.setSelection( false );
+					syncResourceButton.setSelection( false );
 				}
 				setPageComplete( isPageComplete( ) );
 			}
@@ -134,13 +138,52 @@ public class ToolFeaturePage extends WizardPage
 				{
 					brdproButton.setSelection( false );
 					iportalSyncButton.setSelection( false );
+					syncResourceButton.setSelection( false );
 				}
 				setPageComplete( isPageComplete( ) );
 			}
 		} );
 
+		syncResourceButton = new Button( group, SWT.RADIO );
+		syncResourceButton.setText( "Synchronize BRDPro resources from Shanghai server to the local environment" );
+		gd = new GridData( );
+		gd.horizontalSpan = 2;
+		syncResourceButton.setLayoutData( gd );
+		syncResourceButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( syncResourceButton.getSelection( ) )
+				{
+					brdproButton.setSelection( false );
+					iportalSyncButton.setSelection( false );
+					workspaceCloneButton.setSelection( false );
+				}
+				setPageComplete( isPageComplete( ) );
+			}
+		} );
+
+		updateSyncButtonStatus( );
+
 		checkInstallType( );
 		setControl( composite );
+	}
+
+	private void updateSyncButtonStatus( )
+	{
+		GridData gd = (GridData) syncResourceButton.getLayoutData( );
+		if ( !LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) ) )
+		{
+			gd.exclude = true;
+			syncResourceButton.setVisible( false );
+		}
+		else
+		{
+			gd.exclude = false;
+			syncResourceButton.setVisible( true );
+		}
+		syncResourceButton.getParent( ).layout( );
+		syncResourceButton.getParent( ).getParent( ).layout( );
 	}
 
 	public boolean isPageComplete( )
@@ -168,6 +211,10 @@ public class ToolFeaturePage extends WizardPage
 			if ( iportalSyncButton.getSelection( ) )
 			{
 				data.setToolFeature( ToolFeature.synciPortalWorkspace );
+			}
+			if ( syncResourceButton.getSelection( ) )
+			{
+				data.setToolFeature( ToolFeature.syncBRDProResources );
 			}
 		}
 	}

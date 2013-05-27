@@ -63,6 +63,7 @@ public class ToolkitWizard extends Wizard
 		addPage( new BRDProSettingPage( data ) );
 		addPage( new BRDProShortcutPage( data ) );
 		addPage( new IPortalViewerProjectPage( data ) );
+		addPage( new SyncBRDProResourcePage( data ) );
 	}
 
 	private void initShell( )
@@ -225,8 +226,12 @@ public class ToolkitWizard extends Wizard
 				return pages.get( 2 );
 			else if ( data.getToolFeature( ) == ToolFeature.synciPortalWorkspace )
 				return pages.get( 5 );
-			else
+			else if ( data.getToolFeature( ) == ToolFeature.cloneWorkspaceSettings )
 				return pages.get( 1 );
+			else if ( data.getToolFeature( ) == ToolFeature.syncBRDProResources )
+				return pages.get( 6 );
+			else
+				return null;
 		}
 		else if ( index == 1 )
 			return null;
@@ -265,6 +270,10 @@ public class ToolkitWizard extends Wizard
 						else if ( data.getToolFeature( ) == ToolFeature.synciPortalWorkspace )
 						{
 							new SyncIPortalWorkspace( data.getCurrentIportalViewerData( ) ).execute( monitor );
+						}
+						else if ( data.getToolFeature( ) == ToolFeature.syncBRDProResources )
+						{
+							//new SyncIPortalWorkspace( data.getCurrentIportalViewerData( ) ).execute( monitor );
 						}
 					}
 					monitor.done( );

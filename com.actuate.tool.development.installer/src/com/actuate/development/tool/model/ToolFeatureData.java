@@ -24,6 +24,7 @@ public class ToolFeatureData
 			"AugustaR1" );
 	private String currentIVProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_IPORTAL_PROJECT,
 			"AugustaR1" );
+	private Version[] platformVersions;
 
 	public String getCurrentIVProject( )
 	{
@@ -197,5 +198,15 @@ public class ToolFeatureData
 	public void removeChangeListener( IPropertyChangeListener listener )
 	{
 		listeners.remove( listener );
+	}
+
+	public void setPlatformVersions( Version[] platformVersions )
+	{
+		this.platformVersions = platformVersions;
+	}
+
+	public Version[] getPlatformVersions( )
+	{
+		return platformVersions;
 	}
 }

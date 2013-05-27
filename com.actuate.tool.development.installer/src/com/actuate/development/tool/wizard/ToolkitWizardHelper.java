@@ -6,6 +6,8 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -18,6 +20,8 @@ import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Modules;
 import com.actuate.development.tool.model.ToolFeatureData;
+import com.actuate.development.tool.model.Version;
+import com.actuate.development.tool.model.VersionType;
 import com.actuate.development.tool.util.LogUtil;
 
 public class ToolkitWizardHelper
@@ -320,12 +324,10 @@ public class ToolkitWizardHelper
 
 	public void collectInstallationFiles( final IProgressMonitor monitor )
 	{
-		final String[][] fileNames = new String[1][];
-
 		String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
 				"\\\\qaant\\ActuateBuild" );
 		File file = new File( buildDir );
-		fileNames[0] = file.list( new FilenameFilter( ) {
+		file.list( new FilenameFilter( ) {
 
 			public boolean accept( File dir, String name )
 			{
@@ -360,5 +362,38 @@ public class ToolkitWizardHelper
 			}
 
 		} );
+
+		File platformDir = new File( "\\\\QA-BUILD\\BIRTOutput\\platform" );
+		final List<Version> versions = new ArrayList<Version>( );
+		platformDir.list( new FilenameFilter( ) {
+
+			public boolean accept( File dir, String name )
+			{
+				File file = new File( dir, name );
+				monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
+				if ( file.isDirectory( )
+						&& file.getName( ).matches( "(?i).+?_platform" ) )
+				{
+					String version = file.getName( ).split( "_" )[0];
+					if ( version.compareTo( "3.6" ) >= 0 )
+						versions.add( new Version( version,
+								version,
+								VersionType.platform,
+								"/icons/version_platform.gif" ) );
+				}
+				return false;
+			}
+
+		} );
+
+		Collections.sort( versions, new Comparator<Version>( ) {
+
+			public int compare( Version o1, Version o2 )
+			{
+				return o1.getName( ).compareToIgnoreCase( o2.getName( ) );
+			}
+		} );
+		Collections.reverse( versions );
+		data.setPlatformVersions( versions.toArray( new Version[0] ) );
 	}
 }
