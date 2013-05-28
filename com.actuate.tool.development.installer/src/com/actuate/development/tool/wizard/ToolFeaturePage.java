@@ -146,7 +146,7 @@ public class ToolFeaturePage extends WizardPage
 		} );
 
 		syncResourceButton = new Button( group, SWT.RADIO );
-		syncResourceButton.setText( "Synchronize BRDPro resources from Shanghai server to the local environment" );
+		syncResourceButton.setText( "Synchronize BRDPro &resources from Shanghai server to the local environment" );
 		gd = new GridData( );
 		gd.horizontalSpan = 2;
 		syncResourceButton.setLayoutData( gd );

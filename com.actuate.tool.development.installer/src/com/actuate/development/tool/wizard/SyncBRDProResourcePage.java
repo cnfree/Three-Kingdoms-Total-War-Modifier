@@ -165,7 +165,7 @@ public class SyncBRDProResourcePage extends WizardPage implements
 		} );
 
 		final Button bgButton = new Button( composite, SWT.CHECK );
-		bgButton.setText( "Minimize Toolkit to the system tray area when synchironizing the resources" );
+		bgButton.setText( "&Minimize Toolkit to the system tray area when synchironizing the resources" );
 		gd = new GridData( );
 		gd.horizontalSpan = 3;
 		gd.horizontalSpan = 3;
