@@ -19,6 +19,8 @@ import com.actuate.development.tool.model.IPortalViewerData;
 import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Modules;
+import com.actuate.development.tool.model.SyncBRDProResourcesData;
+import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
 import com.actuate.development.tool.model.Version;
 import com.actuate.development.tool.model.VersionType;
@@ -57,85 +59,161 @@ public class ToolkitWizardHelper
 	{
 		if ( data.getCurrentBRDProProject( ) != null )
 		{
-			wizard.getDialogSettings( )
-					.put( ToolkitConstants.CURRENT_BRDPRO_PROJECT,
-							data.getCurrentBRDProProject( ) );
-			IDialogSettings projectSetting = wizard.getDialogSettings( )
-					.getSection( data.getCurrentBRDProProject( ) );
-			if ( projectSetting == null )
-			{
-				projectSetting = wizard.getDialogSettings( )
-						.addNewSection( data.getCurrentBRDProProject( ) );
-			}
-
-			projectSetting.put( ToolkitConstants.DIRECTORY,
-					data.getCurrentInstallBRDProData( ).getDirectory( ) );
-			projectSetting.put( ToolkitConstants.CLEARDIRECTORY,
-					data.getCurrentInstallBRDProData( ).isNotClearDirectory( ) );
-			projectSetting.put( ToolkitConstants.CLOSEBRDPRO,
-					data.getCurrentInstallBRDProData( ).isNotCloseBRDPro( ) );
-			projectSetting.put( ToolkitConstants.CREATESHORTCUT,
-					data.getCurrentInstallBRDProData( ).isNotCreateShortcut( ) );
-			projectSetting.put( ToolkitConstants.SHORTCUTARGUMENTS,
-					data.getCurrentInstallBRDProData( ).getShortcutArguments( ) );
-			if ( data.getCurrentInstallBRDProData( ).getModules( ) != null )
-			{
-				StringBuffer buffer = new StringBuffer( );
-				for ( int i = 0; i < data.getCurrentInstallBRDProData( )
-						.getModules( ).length; i++ )
-				{
-					Module module = data.getCurrentInstallBRDProData( )
-							.getModules( )[i];
-					if ( module != null )
-					{
-						buffer.append( module.getName( ) );
-						if ( i < data.getCurrentInstallBRDProData( )
-								.getModules( ).length - 1 )
-							buffer.append( ";" );
-					}
-				}
-				projectSetting.put( ToolkitConstants.MODULES, buffer.toString( ) );
-			}
-			else
-			{
-				projectSetting.put( ToolkitConstants.MODULES, (String) null );
-			}
+			saveBRDProInstallationSettings( );
 		}
 
 		if ( data.getCurrentIVProject( ) != null )
 		{
-			wizard.getDialogSettings( )
-					.put( ToolkitConstants.CURRENT_IV_PROJECT,
-							data.getCurrentIVProject( ) );
-			IDialogSettings projectSetting = wizard.getDialogSettings( )
-					.getSection( data.getCurrentIVProject( ) );
-			if ( projectSetting == null )
-			{
-				projectSetting = wizard.getDialogSettings( )
-						.addNewSection( data.getCurrentIVProject( ) );
-			}
-
-			projectSetting.put( ToolkitConstants.P4ROOT,
-					data.getCurrentIportalViewerData( ).getRoot( ) );
-			projectSetting.put( ToolkitConstants.P4VIEW,
-					data.getCurrentIportalViewerData( ).getView( ) );
-			projectSetting.put( ToolkitConstants.CUSTOMPROJECTNAME,
-					data.getCurrentIportalViewerData( ).getCustomProjectName( ) );
-			projectSetting.put( ToolkitConstants.FORCEOPERATION,
-					data.getCurrentIportalViewerData( ).isForceOperation( ) );
-			projectSetting.put( ToolkitConstants.REVERTFILES,
-					data.getCurrentIportalViewerData( ).isRevertFiles( ) );
-			projectSetting.put( ToolkitConstants.P4SERVER,
-					data.getCurrentIportalViewerData( ).getServer( ) );
-			projectSetting.put( ToolkitConstants.P4USER,
-					data.getCurrentIportalViewerData( ).getUser( ) );
-			projectSetting.put( ToolkitConstants.P4PASSWORD,
-					data.getCurrentIportalViewerData( ).getPassword( ) );
-			projectSetting.put( ToolkitConstants.P4CLIENT,
-					data.getCurrentIportalViewerData( ).getClient( ) );
+			saveIVSyncSettings( );
 		}
 
+		saveBRDProResourcesSyncSettings( );
+
 		saveWizardDialogSettings( );
+	}
+
+	private void saveBRDProResourcesSyncSettings( )
+	{
+		IDialogSettings syncBRDProResourcesSetting = wizard.getDialogSettings( )
+				.getSection( ToolFeature.syncBRDProResources.name( ) );
+		if ( syncBRDProResourcesSetting == null )
+		{
+			syncBRDProResourcesSetting = wizard.getDialogSettings( )
+					.addNewSection( ToolFeature.syncBRDProResources.name( ) );
+		}
+		syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCTARGETDIRECTORY,
+				data.getSyncBRDProResourcesData( ).getTargetDirectory( ) );
+
+		if ( data.getSyncBRDProResourcesData( ).getIgnorePlatformVersions( ) != null
+				&& data.getSyncBRDProResourcesData( )
+						.getIgnorePlatformVersions( ).length > 0 )
+		{
+			StringBuffer buffer = new StringBuffer( );
+			for ( int i = 0; i < data.getSyncBRDProResourcesData( )
+					.getIgnorePlatformVersions( ).length; i++ )
+			{
+				String version = data.getSyncBRDProResourcesData( )
+						.getIgnorePlatformVersions( )[i];
+				if ( version != null )
+				{
+					buffer.append( version );
+					if ( i < data.getSyncBRDProResourcesData( )
+							.getIgnorePlatformVersions( ).length - 1 )
+						buffer.append( ";" );
+				}
+			}
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS,
+					buffer.toString( ) );
+		}
+		else
+		{
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS,
+					(String) null );
+		}
+
+		if ( data.getSyncBRDProResourcesData( ).getPluginVersions( ) != null
+				&& data.getSyncBRDProResourcesData( ).getPluginVersions( ).length > 0 )
+		{
+			StringBuffer buffer = new StringBuffer( );
+			for ( int i = 0; i < data.getSyncBRDProResourcesData( )
+					.getPluginVersions( ).length; i++ )
+			{
+				String version = data.getSyncBRDProResourcesData( )
+						.getPluginVersions( )[i];
+				if ( version != null )
+				{
+					buffer.append( version );
+					if ( i < data.getSyncBRDProResourcesData( )
+							.getPluginVersions( ).length - 1 )
+						buffer.append( ";" );
+				}
+			}
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS,
+					buffer.toString( ) );
+		}
+		else
+		{
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS,
+					(String) null );
+		}
+	}
+
+	private void saveIVSyncSettings( )
+	{
+		wizard.getDialogSettings( ).put( ToolkitConstants.CURRENT_IV_PROJECT,
+				data.getCurrentIVProject( ) );
+		IDialogSettings projectSetting = wizard.getDialogSettings( )
+				.getSection( data.getCurrentIVProject( ) );
+		if ( projectSetting == null )
+		{
+			projectSetting = wizard.getDialogSettings( )
+					.addNewSection( data.getCurrentIVProject( ) );
+		}
+
+		projectSetting.put( ToolkitConstants.P4ROOT,
+				data.getCurrentIportalViewerData( ).getRoot( ) );
+		projectSetting.put( ToolkitConstants.P4VIEW,
+				data.getCurrentIportalViewerData( ).getView( ) );
+		projectSetting.put( ToolkitConstants.CUSTOMPROJECTNAME,
+				data.getCurrentIportalViewerData( ).getCustomProjectName( ) );
+		projectSetting.put( ToolkitConstants.FORCEOPERATION,
+				data.getCurrentIportalViewerData( ).isForceOperation( ) );
+		projectSetting.put( ToolkitConstants.REVERTFILES,
+				data.getCurrentIportalViewerData( ).isRevertFiles( ) );
+		projectSetting.put( ToolkitConstants.P4SERVER,
+				data.getCurrentIportalViewerData( ).getServer( ) );
+		projectSetting.put( ToolkitConstants.P4USER,
+				data.getCurrentIportalViewerData( ).getUser( ) );
+		projectSetting.put( ToolkitConstants.P4PASSWORD,
+				data.getCurrentIportalViewerData( ).getPassword( ) );
+		projectSetting.put( ToolkitConstants.P4CLIENT,
+				data.getCurrentIportalViewerData( ).getClient( ) );
+	}
+
+	private void saveBRDProInstallationSettings( )
+	{
+		wizard.getDialogSettings( )
+				.put( ToolkitConstants.CURRENT_BRDPRO_PROJECT,
+						data.getCurrentBRDProProject( ) );
+		IDialogSettings projectSetting = wizard.getDialogSettings( )
+				.getSection( data.getCurrentBRDProProject( ) );
+		if ( projectSetting == null )
+		{
+			projectSetting = wizard.getDialogSettings( )
+					.addNewSection( data.getCurrentBRDProProject( ) );
+		}
+
+		projectSetting.put( ToolkitConstants.DIRECTORY,
+				data.getCurrentInstallBRDProData( ).getDirectory( ) );
+		projectSetting.put( ToolkitConstants.CLEARDIRECTORY,
+				data.getCurrentInstallBRDProData( ).isNotClearDirectory( ) );
+		projectSetting.put( ToolkitConstants.CLOSEBRDPRO,
+				data.getCurrentInstallBRDProData( ).isNotCloseBRDPro( ) );
+		projectSetting.put( ToolkitConstants.CREATESHORTCUT,
+				data.getCurrentInstallBRDProData( ).isNotCreateShortcut( ) );
+		projectSetting.put( ToolkitConstants.SHORTCUTARGUMENTS,
+				data.getCurrentInstallBRDProData( ).getShortcutArguments( ) );
+		if ( data.getCurrentInstallBRDProData( ).getModules( ) != null )
+		{
+			StringBuffer buffer = new StringBuffer( );
+			for ( int i = 0; i < data.getCurrentInstallBRDProData( )
+					.getModules( ).length; i++ )
+			{
+				Module module = data.getCurrentInstallBRDProData( )
+						.getModules( )[i];
+				if ( module != null )
+				{
+					buffer.append( module.getName( ) );
+					if ( i < data.getCurrentInstallBRDProData( ).getModules( ).length - 1 )
+						buffer.append( ";" );
+				}
+			}
+			projectSetting.put( ToolkitConstants.MODULES, buffer.toString( ) );
+		}
+		else
+		{
+			projectSetting.put( ToolkitConstants.MODULES, (String) null );
+		}
 	}
 
 	public void initToolkitConfig( )
@@ -145,84 +223,15 @@ public class ToolkitWizardHelper
 		{
 			for ( IDialogSettings setting : settings )
 			{
-				InstallBRDProData installData = new InstallBRDProData( );
-				data.addInstallBRDProData( installData );
-				installData.setProject( setting.getName( ) );
-				if ( setting.get( ToolkitConstants.DIRECTORY ) != null )
+				if ( setting.getName( )
+						.equals( ToolFeature.syncBRDProResources.name( ) ) )
 				{
-					installData.setDirectory( setting.get( ToolkitConstants.DIRECTORY ) );
-				}
-				if ( setting.get( ToolkitConstants.MODULES ) != null
-						&& setting.get( ToolkitConstants.MODULES )
-								.trim( )
-								.length( ) > 0 )
-				{
-					String[] moduleNames = setting.get( ToolkitConstants.MODULES )
-							.split( ";" );
-					Module[] modules = new Module[moduleNames.length];
-					for ( int i = 0; i < modules.length; i++ )
-					{
-						modules[i] = Modules.getInstance( )
-								.valueOf( moduleNames[i] );
-					}
-					installData.setModules( modules );
-				}
-				if ( setting.get( ToolkitConstants.CLEARDIRECTORY ) != null )
-				{
-					installData.setNotClearDirectory( setting.getBoolean( ToolkitConstants.CLEARDIRECTORY ) );
-				}
-				if ( setting.get( ToolkitConstants.CLOSEBRDPRO ) != null )
-				{
-					installData.setNotCloseBRDPro( setting.getBoolean( ToolkitConstants.CLOSEBRDPRO ) );
-				}
-				if ( setting.get( ToolkitConstants.SHORTCUTARGUMENTS ) != null )
-				{
-					installData.setShortcutArguments( setting.get( ToolkitConstants.SHORTCUTARGUMENTS ) );
-				}
-				if ( setting.get( ToolkitConstants.CREATESHORTCUT ) != null )
-				{
-					installData.setNotCreateShortcut( setting.getBoolean( ToolkitConstants.CREATESHORTCUT ) );
+					initSyncBRDProResourcesData( setting );
+					continue;
 				}
 
-				IPortalViewerData ivData = new IPortalViewerData( );
-				ivData.setProject( setting.getName( ) );
-				if ( setting.get( ToolkitConstants.P4ROOT ) != null )
-				{
-					ivData.setRoot( setting.get( ToolkitConstants.P4ROOT ) );
-				}
-				if ( setting.get( ToolkitConstants.P4VIEW ) != null )
-				{
-					ivData.setView( setting.get( ToolkitConstants.P4VIEW ) );
-				}
-				if ( setting.get( ToolkitConstants.CUSTOMPROJECTNAME ) != null )
-				{
-					ivData.setCustomProjectName( setting.get( ToolkitConstants.CUSTOMPROJECTNAME ) );
-				}
-				if ( setting.get( ToolkitConstants.FORCEOPERATION ) != null )
-				{
-					ivData.setForceOperation( setting.getBoolean( ToolkitConstants.FORCEOPERATION ) );
-				}
-				if ( setting.get( ToolkitConstants.REVERTFILES ) != null )
-				{
-					ivData.setRevertFiles( setting.getBoolean( ToolkitConstants.REVERTFILES ) );
-				}
-				if ( setting.get( ToolkitConstants.P4SERVER ) != null )
-				{
-					ivData.setServer( setting.get( ToolkitConstants.P4SERVER ) );
-				}
-				if ( setting.get( ToolkitConstants.P4USER ) != null )
-				{
-					ivData.setUser( setting.get( ToolkitConstants.P4USER ) );
-				}
-				if ( setting.get( ToolkitConstants.P4PASSWORD ) != null )
-				{
-					ivData.setPassword( setting.get( ToolkitConstants.P4PASSWORD ) );
-				}
-				if ( setting.get( ToolkitConstants.P4CLIENT ) != null )
-				{
-					ivData.setClient( setting.get( ToolkitConstants.P4CLIENT ) );
-				}
-				data.addIPortalViewerData( ivData );
+				initBRDProInstallationData( setting );
+				initIVData( setting );
 			}
 		}
 
@@ -238,6 +247,116 @@ public class ToolkitWizardHelper
 		{
 			data.setCurrentIVProject( wizard.getDialogSettings( )
 					.get( ToolkitConstants.CURRENT_IV_PROJECT ) );
+		}
+
+	}
+
+	private IPortalViewerData initIVData( IDialogSettings setting )
+	{
+		IPortalViewerData ivData = new IPortalViewerData( );
+		ivData.setProject( setting.getName( ) );
+		if ( setting.get( ToolkitConstants.P4ROOT ) != null )
+		{
+			ivData.setRoot( setting.get( ToolkitConstants.P4ROOT ) );
+		}
+		if ( setting.get( ToolkitConstants.P4VIEW ) != null )
+		{
+			ivData.setView( setting.get( ToolkitConstants.P4VIEW ) );
+		}
+		if ( setting.get( ToolkitConstants.CUSTOMPROJECTNAME ) != null )
+		{
+			ivData.setCustomProjectName( setting.get( ToolkitConstants.CUSTOMPROJECTNAME ) );
+		}
+		if ( setting.get( ToolkitConstants.FORCEOPERATION ) != null )
+		{
+			ivData.setForceOperation( setting.getBoolean( ToolkitConstants.FORCEOPERATION ) );
+		}
+		if ( setting.get( ToolkitConstants.REVERTFILES ) != null )
+		{
+			ivData.setRevertFiles( setting.getBoolean( ToolkitConstants.REVERTFILES ) );
+		}
+		if ( setting.get( ToolkitConstants.P4SERVER ) != null )
+		{
+			ivData.setServer( setting.get( ToolkitConstants.P4SERVER ) );
+		}
+		if ( setting.get( ToolkitConstants.P4USER ) != null )
+		{
+			ivData.setUser( setting.get( ToolkitConstants.P4USER ) );
+		}
+		if ( setting.get( ToolkitConstants.P4PASSWORD ) != null )
+		{
+			ivData.setPassword( setting.get( ToolkitConstants.P4PASSWORD ) );
+		}
+		if ( setting.get( ToolkitConstants.P4CLIENT ) != null )
+		{
+			ivData.setClient( setting.get( ToolkitConstants.P4CLIENT ) );
+		}
+		data.addIPortalViewerData( ivData );
+		return ivData;
+	}
+
+	private InstallBRDProData initBRDProInstallationData(
+			IDialogSettings setting )
+	{
+		InstallBRDProData installData = new InstallBRDProData( );
+		data.addInstallBRDProData( installData );
+		installData.setProject( setting.getName( ) );
+		if ( setting.get( ToolkitConstants.DIRECTORY ) != null )
+		{
+			installData.setDirectory( setting.get( ToolkitConstants.DIRECTORY ) );
+		}
+		if ( setting.get( ToolkitConstants.MODULES ) != null
+				&& setting.get( ToolkitConstants.MODULES ).trim( ).length( ) > 0 )
+		{
+			String[] moduleNames = setting.get( ToolkitConstants.MODULES )
+					.split( ";" );
+			Module[] modules = new Module[moduleNames.length];
+			for ( int i = 0; i < modules.length; i++ )
+			{
+				modules[i] = Modules.getInstance( ).valueOf( moduleNames[i] );
+			}
+			installData.setModules( modules );
+		}
+		if ( setting.get( ToolkitConstants.CLEARDIRECTORY ) != null )
+		{
+			installData.setNotClearDirectory( setting.getBoolean( ToolkitConstants.CLEARDIRECTORY ) );
+		}
+		if ( setting.get( ToolkitConstants.CLOSEBRDPRO ) != null )
+		{
+			installData.setNotCloseBRDPro( setting.getBoolean( ToolkitConstants.CLOSEBRDPRO ) );
+		}
+		if ( setting.get( ToolkitConstants.SHORTCUTARGUMENTS ) != null )
+		{
+			installData.setShortcutArguments( setting.get( ToolkitConstants.SHORTCUTARGUMENTS ) );
+		}
+		if ( setting.get( ToolkitConstants.CREATESHORTCUT ) != null )
+		{
+			installData.setNotCreateShortcut( setting.getBoolean( ToolkitConstants.CREATESHORTCUT ) );
+		}
+		return installData;
+	}
+
+	private void initSyncBRDProResourcesData( IDialogSettings setting )
+	{
+		SyncBRDProResourcesData syncData = new SyncBRDProResourcesData( );
+		data.setSyncBRDProResourcesData( syncData );
+
+		if ( setting.get( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS ) != null
+				&& setting.get( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS )
+						.trim( )
+						.length( ) > 0 )
+		{
+			syncData.setIgnorePlatformVersions( setting.get( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS )
+					.split( ";" ) );
+		}
+
+		if ( setting.get( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS ) != null
+				&& setting.get( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS )
+						.trim( )
+						.length( ) > 0 )
+		{
+			syncData.setPluginVersions( setting.get( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS )
+					.split( ";" ) );
 		}
 	}
 

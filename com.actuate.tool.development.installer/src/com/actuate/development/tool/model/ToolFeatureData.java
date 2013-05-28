@@ -19,6 +19,7 @@ public class ToolFeatureData
 	private ToolFeature toolFeature;
 	private List<InstallBRDProData> installBRDProDatas = new ArrayList<InstallBRDProData>( );
 	private List<IPortalViewerData> iPortalViewerDatas = new ArrayList<IPortalViewerData>( );
+	private SyncBRDProResourcesData syncBRDProResourcesData;
 	private CloneWorkspaceData cloneWorkspaceData;
 	private String currentBRDProProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_BRDPRO_PROJECT,
 			"AugustaR1" );
@@ -186,6 +187,22 @@ public class ToolFeatureData
 			cloneWorkspaceData = new CloneWorkspaceData( );
 		}
 		return cloneWorkspaceData;
+	}
+	
+	public SyncBRDProResourcesData getSyncBRDProResourcesData( )
+	{
+		if ( syncBRDProResourcesData == null )
+		{
+			syncBRDProResourcesData = new SyncBRDProResourcesData( );
+		}
+		return syncBRDProResourcesData;
+	}
+
+	
+	public void setSyncBRDProResourcesData(
+			SyncBRDProResourcesData syncBRDProResourcesData )
+	{
+		this.syncBRDProResourcesData = syncBRDProResourcesData;
 	}
 
 	private List<IPropertyChangeListener> listeners = new ArrayList<IPropertyChangeListener>( );

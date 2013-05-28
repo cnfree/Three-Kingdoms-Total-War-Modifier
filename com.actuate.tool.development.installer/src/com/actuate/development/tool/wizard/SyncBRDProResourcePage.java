@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.actuate.development.tool.model.Module;
+import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
 import com.actuate.development.tool.model.Version;
 import com.actuate.development.tool.model.VersionType;
@@ -71,7 +72,7 @@ public class SyncBRDProResourcePage extends WizardPage implements
 		composite.setLayout( gridLayout );
 
 		Label platformLabel = new Label( composite, SWT.NONE );
-		platformLabel.setText( "&Select the eclipse platform versions will be synchironized" );
+		platformLabel.setText( "&Select the versions of eclipse platform that will be synchironized" );
 		GridData gd = new GridData( GridData.FILL_HORIZONTAL );
 		gd.horizontalSpan = 3;
 		platformLabel.setLayoutData( gd );
@@ -104,6 +105,7 @@ public class SyncBRDProResourcePage extends WizardPage implements
 				}
 
 				updateModelCheckStatus( platformViewer );
+				setPageComplete( isPageComplete( ) );
 			}
 		} );
 
@@ -111,13 +113,13 @@ public class SyncBRDProResourcePage extends WizardPage implements
 		platformViewer.setChecked( VersionType.platform, true );
 		for ( Object obj : provider.getChildren( VersionType.platform ) )
 			platformViewer.setChecked( obj, true );
-		
+
 		gd = new GridData( GridData.FILL_BOTH );
 		gd.horizontalSpan = 3;
 		gd.heightHint = 100;
 		platformViewer.getTree( ).setLayoutData( gd );
 
-		new Label( composite, SWT.NONE ).setText( "Installation &Directory: " );
+		new Label( composite, SWT.NONE ).setText( "Target &Directory: " );
 		txtDirectory = new Text( composite, SWT.BORDER );
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		txtDirectory.setLayoutData( gd );
@@ -126,19 +128,6 @@ public class SyncBRDProResourcePage extends WizardPage implements
 
 			public void modifyText( ModifyEvent e )
 			{
-				String text = txtDirectory.getText( );
-				File file = new File( text );
-				if ( file.getParentFile( ) == null )
-				{
-					setErrorMessage( "The installation directory is invalid." );
-				}
-				else
-				{
-					setErrorMessage( null );
-					if ( data != null )
-						data.getCurrentInstallBRDProData( )
-								.setDirectory( txtDirectory.getText( ) );
-				}
 				setPageComplete( isPageComplete( ) );
 			}
 
@@ -151,7 +140,7 @@ public class SyncBRDProResourcePage extends WizardPage implements
 			public void widgetSelected( SelectionEvent e )
 			{
 				DirectoryDialog dialog = new DirectoryDialog( getShell( ) );
-				dialog.setMessage( "Select Installation Directory" );
+				dialog.setMessage( "Select Target Directory" );
 				String path = dialog.open( );
 				if ( path != null )
 				{
@@ -160,6 +149,8 @@ public class SyncBRDProResourcePage extends WizardPage implements
 			}
 
 		} );
+
+		txtDirectory.setText( "\\\\qaant\\QA\\Toolkit\\platform" );
 
 		Point size = composite.computeSize( SWT.DEFAULT, SWT.DEFAULT );
 		composite.setSize( size );
@@ -194,6 +185,68 @@ public class SyncBRDProResourcePage extends WizardPage implements
 		scrollContent.setMinSize( composite.computeSize( SWT.DEFAULT,
 				SWT.DEFAULT ) );
 		composite.layout( );
+	}
+
+	public boolean isPageComplete( )
+	{
+		if ( data != null )
+		{
+			if ( data.getToolFeature( ) != ToolFeature.syncBRDProResources )
+				return true;
+			checkStatus( );
+			return getErrorMessage( ) == null;
+
+		}
+		return false;
+	}
+
+	private void checkStatus( )
+	{
+		if ( data != null )
+		{
+			data.getSyncBRDProResourcesData( )
+					.setTargetDirectory( txtDirectory.getText( ) );
+
+			SyncResourcesContentProvider provider = (SyncResourcesContentProvider) platformViewer.getContentProvider( );
+			Object[] children = provider.getChildren( VersionType.platform );
+			List<String> uncheckList = new ArrayList<String>( );
+			List<String> versionList = new ArrayList<String>( );
+			for ( int i = 0; i < children.length; i++ )
+			{
+				if ( !platformViewer.getChecked( children[i] ) )
+				{
+					uncheckList.add( ( (Version) children[i] ).getValue( ) );
+				}
+				else
+				{
+					String versionToken = ( (Version) children[i] ).getValue( );
+					versionToken = versionToken.substring( 0,
+							versionToken.lastIndexOf( '.' ) );
+					if ( !versionList.contains( versionToken ) )
+						versionList.add( versionToken );
+				}
+			}
+			data.getSyncBRDProResourcesData( )
+					.setIgnorePlatformVersions( uncheckList.toArray( new String[0] ) );
+			data.getSyncBRDProResourcesData( )
+					.setPluginVersions( versionList.toArray( new String[0] ) );
+		}
+
+		if ( platformViewer.getCheckedElements( ) == null
+				|| platformViewer.getCheckedElements( ).length == 0 )
+		{
+			setErrorMessage( "Please select at least one version of eclipse platform." );
+			return;
+		}
+		String text = txtDirectory.getText( );
+		File file = new File( text );
+		if ( file.getParentFile( ) == null )
+		{
+			setErrorMessage( "The target directory is invalid." );
+			return;
+		}
+		setErrorMessage( null );
+		return;
 	}
 
 	private void checkCheckStatus( final CheckboxTreeViewer moduleViewer,
