@@ -3,6 +3,7 @@ package com.actuate.development.tool.wizard;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -163,21 +164,58 @@ public class SyncBRDProResourcePage extends WizardPage implements
 			}
 		} );
 
+		final Button bgButton = new Button( composite, SWT.CHECK );
+		bgButton.setText( "Minimize Toolkit to the system tray area when synchironizing the resources" );
+		gd = new GridData( );
+		gd.horizontalSpan = 3;
+		gd.horizontalSpan = 3;
+		bgButton.setLayoutData( gd );
+		bgButton.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				if ( data != null )
+				{
+					data.getSyncBRDProResourcesData( )
+							.setMinimizeToolkit( bgButton.getSelection( ) );
+				}
+			}
+		} );
+
 		scrollContent.setContent( composite );
 
 		setControl( scrollContent );
 
-		// if ( data != null && data.getCurrentIVProject( ) != null )
-		// {
-		// int index = comboProjects.indexOf( data.getCurrentIVProject( ) );
-		// if ( index != -1 )
-		// {
-		// comboProjects.setText( data.getCurrentIVProject( ) );
-		// handleProjectSelection( );
-		// }
-		// }
-		//
-		// initPage( );
+		if ( data != null && data.getSyncBRDProResourcesData( ) != null )
+		{
+			if ( data.getSyncBRDProResourcesData( ).getTargetDirectory( ) != null )
+			{
+				txtDirectory.setText( data.getSyncBRDProResourcesData( )
+						.getTargetDirectory( ) );
+			}
+
+			if ( data.getSyncBRDProResourcesData( ).getIgnorePlatformVersions( ) != null
+					&& data.getSyncBRDProResourcesData( )
+							.getIgnorePlatformVersions( ).length > 0 )
+			{
+				List<String> versions = Arrays.asList( data.getSyncBRDProResourcesData( )
+						.getIgnorePlatformVersions( ) );
+				for ( Object obj : provider.getChildren( VersionType.platform ) )
+				{
+					Version version = (Version) obj;
+					if ( versions.contains( version.getValue( ) ) )
+						platformViewer.setChecked( obj, false );
+				}
+				checkCheckStatus( platformViewer,
+						provider,
+						VersionType.platform );
+			}
+
+			bgButton.setSelection( data.getSyncBRDProResourcesData( )
+					.isMinimizeToolkit( ) );
+
+			setPageComplete( isPageComplete( ) );
+		}
 	}
 
 	private void computeSize( )

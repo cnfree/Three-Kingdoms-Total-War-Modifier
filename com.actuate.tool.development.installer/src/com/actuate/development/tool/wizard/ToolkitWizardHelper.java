@@ -81,8 +81,12 @@ public class ToolkitWizardHelper
 			syncBRDProResourcesSetting = wizard.getDialogSettings( )
 					.addNewSection( ToolFeature.syncBRDProResources.name( ) );
 		}
-		syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCTARGETDIRECTORY,
+
+		syncBRDProResourcesSetting.put( ToolkitConstants.BRDPRO_SYNC_TARGETDIRECTORY,
 				data.getSyncBRDProResourcesData( ).getTargetDirectory( ) );
+
+		syncBRDProResourcesSetting.put( ToolkitConstants.BRDPRO_SYNC_MINIMIZETOOLKIT,
+				data.getSyncBRDProResourcesData( ).isMinimizeToolkit( ) );
 
 		if ( data.getSyncBRDProResourcesData( ).getIgnorePlatformVersions( ) != null
 				&& data.getSyncBRDProResourcesData( )
@@ -102,12 +106,12 @@ public class ToolkitWizardHelper
 						buffer.append( ";" );
 				}
 			}
-			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS,
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPRO_SYNC_IGNOREDVERSIONS,
 					buffer.toString( ) );
 		}
 		else
 		{
-			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS,
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPRO_SYNC_IGNOREDVERSIONS,
 					(String) null );
 		}
 
@@ -128,12 +132,12 @@ public class ToolkitWizardHelper
 						buffer.append( ";" );
 				}
 			}
-			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS,
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPRO_SYNC_PLUGINVERSIONS,
 					buffer.toString( ) );
 		}
 		else
 		{
-			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS,
+			syncBRDProResourcesSetting.put( ToolkitConstants.BRDPRO_SYNC_PLUGINVERSIONS,
 					(String) null );
 		}
 	}
@@ -341,22 +345,35 @@ public class ToolkitWizardHelper
 		SyncBRDProResourcesData syncData = new SyncBRDProResourcesData( );
 		data.setSyncBRDProResourcesData( syncData );
 
-		if ( setting.get( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS ) != null
-				&& setting.get( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS )
+		if ( setting.get( ToolkitConstants.BRDPRO_SYNC_IGNOREDVERSIONS ) != null
+				&& setting.get( ToolkitConstants.BRDPRO_SYNC_IGNOREDVERSIONS )
 						.trim( )
 						.length( ) > 0 )
 		{
-			syncData.setIgnorePlatformVersions( setting.get( ToolkitConstants.BRDPROSYNCIGNOREDVERSIONS )
+			syncData.setIgnorePlatformVersions( setting.get( ToolkitConstants.BRDPRO_SYNC_IGNOREDVERSIONS )
 					.split( ";" ) );
 		}
 
-		if ( setting.get( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS ) != null
-				&& setting.get( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS )
+		if ( setting.get( ToolkitConstants.BRDPRO_SYNC_PLUGINVERSIONS ) != null
+				&& setting.get( ToolkitConstants.BRDPRO_SYNC_PLUGINVERSIONS )
 						.trim( )
 						.length( ) > 0 )
 		{
-			syncData.setPluginVersions( setting.get( ToolkitConstants.BRDPROSYNCPLUGINVERSIONS )
+			syncData.setPluginVersions( setting.get( ToolkitConstants.BRDPRO_SYNC_PLUGINVERSIONS )
 					.split( ";" ) );
+		}
+
+		if ( setting.get( ToolkitConstants.BRDPRO_SYNC_TARGETDIRECTORY ) != null
+				&& setting.get( ToolkitConstants.BRDPRO_SYNC_TARGETDIRECTORY )
+						.trim( )
+						.length( ) > 0 )
+		{
+			syncData.setTargetDirectory( setting.get( ToolkitConstants.BRDPRO_SYNC_TARGETDIRECTORY ) );
+		}
+
+		if ( setting.get( ToolkitConstants.BRDPRO_SYNC_MINIMIZETOOLKIT ) != null )
+		{
+			syncData.setMinimizeToolkit( setting.getBoolean( ToolkitConstants.BRDPRO_SYNC_MINIMIZETOOLKIT ) );
 		}
 	}
 

@@ -56,9 +56,11 @@ public class ToolkitConstants
 
 	public static final String SHORTCUTARGUMENTS = "ShortcutArguments";
 	
-	public static final String BRDPROSYNCIGNOREDVERSIONS = "BRDProSyncIgnoredVersions";
+	public static final String BRDPRO_SYNC_IGNOREDVERSIONS = "BRDProSyncIgnoredVersions";
 	
-	public static final String BRDPROSYNCPLUGINVERSIONS = "BRDProSyncPluginVersions";
+	public static final String BRDPRO_SYNC_PLUGINVERSIONS = "BRDProSyncPluginVersions";
 	
-	public static final String BRDPROSYNCTARGETDIRECTORY = "BRDProSyncTargetDirectory";
+	public static final String BRDPRO_SYNC_TARGETDIRECTORY = "BRDProSyncTargetDirectory";
+	
+	public static final String BRDPRO_SYNC_MINIMIZETOOLKIT = "BRDProSyncMinimizeToolkit";
 }

@@ -69,6 +69,7 @@ public class ToolFeaturePage extends WizardPage
 					LocationConfig.setLocation( LocationConfig.SHANGHAI );
 				}
 				updateSyncButtonStatus( );
+				setPageComplete( isPageComplete( ) );
 			}
 		} );
 
@@ -191,7 +192,7 @@ public class ToolFeaturePage extends WizardPage
 		if ( data != null )
 		{
 			checkInstallType( );
-			return true;
+			return data.getToolFeature( ) != null;
 		}
 		return false;
 	}
@@ -214,7 +215,10 @@ public class ToolFeaturePage extends WizardPage
 			}
 			if ( syncResourceButton.getSelection( ) )
 			{
-				data.setToolFeature( ToolFeature.syncBRDProResources );
+				if ( syncResourceButton.isVisible( ) )
+					data.setToolFeature( ToolFeature.syncBRDProResources );
+				else
+					data.setToolFeature( null );
 			}
 		}
 	}
