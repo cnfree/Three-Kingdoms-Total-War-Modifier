@@ -1402,6 +1402,8 @@ public class IPortalViewerProjectPage extends WizardPage implements
 			revertButton.setSelection( false );
 			skipSyncButton.setSelection( false );
 		}
+
+		setPageComplete( isPageComplete( ) );
 	}
 
 	public boolean isPageComplete( )

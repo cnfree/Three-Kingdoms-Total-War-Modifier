@@ -18,7 +18,8 @@ import org.eclipse.swt.widgets.Text;
 
 import com.actuate.development.tool.model.ToolFeatureData;
 
-public class BRDProShortcutPage extends WizardPage implements IPropertyChangeListener
+public class BRDProShortcutPage extends WizardPage implements
+		IPropertyChangeListener
 {
 
 	private Text shortcutArgumentText;
@@ -80,7 +81,7 @@ public class BRDProShortcutPage extends WizardPage implements IPropertyChangeLis
 				if ( data != null )
 					data.getCurrentInstallBRDProData( )
 							.setNotCreateShortcut( !shortcutButton.getSelection( ) );
-				//checkTextStatus( shortcutButton );
+				// checkTextStatus( shortcutButton );
 			}
 		} );
 		gd = new GridData( );
@@ -99,7 +100,7 @@ public class BRDProShortcutPage extends WizardPage implements IPropertyChangeLis
 		{
 			shortcutButton.setSelection( !data.getCurrentInstallBRDProData( )
 					.isNotCreateShortcut( ) );
-			//checkTextStatus( shortcutButton );
+			// checkTextStatus( shortcutButton );
 			if ( data.getCurrentInstallBRDProData( ).getShortcutArguments( ) != null
 					&& data.getCurrentInstallBRDProData( )
 							.getShortcutArguments( )
@@ -116,6 +117,8 @@ public class BRDProShortcutPage extends WizardPage implements IPropertyChangeLis
 						.setShortcutArguments( shortcutArgumentText.getText( ) );
 			}
 		}
+		
+		setPageComplete( isPageComplete( ) );
 	}
 
 	public boolean isPageComplete( )
@@ -126,11 +129,6 @@ public class BRDProShortcutPage extends WizardPage implements IPropertyChangeLis
 		}
 		return false;
 	}
-
-//	private void checkTextStatus( final Button shortcutButton )
-//	{
-//		shortcutArgumentText.setEnabled( shortcutButton.getSelection( ) );
-//	}
 
 	public void propertyChange( PropertyChangeEvent event )
 	{

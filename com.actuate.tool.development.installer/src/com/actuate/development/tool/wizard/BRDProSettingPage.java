@@ -286,6 +286,8 @@ public class BRDProSettingPage extends WizardPage implements IPropertyChangeList
 			closeButton.setSelection( !data.getCurrentInstallBRDProData( )
 					.isNotCloseBRDPro( ) );
 		}
+		
+		setPageComplete( isPageComplete( ) );
 	}
 
 	public boolean isPageComplete( )

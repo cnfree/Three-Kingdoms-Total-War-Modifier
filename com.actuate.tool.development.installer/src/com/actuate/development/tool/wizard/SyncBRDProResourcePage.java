@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -38,8 +36,7 @@ import com.actuate.development.tool.model.VersionType;
 import com.actuate.development.tool.provider.SyncResourcesContentProvider;
 import com.actuate.development.tool.provider.SyncResourcesLabelProvider;
 
-public class SyncBRDProResourcePage extends WizardPage implements
-		IPropertyChangeListener
+public class SyncBRDProResourcePage extends WizardPage
 {
 
 	private ToolFeatureData data;
@@ -47,6 +44,8 @@ public class SyncBRDProResourcePage extends WizardPage implements
 	private Text txtDirectory;
 	private ScrolledComposite scrollContent;
 	private Composite composite;
+	private Button bgButton;
+	private SyncResourcesContentProvider provider;
 
 	public SyncBRDProResourcePage( ToolFeatureData data )
 	{
@@ -81,7 +80,7 @@ public class SyncBRDProResourcePage extends WizardPage implements
 		platformViewer = new CheckboxTreeViewer( composite, SWT.BORDER );
 		platformViewer.getTree( )
 				.setLayoutData( new GridData( GridData.FILL_BOTH ) );
-		final SyncResourcesContentProvider provider = new SyncResourcesContentProvider( data );
+		provider = new SyncResourcesContentProvider( data );
 		platformViewer.setContentProvider( provider );
 		platformViewer.setLabelProvider( new SyncResourcesLabelProvider( ) );
 		platformViewer.setInput( new Object[0] );
@@ -164,7 +163,7 @@ public class SyncBRDProResourcePage extends WizardPage implements
 			}
 		} );
 
-		final Button bgButton = new Button( composite, SWT.CHECK );
+		bgButton = new Button( composite, SWT.CHECK );
 		bgButton.setText( "&Minimize Toolkit to the system tray area when synchironizing the resources" );
 		gd = new GridData( );
 		gd.horizontalSpan = 3;
@@ -186,6 +185,11 @@ public class SyncBRDProResourcePage extends WizardPage implements
 
 		setControl( scrollContent );
 
+		initPage( );
+	}
+
+	private void initPage( )
+	{
 		if ( data != null && data.getSyncBRDProResourcesData( ) != null )
 		{
 			if ( data.getSyncBRDProResourcesData( ).getTargetDirectory( ) != null )
@@ -245,7 +249,6 @@ public class SyncBRDProResourcePage extends WizardPage implements
 			data.getSyncBRDProResourcesData( )
 					.setTargetDirectory( txtDirectory.getText( ) );
 
-			SyncResourcesContentProvider provider = (SyncResourcesContentProvider) platformViewer.getContentProvider( );
 			Object[] children = provider.getChildren( VersionType.platform );
 			List<String> uncheckList = new ArrayList<String>( );
 			List<String> versionList = new ArrayList<String>( );
@@ -318,12 +321,6 @@ public class SyncBRDProResourcePage extends WizardPage implements
 		}
 		data.getCurrentInstallBRDProData( )
 				.setModules( list.toArray( new Module[0] ) );
-	}
-
-	public void propertyChange( PropertyChangeEvent event )
-	{
-		// TODO Auto-generated method stub
-
 	}
 
 }
