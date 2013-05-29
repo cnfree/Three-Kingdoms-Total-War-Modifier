@@ -28,7 +28,7 @@ public class ToolFeaturePage extends WizardPage
 
 	ToolFeaturePage( ToolFeatureData data )
 	{
-		super( "InstallTypePage" );
+		super( "ToolFeaturePage" );
 		this.data = data;
 		setTitle( "Select the Toolkit Feature" );
 		setDescription( "Select the toolkit feature." );
@@ -102,7 +102,7 @@ public class ToolFeaturePage extends WizardPage
 					iportalSyncButton.setSelection( false );
 					syncResourceButton.setSelection( false );
 				}
-				checkInstallType( );
+				checkToolFeature( );
 				setPageComplete( isPageComplete( ) );
 			}
 		} );
@@ -166,7 +166,7 @@ public class ToolFeaturePage extends WizardPage
 
 		updateSyncButtonStatus( );
 
-		checkInstallType( );
+		checkToolFeature( );
 		setControl( composite );
 	}
 
@@ -191,13 +191,13 @@ public class ToolFeaturePage extends WizardPage
 	{
 		if ( data != null )
 		{
-			checkInstallType( );
+			checkToolFeature( );
 			return data.getToolFeature( ) != null;
 		}
 		return false;
 	}
 
-	private void checkInstallType( )
+	private void checkToolFeature( )
 	{
 		if ( data != null )
 		{
@@ -215,9 +215,9 @@ public class ToolFeaturePage extends WizardPage
 			}
 			if ( syncResourceButton.getSelection( ) )
 			{
-				if ( syncResourceButton.isVisible( ) )
-					data.setToolFeature( ToolFeature.syncBRDProResources );
-				else
+				data.setToolFeature( ToolFeature.syncBRDProResources );
+				if ( this.getControl( ).isVisible( )
+						&& !syncResourceButton.isVisible( ) )
 					data.setToolFeature( null );
 			}
 		}
