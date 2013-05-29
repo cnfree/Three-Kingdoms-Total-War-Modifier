@@ -11,7 +11,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import com.actuate.development.tool.config.UserDataConfig;
-import com.actuate.development.tool.model.Version;
 import com.actuate.development.tool.wizard.ToolkitConstants;
 
 public class ToolFeatureData
@@ -26,7 +25,6 @@ public class ToolFeatureData
 			"AugustaR1" );
 	private String currentIVProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_IPORTAL_PROJECT,
 			"AugustaR1" );
-	private Version[] platformVersions;
 
 	public String getCurrentIVProject( )
 	{
@@ -189,7 +187,7 @@ public class ToolFeatureData
 		}
 		return cloneWorkspaceData;
 	}
-	
+
 	public SyncBRDProResourcesData getSyncBRDProResourcesData( )
 	{
 		if ( syncBRDProResourcesData == null )
@@ -199,7 +197,6 @@ public class ToolFeatureData
 		return syncBRDProResourcesData;
 	}
 
-	
 	public void setSyncBRDProResourcesData(
 			SyncBRDProResourcesData syncBRDProResourcesData )
 	{
@@ -216,15 +213,5 @@ public class ToolFeatureData
 	public void removeChangeListener( IPropertyChangeListener listener )
 	{
 		listeners.remove( listener );
-	}
-
-	public void setPlatformVersions( Version[] platformVersions )
-	{
-		this.platformVersions = platformVersions;
-	}
-
-	public Version[] getPlatformVersions( )
-	{
-		return platformVersions;
 	}
 }

@@ -1,6 +1,8 @@
 
 package com.actuate.development.tool.model.feature;
 
+import com.actuate.development.tool.model.Version;
+
 public class SyncBRDProResourcesData
 {
 
@@ -8,8 +10,20 @@ public class SyncBRDProResourcesData
 	private String[] pluginVersions;
 	private String targetDirectory;
 	private boolean minimizeToolkit;
+	private Version[] platformVersions;
+	
+	
+	public Version[] getPlatformVersions( )
+	{
+		return platformVersions;
+	}
 
 	
+	public void setPlatformVersions( Version[] platformVersions )
+	{
+		this.platformVersions = platformVersions;
+	}
+
 	public boolean isMinimizeToolkit( )
 	{
 		return minimizeToolkit;

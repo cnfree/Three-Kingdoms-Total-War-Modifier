@@ -47,7 +47,8 @@ public class SyncResourcesContentProvider implements ITreeContentProvider
 			switch ( type )
 			{
 				case platform :
-					return data.getPlatformVersions( );
+					return data.getSyncBRDProResourcesData( )
+							.getPlatformVersions( );
 			}
 		}
 		return new Object[0];

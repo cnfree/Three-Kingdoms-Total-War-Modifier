@@ -530,6 +530,6 @@ public class ToolkitWizardHelper
 			}
 		} );
 		Collections.reverse( versions );
-		data.setPlatformVersions( versions.toArray( new Version[0] ) );
+		data.getSyncBRDProResourcesData( ).setPlatformVersions( versions.toArray( new Version[0] ) );
 	}
 }
