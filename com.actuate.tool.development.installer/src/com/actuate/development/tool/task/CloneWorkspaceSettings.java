@@ -6,16 +6,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 
-import com.actuate.development.tool.model.ToolFeatureData;
+import com.actuate.development.tool.model.CloneWorkspaceData;
 import com.actuate.development.tool.util.UIUtil;
 import com.actuate.development.tool.util.WorkspaceUtil;
 
-public class CloneWorkspaceSettings
+public class CloneWorkspaceSettings implements ITaskWithMonitor
 {
 
-	private ToolFeatureData data;
+	private CloneWorkspaceData data;
 
-	public CloneWorkspaceSettings( ToolFeatureData data )
+	public CloneWorkspaceSettings( CloneWorkspaceData data )
 	{
 		this.data = data;
 	}
@@ -29,10 +29,8 @@ public class CloneWorkspaceSettings
 				IProgressMonitor.UNKNOWN );
 
 		final boolean result = WorkspaceUtil.cloneWorkspaceSettings( monitor,
-				data.getCloneWorkspaceData( ).getSourceWorkspace( )
-						+ "\\.metadata",
-				data.getCloneWorkspaceData( ).getTargetWorkspace( )
-						+ "\\.metadata" );
+				data.getSourceWorkspace( ) + "\\.metadata",
+				data.getTargetWorkspace( ) + "\\.metadata" );
 
 		monitor.subTask( "" );
 		monitor.setTaskName( "Finished cloning the workspace settings" );

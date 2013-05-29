@@ -51,7 +51,7 @@ import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.util.UIUtil;
 
-public class InstallBRDPro
+public class InstallBRDPro implements ITaskWithMonitor
 {
 
 	private static final String ORG_ECLIPSE_DTP = "org.eclipse.datatools.connectivity.oda.feature_";

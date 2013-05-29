@@ -26,9 +26,8 @@ import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
 import com.actuate.development.tool.model.ToolFeature;
 import com.actuate.development.tool.model.ToolFeatureData;
-import com.actuate.development.tool.task.CloneWorkspaceSettings;
-import com.actuate.development.tool.task.InstallBRDPro;
-import com.actuate.development.tool.task.SyncIPortalWorkspace;
+import com.actuate.development.tool.task.ITaskWithMonitor;
+import com.actuate.development.tool.task.TaskFactory;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.util.UIUtil;
 
@@ -256,25 +255,10 @@ public class ToolkitWizard extends Wizard
 				public void run( IProgressMonitor monitor )
 						throws InvocationTargetException, InterruptedException
 				{
-
-					if ( data != null )
+					ITaskWithMonitor task = TaskFactory.createTask( data );
+					if ( task != null )
 					{
-						if ( data.getToolFeature( ) == ToolFeature.installBRDPro )
-						{
-							new InstallBRDPro( data.getCurrentInstallBRDProData( ) ).execute( monitor );
-						}
-						else if ( data.getToolFeature( ) == ToolFeature.cloneWorkspaceSettings )
-						{
-							new CloneWorkspaceSettings( data ).execute( monitor );
-						}
-						else if ( data.getToolFeature( ) == ToolFeature.synciPortalWorkspace )
-						{
-							new SyncIPortalWorkspace( data.getCurrentIportalViewerData( ) ).execute( monitor );
-						}
-						else if ( data.getToolFeature( ) == ToolFeature.syncBRDProResources )
-						{
-							//new SyncIPortalWorkspace( data.getCurrentIportalViewerData( ) ).execute( monitor );
-						}
+						task.execute( monitor );
 					}
 					monitor.done( );
 				}

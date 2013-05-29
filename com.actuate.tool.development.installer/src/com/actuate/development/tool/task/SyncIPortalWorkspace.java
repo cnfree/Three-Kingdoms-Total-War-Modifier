@@ -47,7 +47,7 @@ import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.util.UIUtil;
 
-public class SyncIPortalWorkspace
+public class SyncIPortalWorkspace implements ITaskWithMonitor
 {
 
 	private IPortalViewerData data;
