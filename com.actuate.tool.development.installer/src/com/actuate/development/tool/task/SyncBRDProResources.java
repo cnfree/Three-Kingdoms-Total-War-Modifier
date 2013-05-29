@@ -1,9 +1,11 @@
 
 package com.actuate.development.tool.task;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,10 +18,15 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.sf.feeling.swt.win32.extension.shell.Windows;
 
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.Version;
 import com.actuate.development.tool.model.feature.SyncBRDProResourcesData;
+import com.actuate.development.tool.util.FileUtil;
+import com.actuate.development.tool.util.UIUtil;
 
 public class SyncBRDProResources implements ITaskWithMonitor
 {
@@ -34,6 +41,9 @@ public class SyncBRDProResources implements ITaskWithMonitor
 			"(?i)wtp.+sdk.+\\.zip" );
 
 	private SyncBRDProResourcesData data;
+	private long allLength;
+	private boolean monitorAntProcess;
+	private Process javaProcess;
 
 	public SyncBRDProResources( SyncBRDProResourcesData data )
 	{
@@ -45,7 +55,9 @@ public class SyncBRDProResources implements ITaskWithMonitor
 		if ( data == null )
 			return;
 
-		monitor.beginTask( "Synchronizing the BRDPro resource files", 100000 );
+		startMonitorProcess( monitor );
+
+		monitor.beginTask( "Synchronizing file", 100000 );
 
 		Version[] versions = data.getPlatformVersions( );
 		List<String> ignoreVersions = new ArrayList<String>( );
@@ -61,12 +73,10 @@ public class SyncBRDProResources implements ITaskWithMonitor
 				syncVersions.add( versions[i].getValue( ) );
 		}
 
-		final long[] allLength = new long[]{
-			0L
-		};
+		allLength = 0L;
 		File platformDir = new File( "\\\\QA-BUILD\\BIRTOutput\\platform" );
 		final Map<String, List<File>> sdkFiles = new HashMap<String, List<File>>( );
-		listSDKFiles( syncVersions, allLength, platformDir, sdkFiles );
+		listSDKFiles( syncVersions, platformDir, sdkFiles );
 
 		final List<String> pluginVersions = new ArrayList<String>( );
 		if ( data.getPluginVersions( ) != null )
@@ -75,21 +85,68 @@ public class SyncBRDProResources implements ITaskWithMonitor
 		}
 
 		File pluginDir = new File( "\\\\qaant\\QA\\Toolkit\\plugins" );
-		final File[] pluginFiles = listToolkitPlugins( allLength,
-				pluginVersions,
+		final File[] pluginFiles = listToolkitPlugins( pluginVersions,
 				pluginDir );
 
 		File targetDir = new File( data.getTargetDirectory( ) );
 		if ( !targetDir.exists( ) )
 			targetDir.mkdirs( );
 		{
-			copySDKFiles( platformDir, sdkFiles );
-			copyToolkitPluginFiles( pluginDir, pluginFiles );
+			copySDKFiles( platformDir, sdkFiles, monitor );
+			copyToolkitPluginFiles( pluginDir, pluginFiles, monitor );
+		}
+
+		if ( !monitor.isCanceled( ) )
+		{
+			finishTask( monitor );
+		}
+		else
+		{
+			cancelTask( monitor );
 		}
 	}
 
+	private void cancelTask( final IProgressMonitor monitor )
+	{
+		monitorAntProcess = false;
+		monitor.subTask( "" );
+		monitor.setTaskName( "Canceled synchronizing the BRDPro resource files" );
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				MessageDialog.openInformation( null,
+						"Information",
+						"Canceled synchronizing the BRDPro resource files." );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+			}
+		} );
+	}
+
+	private void finishTask( final IProgressMonitor monitor )
+	{
+		monitorAntProcess = false;
+		monitor.subTask( "" );
+		monitor.setTaskName( "Finished synchronizing the BRDPro resource files" );
+
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				if ( UIUtil.getShell( ).getMinimized( ) )
+					Windows.flashWindow( UIUtil.getShell( ).handle, true );
+				StringBuffer buffer = new StringBuffer( );
+				buffer.append( "Synchronize the BRDPro resource files sucessfully." );
+				MessageDialog.openInformation( null,
+						"Information",
+						buffer.toString( ) );
+				Windows.flashWindow( UIUtil.getShell( ).handle, false );
+			}
+		} );
+	}
+
 	private void copyToolkitPluginFiles( File pluginDir,
-			final File[] pluginFiles )
+			final File[] pluginFiles, IProgressMonitor monitor )
 	{
 		File targetPlugins = new File( data.getTargetDirectory( ), "plugins" );
 
@@ -137,7 +194,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 	}
 
 	private void copySDKFiles( File platformDir,
-			final Map<String, List<File>> sdkFiles )
+			final Map<String, List<File>> sdkFiles, IProgressMonitor monitor )
 	{
 		File targetPlatform = new File( data.getTargetDirectory( ), "platform" );
 
@@ -192,21 +249,175 @@ public class SyncBRDProResources implements ITaskWithMonitor
 							|| targetFile.length( ) != sourceFile.length( ) )
 					{
 						targetFile.delete( );
+						final boolean[] flag = new boolean[]{
+							false
+						};
 						try
 						{
-							FileUtils.copyFile( sourceFile, targetFile );
+							monitorCopy( monitor,
+									flag,
+									sourceFile.getAbsolutePath( )
+											.substring( sourceFile.getParentFile( )
+													.getParentFile( )
+													.getAbsolutePath( )
+													.length( ) ),
+									targetFile,
+									sourceFile.length( ) );
+
+							javaProcess = Runtime.getRuntime( )
+									.exec( new String[]{
+											System.getProperty( "java.home" )
+													+ "/bin/java",
+											"-cp",
+											System.getProperty( "java.class.path" ),
+											CopyFileTask.class.getName( ),
+											"\""
+													+ sourceFile.getAbsolutePath( )
+													+ "\"",
+											"\""
+													+ targetFile.getAbsolutePath( )
+													+ "\""
+									} );
+
+							StringBuffer errorMessage = new StringBuffer( );
+							interruptJavaProcessErrorMessage( javaProcess,
+									errorMessage );
+							int result = javaProcess.waitFor( );
+							if ( result == -1 )
+							{
+								Logger.getLogger( SyncBRDProResources.class.getName( ) )
+										.log( Level.WARNING,
+												"Copy file " + sourceFile.getAbsolutePath( ) + " failed.", //$NON-NLS-1$
+												errorMessage );
+							}
+							javaProcess = null;
+
 						}
-						catch ( IOException e )
+						catch ( Exception e )
 						{
 							Logger.getLogger( SyncBRDProResources.class.getName( ) )
 									.log( Level.WARNING,
 											"Copy file " + sourceFile.getAbsolutePath( ) + " failed.", //$NON-NLS-1$
 											e );
 						}
+						flag[0] = true;
+					}
+					else
+					{
+						monitor.worked( (int) ( targetFile.length( ) * 100000 / allLength ) );
 					}
 				}
 			}
+			else
+			{
+				monitor.worked( (int) ( targetLength * 100000 / allLength ) );
+			}
 		}
+	}
+
+	private void startMonitorProcess( final IProgressMonitor monitor )
+	{
+		monitorAntProcess = true;
+		Thread thread = new Thread( "Monitor Process" ) {
+
+			public void run( )
+			{
+				while ( monitorAntProcess )
+				{
+					if ( monitor.isCanceled( ) )
+					{
+						if ( javaProcess != null )
+						{
+							javaProcess.destroy( );
+						}
+					}
+					try
+					{
+						Thread.sleep( 100 );
+					}
+					catch ( InterruptedException e )
+					{
+					}
+				}
+			}
+		};
+		thread.setDaemon( true );
+		thread.start( );
+	}
+
+	private void interruptJavaProcessErrorMessage( final Process process,
+			final StringBuffer buffer )
+	{
+		Thread errThread = new Thread( "Monitor Java Process" ) {
+
+			public void run( )
+			{
+				try
+				{
+					BufferedReader input = new BufferedReader( new InputStreamReader( process.getErrorStream( ) ) );
+					String line;
+					while ( ( line = input.readLine( ) ) != null )
+					{
+						if ( buffer != null )
+							buffer.append( line ).append( "\r\n" );
+					}
+					input.close( );
+				}
+				catch ( Exception e )
+				{
+				}
+			}
+		};
+		errThread.setDaemon( true );
+		errThread.start( );
+	}
+
+	private void monitorCopy( final IProgressMonitor monitor,
+			final boolean[] flag, final String defaultTaskName,
+			final File file, final long size )
+	{
+		Thread downloadThread = new Thread( "Monitor Synchronization" ) {
+
+			public void run( )
+			{
+				long donwloadSize = file.length( );
+				long time = System.currentTimeMillis( );
+				while ( !flag[0] )
+				{
+					if ( file.exists( ) )
+					{
+						if ( file.length( ) != donwloadSize )
+						{
+							long increasement = file.length( ) - donwloadSize;
+							String speed = FileUtil.format( ( (float) increasement )
+									/ ( ( (float) ( System.currentTimeMillis( ) - time ) ) / 1000 ) )
+									+ "/s";
+							donwloadSize = file.length( );
+							time = System.currentTimeMillis( );
+							monitor.subTask( defaultTaskName
+									+ "\t[ "
+									+ ( donwloadSize * 100 / size )
+									+ "% , Speed: "
+									+ speed
+									+ " , Size: "
+									+ FileUtils.byteCountToDisplaySize( size )
+									+ " ]" );
+
+							monitor.worked( (int) ( increasement * 100000 / allLength ) );
+						}
+					}
+					try
+					{
+						Thread.sleep( 500 );
+					}
+					catch ( InterruptedException e )
+					{
+					}
+				}
+			}
+		};
+		downloadThread.setDaemon( true );
+		downloadThread.start( );
 	}
 
 	private long computeSDKFilesLength( File platformVersion )
@@ -229,8 +440,8 @@ public class SyncBRDProResources implements ITaskWithMonitor
 		return targetLength;
 	}
 
-	private File[] listToolkitPlugins( final long[] allLength,
-			final List<String> pluginVersions, File pluginDir )
+	private File[] listToolkitPlugins( final List<String> pluginVersions,
+			File pluginDir )
 	{
 		return pluginDir.listFiles( new FileFilter( ) {
 
@@ -241,7 +452,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 				{
 					if ( pluginVersions.contains( file.getName( ) ) )
 					{
-						allLength[0] += FileUtils.sizeOfDirectory( file );
+						allLength += FileUtils.sizeOfDirectory( file );
 						return true;
 					}
 					return false;
@@ -250,11 +461,11 @@ public class SyncBRDProResources implements ITaskWithMonitor
 				{
 					if ( file.isDirectory( ) )
 					{
-						allLength[0] += FileUtils.sizeOfDirectory( file );
+						allLength += FileUtils.sizeOfDirectory( file );
 					}
 					else
 					{
-						allLength[0] += file.length( );
+						allLength += file.length( );
 					}
 					return true;
 				}
@@ -264,8 +475,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 	}
 
 	private void listSDKFiles( final List<String> syncVersions,
-			final long[] allLength, File platformDir,
-			final Map<String, List<File>> sdkFiles )
+			File platformDir, final Map<String, List<File>> sdkFiles )
 	{
 		platformDir.listFiles( new FileFilter( ) {
 
@@ -298,7 +508,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 										}
 										sdkFiles.get( parentFileName )
 												.add( file );
-										allLength[0] += file.length( );
+										allLength += file.length( );
 									}
 								}
 								return false;
