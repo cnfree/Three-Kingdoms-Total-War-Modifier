@@ -15,15 +15,15 @@ import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import com.actuate.development.tool.config.PathConfig;
-import com.actuate.development.tool.model.IPortalViewerData;
-import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Modules;
-import com.actuate.development.tool.model.SyncBRDProResourcesData;
-import com.actuate.development.tool.model.ToolFeature;
-import com.actuate.development.tool.model.ToolFeatureData;
 import com.actuate.development.tool.model.Version;
 import com.actuate.development.tool.model.VersionType;
+import com.actuate.development.tool.model.feature.IPortalViewerData;
+import com.actuate.development.tool.model.feature.InstallBRDProData;
+import com.actuate.development.tool.model.feature.SyncBRDProResourcesData;
+import com.actuate.development.tool.model.feature.ToolFeature;
+import com.actuate.development.tool.model.feature.ToolFeatureData;
 import com.actuate.development.tool.util.LogUtil;
 
 public class ToolkitWizardHelper

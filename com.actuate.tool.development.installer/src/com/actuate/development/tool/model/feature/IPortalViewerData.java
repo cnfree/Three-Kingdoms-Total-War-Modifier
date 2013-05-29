@@ -1,5 +1,5 @@
 
-package com.actuate.development.tool.model;
+package com.actuate.development.tool.model.feature;
 
 public class IPortalViewerData
 {

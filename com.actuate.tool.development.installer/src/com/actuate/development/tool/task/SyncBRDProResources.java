@@ -3,7 +3,7 @@ package com.actuate.development.tool.task;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import com.actuate.development.tool.model.SyncBRDProResourcesData;
+import com.actuate.development.tool.model.feature.SyncBRDProResourcesData;
 
 public class SyncBRDProResources implements ITaskWithMonitor
 {

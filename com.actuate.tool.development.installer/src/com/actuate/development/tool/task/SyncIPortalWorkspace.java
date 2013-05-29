@@ -41,8 +41,8 @@ import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.extension.system.Kernel;
 import org.sf.feeling.swt.win32.extension.system.ProcessEntry;
 
-import com.actuate.development.tool.model.IPortalViewerData;
 import com.actuate.development.tool.model.Modules;
+import com.actuate.development.tool.model.feature.IPortalViewerData;
 import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
 import com.actuate.development.tool.util.UIUtil;

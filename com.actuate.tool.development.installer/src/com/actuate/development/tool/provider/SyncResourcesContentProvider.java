@@ -9,8 +9,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.actuate.development.tool.model.Module;
-import com.actuate.development.tool.model.ToolFeatureData;
 import com.actuate.development.tool.model.VersionType;
+import com.actuate.development.tool.model.feature.ToolFeatureData;
 
 public class SyncResourcesContentProvider implements ITreeContentProvider
 {

@@ -1,5 +1,5 @@
 
-package com.actuate.development.tool.model;
+package com.actuate.development.tool.model.feature;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import com.actuate.development.tool.config.UserDataConfig;
+import com.actuate.development.tool.model.Version;
 import com.actuate.development.tool.wizard.ToolkitConstants;
 
 public class ToolFeatureData

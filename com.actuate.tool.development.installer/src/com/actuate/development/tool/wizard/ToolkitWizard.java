@@ -24,8 +24,8 @@ import org.sf.feeling.swt.win32.extension.Win32;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
-import com.actuate.development.tool.model.ToolFeature;
-import com.actuate.development.tool.model.ToolFeatureData;
+import com.actuate.development.tool.model.feature.ToolFeature;
+import com.actuate.development.tool.model.feature.ToolFeatureData;
 import com.actuate.development.tool.task.ITaskWithMonitor;
 import com.actuate.development.tool.task.TaskFactory;
 import com.actuate.development.tool.util.LogUtil;

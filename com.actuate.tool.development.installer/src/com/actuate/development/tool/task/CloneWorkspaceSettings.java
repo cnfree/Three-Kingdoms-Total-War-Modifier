@@ -6,7 +6,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 
-import com.actuate.development.tool.model.CloneWorkspaceData;
+import com.actuate.development.tool.model.feature.CloneWorkspaceData;
 import com.actuate.development.tool.util.UIUtil;
 import com.actuate.development.tool.util.WorkspaceUtil;
 

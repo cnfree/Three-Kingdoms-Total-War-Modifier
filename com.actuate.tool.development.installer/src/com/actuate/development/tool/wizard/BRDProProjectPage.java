@@ -20,8 +20,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
-import com.actuate.development.tool.model.ToolFeature;
-import com.actuate.development.tool.model.ToolFeatureData;
+import com.actuate.development.tool.model.feature.ToolFeature;
+import com.actuate.development.tool.model.feature.ToolFeatureData;
 import com.actuate.development.tool.util.FileSorter;
 
 public class BRDProProjectPage extends WizardPage

@@ -1,5 +1,5 @@
 
-package com.actuate.development.tool.model;
+package com.actuate.development.tool.model.feature;
 
 public enum ToolFeature {
 	installBRDPro("Install BRDPro"), cloneWorkspaceSettings(

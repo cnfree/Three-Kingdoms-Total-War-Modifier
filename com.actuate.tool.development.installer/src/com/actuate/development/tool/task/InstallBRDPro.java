@@ -42,10 +42,10 @@ import org.sf.feeling.swt.win32.extension.system.ProcessEntry;
 
 import com.actuate.development.tool.Toolkit;
 import com.actuate.development.tool.config.PathConfig;
-import com.actuate.development.tool.model.InstallBRDProData;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.ModuleType;
 import com.actuate.development.tool.model.ModuleVersion;
+import com.actuate.development.tool.model.feature.InstallBRDProData;
 import com.actuate.development.tool.util.FileSorter;
 import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;

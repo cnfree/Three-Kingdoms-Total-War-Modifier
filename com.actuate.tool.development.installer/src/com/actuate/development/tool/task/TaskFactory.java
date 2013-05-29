@@ -1,8 +1,8 @@
 
 package com.actuate.development.tool.task;
 
-import com.actuate.development.tool.model.ToolFeature;
-import com.actuate.development.tool.model.ToolFeatureData;
+import com.actuate.development.tool.model.feature.ToolFeature;
+import com.actuate.development.tool.model.feature.ToolFeatureData;
 
 public class TaskFactory
 {
