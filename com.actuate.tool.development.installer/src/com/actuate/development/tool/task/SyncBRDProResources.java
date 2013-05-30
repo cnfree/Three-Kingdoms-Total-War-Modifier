@@ -19,8 +19,21 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tray;
+import org.eclipse.swt.widgets.TrayItem;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
+import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.Version;
@@ -42,8 +55,12 @@ public class SyncBRDProResources implements ITaskWithMonitor
 
 	private SyncBRDProResourcesData data;
 	private long allLength;
+	private long currentLength;
 	private boolean monitorAntProcess;
 	private Process javaProcess;
+	private Tray tray;
+	private Shell shell;
+	private TrayItem trayItem;
 
 	public SyncBRDProResources( SyncBRDProResourcesData data )
 	{
@@ -54,6 +71,17 @@ public class SyncBRDProResources implements ITaskWithMonitor
 	{
 		if ( data == null )
 			return;
+
+		if ( data.isMinimizeToolkit( ) )
+		{
+			Display.getDefault( ).syncExec( new Runnable( ) {
+
+				public void run( )
+				{
+					createSystemTray( );
+				}
+			} );
+		}
 
 		startMonitorProcess( monitor );
 
@@ -96,6 +124,18 @@ public class SyncBRDProResources implements ITaskWithMonitor
 			copyToolkitPluginFiles( pluginDir, pluginFiles, monitor );
 		}
 
+		if ( data.isMinimizeToolkit( ) )
+		{
+			shell.getDisplay( ).syncExec( new Runnable( ) {
+
+				public void run( )
+				{
+					if ( shell.getMinimized( ) || !shell.isVisible( ) )
+						toggleDisplay( shell, tray );
+				}
+			} );
+		}
+
 		if ( !monitor.isCanceled( ) )
 		{
 			finishTask( monitor );
@@ -103,6 +143,65 @@ public class SyncBRDProResources implements ITaskWithMonitor
 		else
 		{
 			cancelTask( monitor );
+		}
+	}
+
+	private void createSystemTray( )
+	{
+		shell = UIUtil.getShell( );
+		tray = shell.getDisplay( ).getSystemTray( );
+		trayItem = new TrayItem( tray, SWT.NONE );
+		trayItem.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent e )
+			{
+				toggleDisplay( shell, tray );
+			}
+		} );
+
+		final Menu trayMenu = new Menu( shell, SWT.POP_UP );
+		MenuItem showMenuItem = new MenuItem( trayMenu, SWT.PUSH );
+		showMenuItem.setText( "&Show Window" );
+
+		showMenuItem.addSelectionListener( new SelectionAdapter( ) {
+
+			public void widgetSelected( SelectionEvent event )
+			{
+				toggleDisplay( shell, tray );
+			}
+		} );
+
+		trayMenu.setDefaultItem( showMenuItem );
+
+		trayItem.addMenuDetectListener( new MenuDetectListener( ) {
+
+			public void menuDetected( MenuDetectEvent e )
+			{
+				trayMenu.setVisible( true );
+			}
+		} );
+
+		trayItem.setImage( ImageCache.getImage( "/icons/actuate_16.png" ) );
+
+		shell.addShellListener( new ShellAdapter( ) {
+
+			public void shellIconified( ShellEvent e )
+			{
+				toggleDisplay( shell, tray );
+			}
+		} );
+
+		toggleDisplay( shell, tray );
+	}
+
+	protected void toggleDisplay( Shell shell, Tray tray )
+	{
+		shell.setVisible( !shell.isVisible( ) );
+		tray.getItem( 0 ).setVisible( !shell.isVisible( ) );
+		if ( shell.getVisible( ) )
+		{
+			shell.setMinimized( false );
+			shell.setActive( );
 		}
 	}
 
@@ -236,7 +335,9 @@ public class SyncBRDProResources implements ITaskWithMonitor
 			}
 			else
 			{
+				currentLength += targetFile.length( );
 				monitor.worked( (int) ( targetFile.length( ) * 10000 / allLength ) );
+				updateTooltip( );
 			}
 		}
 		if ( !monitor.isCanceled( ) )
@@ -398,13 +499,17 @@ public class SyncBRDProResources implements ITaskWithMonitor
 					}
 					else
 					{
+						currentLength += targetFile.length( );
 						monitor.worked( (int) ( targetFile.length( ) * 10000 / allLength ) );
+						updateTooltip( );
 					}
 				}
 			}
 			else
 			{
+				currentLength += targetLength;
 				monitor.worked( (int) ( targetLength * 10000 / allLength ) );
+				updateTooltip( );
 			}
 		}
 	}
@@ -497,7 +602,9 @@ public class SyncBRDProResources implements ITaskWithMonitor
 									+ FileUtils.byteCountToDisplaySize( size )
 									+ " ]" );
 
+							currentLength += increasement;
 							monitor.worked( (int) ( increasement * 10000 / allLength ) );
+							updateTooltip( );
 						}
 					}
 					try
@@ -613,5 +720,23 @@ public class SyncBRDProResources implements ITaskWithMonitor
 				return false;
 			}
 		} );
+	}
+
+	private void updateTooltip( )
+	{
+		if ( data.isMinimizeToolkit( ) )
+		{
+			Display.getDefault( ).syncExec( new Runnable( ) {
+
+				public void run( )
+				{
+					trayItem.setToolTipText( "Sync Progress: "
+							+ currentLength
+							* 100
+							/ allLength
+							+ "%" );
+				}
+			} );
+		}
 	}
 }
