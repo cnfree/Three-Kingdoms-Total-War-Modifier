@@ -164,6 +164,8 @@ public class SyncBRDProResources implements ITaskWithMonitor
 		String pluginsPath = pluginDir.getAbsolutePath( );
 		for ( int i = 0; i < movePluginFiles.size( ); i++ )
 		{
+			if ( monitor.isCanceled( ) )
+				break;
 			File sourceFile = movePluginFiles.get( i );
 			if ( sourceFile.isDirectory( ) )
 				continue;
@@ -237,7 +239,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 				monitor.worked( (int) ( targetFile.length( ) * 10000 / allLength ) );
 			}
 		}
-
+		if ( !monitor.isCanceled( ) )
 		{
 			final boolean[] flag = new boolean[]{
 				false
@@ -288,6 +290,8 @@ public class SyncBRDProResources implements ITaskWithMonitor
 		Iterator<String> iter = sdkFiles.keySet( ).iterator( );
 		while ( iter.hasNext( ) )
 		{
+			if ( monitor.isCanceled( ) )
+				break;
 			String version = iter.next( );
 			File platformVersion = new File( targetPlatform, version );
 			long targetLength = computeSDKFilesLength( platformVersion );
@@ -323,6 +327,8 @@ public class SyncBRDProResources implements ITaskWithMonitor
 				}
 				for ( int i = 0; i < sourceFiles.size( ); i++ )
 				{
+					if ( monitor.isCanceled( ) )
+						break;
 					File sourceFile = sourceFiles.get( i );
 					String path = sourceFile.getParentFile( )
 							.getAbsolutePath( )
