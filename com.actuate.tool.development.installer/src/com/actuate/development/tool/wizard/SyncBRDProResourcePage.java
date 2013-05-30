@@ -52,7 +52,7 @@ public class SyncBRDProResourcePage extends WizardPage
 		super( "SyncBRDProResourcePage" );
 		this.data = data;
 		setTitle( "Synchronize the BRDPro Resources" );
-		setDescription( "Synchronize the BRDPro resource files, such as toolkit plugins, eclipse framework SDKs." );
+		setDescription( "Synchronize the BRDPro resource files, such as Toolkit plugins, Eclipse framework SDKs, etc." );
 	}
 
 	public void createControl( Composite parent )

@@ -10,10 +10,10 @@ import org.apache.commons.io.FileUtils;
 
 import com.actuate.development.tool.util.ClassPathUpdater;
 
-public class CopyFileTask
+public class CopyZipFileTask
 {
 
-	public CopyFileTask( String source, String target )
+	public CopyZipFileTask( String source, String target )
 	{
 		try
 		{
@@ -42,6 +42,6 @@ public class CopyFileTask
 		if ( args.length != 2 )
 			return;
 		ClassPathUpdater.loadClasspath( );
-		new CopyFileTask( args[0], args[1] );
+		new CopyZipFileTask( args[0], args[1] );
 	}
 }

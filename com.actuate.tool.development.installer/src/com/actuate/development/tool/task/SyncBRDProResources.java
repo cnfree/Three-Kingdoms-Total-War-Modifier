@@ -57,7 +57,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 
 		startMonitorProcess( monitor );
 
-		monitor.beginTask( "Synchronizing file", 100000 );
+		monitor.beginTask( "Synchronizing file", 10000 );
 
 		Version[] versions = data.getPlatformVersions( );
 		List<String> ignoreVersions = new ArrayList<String>( );
@@ -167,6 +167,11 @@ public class SyncBRDProResources implements ITaskWithMonitor
 			File sourceFile = movePluginFiles.get( i );
 			if ( sourceFile.isDirectory( ) )
 				continue;
+			if ( !sourceFile.getName( )
+					.toLowerCase( )
+					.trim( )
+					.endsWith( ".zip" ) )
+				continue;
 			String path = sourceFile.getParentFile( )
 					.getAbsolutePath( )
 					.substring( pluginsPath.length( ) );
@@ -178,18 +183,99 @@ public class SyncBRDProResources implements ITaskWithMonitor
 					|| targetFile.length( ) != sourceFile.length( ) )
 			{
 				targetFile.delete( );
+
+				final boolean[] flag = new boolean[]{
+					false
+				};
 				try
 				{
-					FileUtils.copyFile( sourceFile, targetFile );
+					monitorCopy( monitor,
+							flag,
+							sourceFile.getAbsolutePath( )
+									.substring( sourceFile.getParentFile( )
+											.getParentFile( )
+											.getAbsolutePath( )
+											.length( ) )
+									.replace( '\\', '/' ),
+							targetFile,
+							sourceFile.length( ) );
+
+					javaProcess = Runtime.getRuntime( ).exec( new String[]{
+							System.getProperty( "java.home" ) + "/bin/java",
+							"-cp",
+							System.getProperty( "java.class.path" ),
+							CopyZipFileTask.class.getName( ),
+							"\"" + sourceFile.getAbsolutePath( ) + "\"",
+							"\"" + targetFile.getAbsolutePath( ) + "\""
+					} );
+
+					StringBuffer errorMessage = new StringBuffer( );
+					interruptJavaProcessErrorMessage( javaProcess, errorMessage );
+					int result = javaProcess.waitFor( );
+					if ( result == -1 )
+					{
+						Logger.getLogger( SyncBRDProResources.class.getName( ) )
+								.log( Level.WARNING,
+										"Copy file " + sourceFile.getAbsolutePath( ) + " failed.", //$NON-NLS-1$
+										errorMessage );
+					}
+					javaProcess = null;
+
 				}
-				catch ( IOException e )
+				catch ( Exception e )
 				{
 					Logger.getLogger( SyncBRDProResources.class.getName( ) )
 							.log( Level.WARNING,
 									"Copy file " + sourceFile.getAbsolutePath( ) + " failed.", //$NON-NLS-1$
 									e );
 				}
+				flag[0] = true;
+				monitor.subTask( "" );
 			}
+			else
+			{
+				monitor.worked( (int) ( targetFile.length( ) * 10000 / allLength ) );
+			}
+		}
+
+		{
+			final boolean[] flag = new boolean[]{
+				false
+			};
+			try
+			{
+				javaProcess = Runtime.getRuntime( ).exec( new String[]{
+						System.getProperty( "java.home" ) + "/bin/java",
+						"-cp",
+						System.getProperty( "java.class.path" ),
+						CopyResourcesTask.class.getName( ),
+						"\"" + pluginsPath + "\"",
+						"\"" + targetPlugins.getAbsolutePath( ) + "\""
+				} );
+
+				StringBuffer errorMessage = new StringBuffer( );
+				interruptJavaProcessErrorMessage( javaProcess, errorMessage );
+				int result = javaProcess.waitFor( );
+				if ( result == -1 )
+				{
+					Logger.getLogger( SyncBRDProResources.class.getName( ) )
+							.log( Level.WARNING,
+									"Copy resource files " + pluginsPath + " failed.", //$NON-NLS-1$
+									errorMessage );
+				}
+				javaProcess = null;
+
+			}
+			catch ( Exception e )
+			{
+				Logger.getLogger( SyncBRDProResources.class.getName( ) )
+						.log( Level.WARNING,
+								"Copy resource files " + pluginsPath + " failed.", //$NON-NLS-1$
+								e );
+			}
+			flag[0] = true;
+			monitor.subTask( "" );
+			monitor.worked( 10000 );
 		}
 	}
 
@@ -260,7 +346,8 @@ public class SyncBRDProResources implements ITaskWithMonitor
 											.substring( sourceFile.getParentFile( )
 													.getParentFile( )
 													.getAbsolutePath( )
-													.length( ) ),
+													.length( ) )
+											.replace( '\\', '/' ),
 									targetFile,
 									sourceFile.length( ) );
 
@@ -270,7 +357,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 													+ "/bin/java",
 											"-cp",
 											System.getProperty( "java.class.path" ),
-											CopyFileTask.class.getName( ),
+											CopyZipFileTask.class.getName( ),
 											"\""
 													+ sourceFile.getAbsolutePath( )
 													+ "\"",
@@ -301,16 +388,17 @@ public class SyncBRDProResources implements ITaskWithMonitor
 											e );
 						}
 						flag[0] = true;
+						monitor.subTask( "" );
 					}
 					else
 					{
-						monitor.worked( (int) ( targetFile.length( ) * 100000 / allLength ) );
+						monitor.worked( (int) ( targetFile.length( ) * 10000 / allLength ) );
 					}
 				}
 			}
 			else
 			{
-				monitor.worked( (int) ( targetLength * 100000 / allLength ) );
+				monitor.worked( (int) ( targetLength * 10000 / allLength ) );
 			}
 		}
 	}
@@ -403,7 +491,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 									+ FileUtils.byteCountToDisplaySize( size )
 									+ " ]" );
 
-							monitor.worked( (int) ( increasement * 100000 / allLength ) );
+							monitor.worked( (int) ( increasement * 10000 / allLength ) );
 						}
 					}
 					try
