@@ -6,14 +6,18 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import com.actuate.development.tool.config.LocationConfig;
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Modules;
@@ -460,46 +464,161 @@ public class ToolkitWizardHelper
 
 	public void collectInstallationFiles( final IProgressMonitor monitor )
 	{
-		String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
-				"\\\\qaant\\ActuateBuild" );
-		File file = new File( buildDir );
-		file.list( new FilenameFilter( ) {
+		if ( LocationConfig.SHANGHAI.equals( LocationConfig.getLocation( ) ) )
+		{
+			String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
+					"\\\\qaant\\ActuateBuild" );
+			File file = new File( buildDir );
+			file.list( new FilenameFilter( ) {
 
-			public boolean accept( File dir, String name )
-			{
-				File file = new File( dir, name );
-				monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
-				List<File> brdproFiles = new ArrayList<File>( );
-				List<File> iportalViewerFiles = new ArrayList<File>( );
-
-				checkActuateBuildFile( file, brdproFiles, iportalViewerFiles );
-
-				if ( brdproFiles.size( ) > 0 )
+				public boolean accept( File dir, String name )
 				{
-					if ( !data.getBrdproMap( ).containsKey( name ) )
-						data.getBrdproMap( ).put( name, new ArrayList<File>( ) );
-					data.getBrdproMap( ).get( name ).addAll( brdproFiles );
+					File file = new File( dir, name );
+					monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
+					List<File> brdproFiles = new ArrayList<File>( );
+					List<File> iportalViewerFiles = new ArrayList<File>( );
+
+					checkActuateBuildFile( file,
+							brdproFiles,
+							iportalViewerFiles );
+
+					if ( brdproFiles.size( ) > 0 )
+					{
+						if ( !data.getBrdproMap( ).containsKey( name ) )
+							data.getBrdproMap( ).put( name,
+									new ArrayList<File>( ) );
+						data.getBrdproMap( ).get( name ).addAll( brdproFiles );
+					}
+					if ( iportalViewerFiles.size( ) > 0
+							&& Modules.getInstance( )
+									.getIPortalProjects( )
+									.contains( name ) )
+					{
+						if ( !data.getIportalViewMap( ).containsKey( name ) )
+							data.getIportalViewMap( ).put( name,
+									new ArrayList<File>( ) );
+						data.getIportalViewMap( )
+								.get( name )
+								.addAll( iportalViewerFiles );
+					}
+					if ( brdproFiles.size( ) > 0
+							|| iportalViewerFiles.size( ) > 0 )
+						return true;
+					return false;
 				}
-				if ( iportalViewerFiles.size( ) > 0
-						&& Modules.getInstance( )
-								.getIPortalProjects( )
-								.contains( name ) )
+
+			} );
+		}
+		else
+		{
+			String buildDir = PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR,
+					"\\\\fs1-lnx\\build2\\DailyBuild\\Install" );
+			File file = new File( buildDir );
+			file.list( new FilenameFilter( ) {
+
+				public boolean accept( File dir, String name )
 				{
-					if ( !data.getIportalViewMap( ).containsKey( name ) )
-						data.getIportalViewMap( ).put( name,
-								new ArrayList<File>( ) );
-					data.getIportalViewMap( )
-							.get( name )
-							.addAll( iportalViewerFiles );
+					File file = new File( dir, name );
+					monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
+					List<File> brdproFiles = new ArrayList<File>( );
+					List<File> iportalViewerFiles = new ArrayList<File>( );
+					checkHqReleaseActuateBuildFile( file,
+							brdproFiles,
+							iportalViewerFiles );
+
+					if ( brdproFiles.size( ) > 0 )
+					{
+						if ( !data.getBrdproMap( ).containsKey( name ) )
+							data.getBrdproMap( ).put( name,
+									new ArrayList<File>( ) );
+						data.getBrdproMap( ).get( name ).addAll( brdproFiles );
+					}
+
+					if ( iportalViewerFiles.size( ) > 0
+							&& Modules.getInstance( )
+									.getIPortalProjects( )
+									.contains( name ) )
+					{
+						if ( !data.getIportalViewMap( ).containsKey( name ) )
+							data.getIportalViewMap( ).put( name,
+									new ArrayList<File>( ) );
+						data.getIportalViewMap( )
+								.get( name )
+								.addAll( iportalViewerFiles );
+					}
+
+					if ( brdproFiles.size( ) > 0
+							|| iportalViewerFiles.size( ) > 0 )
+						return true;
+					return false;
 				}
-				if ( brdproFiles.size( ) > 0 || iportalViewerFiles.size( ) > 0 )
-					return true;
-				return false;
-			}
 
-		} );
+			} );
 
-		File platformDir = new File( "\\\\QA-BUILD\\BIRTOutput\\platform" );
+			buildDir = PathConfig.getProperty( PathConfig.HQ_PROJECT_ACTUATE_BUILD_DIR,
+					"\\\\fs1-lnx\\build2\\project\\Install" );
+			file = new File( buildDir );
+			file.list( new FilenameFilter( ) {
+
+				public boolean accept( File dir, String name )
+				{
+					File file = new File( dir, name );
+					monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
+					List<File> brdproFiles = new ArrayList<File>( );
+
+					checkHqProjectActuateBuildFile( file, brdproFiles );
+
+					if ( brdproFiles.size( ) > 0 )
+					{
+						if ( !data.getBrdproMap( ).containsKey( name ) )
+							data.getBrdproMap( ).put( name,
+									new ArrayList<File>( ) );
+						data.getBrdproMap( ).get( name ).addAll( brdproFiles );
+					}
+
+					if ( brdproFiles.size( ) > 0 )
+						return true;
+					return false;
+				}
+
+			} );
+
+			buildDir = PathConfig.getProperty( PathConfig.HQ_PROJECT_VIEWER_WAR_DIR,
+					"\\\\fs1-lnx\\build2\\project\\Source" );
+			file = new File( buildDir );
+			file.list( new FilenameFilter( ) {
+
+				public boolean accept( File dir, String name )
+				{
+					File file = new File( dir, name );
+					monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
+					List<File> iportalViewerFiles = new ArrayList<File>( );
+
+					checkHqProjecViewerWarFile( file, iportalViewerFiles );
+
+					if ( iportalViewerFiles.size( ) > 0
+							&& Modules.getInstance( )
+									.getIPortalProjects( )
+									.contains( name ) )
+					{
+						if ( !data.getIportalViewMap( ).containsKey( name ) )
+							data.getIportalViewMap( ).put( name,
+									new ArrayList<File>( ) );
+						data.getIportalViewMap( )
+								.get( name )
+								.addAll( iportalViewerFiles );
+					}
+
+					if ( iportalViewerFiles.size( ) > 0 )
+						return true;
+					return false;
+				}
+
+			} );
+		}
+
+		File platformDir = new File( PathConfig.getProperty( PathConfig.PLATFORM_VERSION_DIR,
+				"\\\\QA-BUILD\\BIRTOutput\\platform" ) );
 		final List<Version> versions = new ArrayList<Version>( );
 		platformDir.list( new FilenameFilter( ) {
 
@@ -530,6 +649,75 @@ public class ToolkitWizardHelper
 			}
 		} );
 		Collections.reverse( versions );
-		data.getSyncBRDProResourcesData( ).setPlatformVersions( versions.toArray( new Version[0] ) );
+		data.getSyncBRDProResourcesData( )
+				.setPlatformVersions( versions.toArray( new Version[0] ) );
+	}
+
+	protected void checkHqProjecViewerWarFile( File parent,
+			List<File> iportalViewerFiles )
+	{
+		File[] versions = parent.listFiles( );
+		for ( int i = 0; i < versions.length; i++ )
+		{
+			File viewerFile = new File( versions[i],
+					"iPortalApp\\build\\WARFILES\\iportal\\WL_TOMCAT_ActuateBIRTJavaComponent.war" );
+			if ( viewerFile.exists( ) )
+			{
+				iportalViewerFiles.add( viewerFile );
+			}
+		}
+	}
+
+	protected void checkHqReleaseActuateBuildFile( File parent,
+			List<File> brdproFiles, List<File> iportalViewerFiles )
+	{
+		File[] versions = parent.listFiles( );
+		for ( int i = 0; i < versions.length; i++ )
+		{
+			File brdProFile = new File( versions[i],
+					"BIRTDesignerProfessional\\ActuateBIRTDesignerProfessional.zip" );
+			if ( brdProFile.exists( ) )
+			{
+				brdproFiles.add( brdProFile );
+			}
+			else
+			{
+				brdProFile = new File( versions[i],
+						"BIRTDesignerProfessional\\Disk Images" );
+
+				if ( brdProFile.exists( ) )
+				{
+					brdproFiles.add( brdProFile );
+				}
+			}
+
+			File viewerFile = new File( versions[i],
+					"DeploymentKit\\WL_TOMCAT_ActuateBIRTJavaComponent.war" );
+			if ( viewerFile.exists( ) )
+			{
+				iportalViewerFiles.add( viewerFile );
+			}
+		}
+	}
+
+	protected void checkHqProjectActuateBuildFile( File parent,
+			List<File> brdproFiles )
+	{
+		Collection<File> files = FileUtils.listFiles( parent, new String[]{
+			"zip"
+		}, true );
+		if ( files != null )
+		{
+			Iterator<File> iter = files.iterator( );
+			while ( iter.hasNext( ) )
+			{
+				File file = iter.next( );
+				if ( file.getName( )
+						.equalsIgnoreCase( "ActuateBIRTDesignerProfessional.zip" ) )
+				{
+					brdproFiles.add( file );
+				}
+			}
+		}
 	}
 }

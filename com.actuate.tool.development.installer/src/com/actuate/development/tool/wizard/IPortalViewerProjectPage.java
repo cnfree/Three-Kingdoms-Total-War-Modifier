@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.dialog.ChangelistDialog;
 import com.actuate.development.tool.dialog.CreateClientDialog;
 import com.actuate.development.tool.model.Modules;
@@ -1434,7 +1435,26 @@ public class IPortalViewerProjectPage extends WizardPage implements
 		{
 			for ( File file : files )
 			{
-				comboFiles.add( file.getName( ) );
+				if ( file.getAbsolutePath( )
+						.startsWith( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) ) )
+				{
+					String path = file.getAbsolutePath( );
+					String[] tokens = path.split( "\\\\" );
+					if ( tokens.length > 3 )
+						comboFiles.add( tokens[tokens.length - 3] );
+				}
+				else if ( file.getAbsolutePath( )
+						.startsWith( PathConfig.getProperty( PathConfig.HQ_PROJECT_VIEWER_WAR_DIR ) ) )
+				{
+					String path = file.getAbsolutePath( );
+					String[] tokens = path.split( "\\\\" );
+					if ( tokens.length > 6 )
+						comboFiles.add( tokens[tokens.length - 6] );
+				}
+				else
+				{
+					comboFiles.add( file.getName( ) );
+				}
 			}
 			comboFiles.select( comboFiles.getItemCount( ) - 1 );
 			handleProjectFileSelection( );

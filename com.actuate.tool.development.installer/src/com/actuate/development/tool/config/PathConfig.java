@@ -57,6 +57,14 @@ public class PathConfig
 	// DTP SDK file name regex in the dtp output directory
 	public final static String DTP_SDK = "dtp_sdk";
 
+	public static final String HQ_PROJECT_ACTUATE_BUILD_DIR = "hq_project_actuate_build_dir";
+
+	public static final String HQ_RELEASE_ACTUATE_BUILD_DIR = "hq_release_actuate_build_dir";
+
+	public static final String PLATFORM_VERSION_DIR = "platform_version_dir";
+
+	public static final String HQ_PROJECT_VIEWER_WAR_DIR = "hq_project_viewer_war_dir";
+
 	private static Properties props = new Properties( );
 	static
 	{
@@ -117,7 +125,16 @@ public class PathConfig
 
 	public static String getProperty( String property, String defaultValue )
 	{
-		return props.getProperty( property, defaultValue );
+		if ( !props.containsKey( property ) )
+		{
+			props.put( property, defaultValue );
+		}
+		return props.getProperty( property );
+	}
+
+	public static String getProperty( String property )
+	{
+		return props.getProperty( property );
 	}
 
 }

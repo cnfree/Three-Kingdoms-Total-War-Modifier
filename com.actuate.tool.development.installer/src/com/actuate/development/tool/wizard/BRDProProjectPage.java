@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
+import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.feature.ToolFeature;
 import com.actuate.development.tool.model.feature.ToolFeatureData;
 import com.actuate.development.tool.util.FileSorter;
@@ -176,7 +177,20 @@ public class BRDProProjectPage extends WizardPage
 		{
 			for ( File file : files )
 			{
-				comboFiles.add( file.getName( ) );
+				if ( file.getAbsolutePath( )
+						.startsWith( PathConfig.getProperty( PathConfig.HQ_PROJECT_ACTUATE_BUILD_DIR ) )
+						|| file.getAbsolutePath( )
+								.startsWith( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) ) )
+				{
+					String path = file.getAbsolutePath( );
+					String[] tokens = path.split( "\\\\" );
+					if ( tokens.length > 3 )
+						comboFiles.add( tokens[tokens.length - 3] );
+				}
+				else
+				{
+					comboFiles.add( file.getName( ) );
+				}
 			}
 			comboFiles.select( comboFiles.getItemCount( ) - 1 );
 			handleProjectFileSelection( );
