@@ -8,6 +8,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import com.actuate.development.tool.config.LocationConfig;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.ModuleType;
 import com.actuate.development.tool.model.Modules;
@@ -44,7 +45,14 @@ public class ModuleContentProvider implements ITreeContentProvider
 				case sdk :
 					return Modules.getInstance( ).getSDKs( );
 				case source :
-					return Modules.getInstance( ).getSources( );
+					List<Module> modules = new ArrayList<Module>( );
+					modules.addAll( Arrays.asList( Modules.getInstance( )
+							.getSources( ) ) );
+					if ( LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) ) )
+					{
+						modules.remove( Module.dtp );
+					}
+					return modules.toArray( );
 				case plugin :
 					return Modules.getInstance( ).getPlugins( );
 				case extension :
