@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FileSorter implements Comparator<File>
 {
@@ -24,6 +26,32 @@ public class FileSorter implements Comparator<File>
 	{
 		String first = file0.getName( );
 		String second = file1.getName( );
-		return first.compareTo( second );
+
+		Pattern pattern = Pattern.compile( "\\d{3,10}",
+				Pattern.CASE_INSENSITIVE | Pattern.DOTALL );
+		String number1 = null;
+		Matcher matcher = pattern.matcher( first );
+		if ( matcher.find( ) )
+		{
+			number1 = matcher.group( );
+		}
+
+		String number2 = null;
+		matcher = pattern.matcher( second );
+		if ( matcher.find( ) )
+		{
+			number2 = matcher.group( );
+		}
+
+		if ( number1 == null && number2 == null )
+			return first.compareTo( second );
+		else if ( number1 != null && number2 == null )
+			return 1;
+		else if ( number2 != null && number1 == null )
+			return -1;
+		else if ( number1.equals( number2 ) )
+			return first.compareTo( second );
+		else
+			return number1.compareTo( number2 );
 	}
 }
