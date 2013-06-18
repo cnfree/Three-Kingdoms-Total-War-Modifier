@@ -46,7 +46,7 @@ public class ToolFeaturePage extends WizardPage
 		Label locationLabel = new Label( composite, SWT.NONE );
 		locationLabel.setText( "&Location: " );
 		GridData gd = new GridData( );
-		gd.exclude = true;
+		//gd.exclude = true;
 		locationLabel.setLayoutData( gd );
 		final Combo locationCombo = new Combo( composite, SWT.READ_ONLY
 				| SWT.BORDER
@@ -79,7 +79,7 @@ public class ToolFeaturePage extends WizardPage
 		gd = new GridData( );
 		gd.widthHint = 250;
 		gd.horizontalAlignment = SWT.FILL;
-		gd.exclude = true;
+		//gd.exclude = true;
 		locationCombo.setLayoutData( gd );
 
 		Group group = new Group( composite, SWT.NONE );
