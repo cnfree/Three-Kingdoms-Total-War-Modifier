@@ -1,10 +1,16 @@
 
 package com.actuate.development.tool.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -12,10 +18,14 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
 import com.actuate.development.tool.config.LocationConfig;
+import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.feature.ToolFeature;
 import com.actuate.development.tool.model.feature.ToolFeatureData;
+import com.actuate.development.tool.util.LogUtil;
 
 public class ToolFeaturePage extends WizardPage
 {
@@ -25,11 +35,13 @@ public class ToolFeaturePage extends WizardPage
 	private Button workspaceCloneButton;
 	private Button iportalSyncButton;
 	private Button syncResourceButton;
+	private ToolkitWizardHelper helper;
 
-	ToolFeaturePage( ToolFeatureData data )
+	ToolFeaturePage( ToolkitWizardHelper helper, ToolFeatureData data )
 	{
 		super( "ToolFeaturePage" );
 		this.data = data;
+		this.helper = helper;
 		setTitle( "Select the Toolkit Feature" );
 		setDescription( "Select the toolkit feature." );
 	}
@@ -46,7 +58,7 @@ public class ToolFeaturePage extends WizardPage
 		Label locationLabel = new Label( composite, SWT.NONE );
 		locationLabel.setText( "&Location: " );
 		GridData gd = new GridData( );
-		//gd.exclude = true;
+		// gd.exclude = true;
 		locationLabel.setLayoutData( gd );
 		final Combo locationCombo = new Combo( composite, SWT.READ_ONLY
 				| SWT.BORDER
@@ -63,13 +75,63 @@ public class ToolFeaturePage extends WizardPage
 
 			public void widgetSelected( SelectionEvent e )
 			{
+				boolean change = false;
 				if ( locationCombo.getSelectionIndex( ) == 0 )
 				{
+					if ( !LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) ) )
+						change = true;
 					LocationConfig.setLocation( LocationConfig.HEADQUARTER );
 				}
 				else if ( locationCombo.getSelectionIndex( ) == 1 )
 				{
+					if ( !LocationConfig.SHANGHAI.equals( LocationConfig.getLocation( ) ) )
+						change = true;
 					LocationConfig.setLocation( LocationConfig.SHANGHAI );
+				}
+
+				if ( change )
+				{
+					PathConfig.load( );
+					try
+					{
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog( null ) {
+
+							protected void configureShell( Shell shell )
+							{
+								super.configureShell( shell );
+								shell.setImages( new Image[]{
+										ImageCache.getImage( "/icons/actuate_16.png" ),
+										ImageCache.getImage( "/icons/actuate_32.png" ),
+										ImageCache.getImage( "/icons/actuate_48.png" )
+								} );
+								shell.forceActive( );
+							}
+
+							protected void cancelPressed( )
+							{
+								System.exit( 0 );
+							}
+						};
+
+						dialog.setCancelable( false );
+
+						dialog.run( true, true, new IRunnableWithProgress( ) {
+
+							public void run( final IProgressMonitor monitor )
+									throws InvocationTargetException,
+									InterruptedException
+							{
+								monitor.beginTask( "Collecting Actuate Build Projects...",
+										IProgressMonitor.UNKNOWN );
+								helper.collectInstallationFiles( monitor );
+								monitor.done( );
+							}
+						} );
+					}
+					catch ( Exception e1 )
+					{
+						LogUtil.recordErrorMsg( e1, false );
+					}
 				}
 				updateSyncButtonStatus( );
 				setPageComplete( isPageComplete( ) );
@@ -79,7 +141,7 @@ public class ToolFeaturePage extends WizardPage
 		gd = new GridData( );
 		gd.widthHint = 250;
 		gd.horizontalAlignment = SWT.FILL;
-		//gd.exclude = true;
+		// gd.exclude = true;
 		locationCombo.setLayoutData( gd );
 
 		Group group = new Group( composite, SWT.NONE );

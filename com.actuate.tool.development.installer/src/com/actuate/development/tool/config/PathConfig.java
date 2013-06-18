@@ -66,7 +66,13 @@ public class PathConfig
 	public static final String HQ_PROJECT_VIEWER_WAR_DIR = "hq_project_viewer_war_dir";
 
 	private static Properties props = new Properties( );
+
 	static
+	{
+		load( );
+	}
+
+	public static void load( )
 	{
 		String location = LocationConfig.getLocation( );
 		String path;

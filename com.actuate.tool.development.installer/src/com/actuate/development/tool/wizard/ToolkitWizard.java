@@ -56,7 +56,7 @@ public class ToolkitWizard extends Wizard
 	{
 		initShell( );
 
-		addPage( new ToolFeaturePage( data ) );
+		addPage( new ToolFeaturePage( helper, data ) );
 		addPage( new CloneWorkspaceSettingsPage( data ) );
 		addPage( new BRDProProjectPage( data ) );
 		addPage( new BRDProSettingPage( data ) );

@@ -214,4 +214,14 @@ public class ToolFeatureData
 	{
 		listeners.remove( listener );
 	}
+
+	public void firePropertyChangeEvent( PropertyChangeEvent event )
+	{
+		if ( listeners == null )
+			return;
+		for ( IPropertyChangeListener listener : listeners )
+		{
+			listener.propertyChange( event );
+		}
+	}
 }

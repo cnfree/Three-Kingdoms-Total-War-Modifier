@@ -117,7 +117,7 @@ public class BRDProShortcutPage extends WizardPage implements
 						.setShortcutArguments( shortcutArgumentText.getText( ) );
 			}
 		}
-		
+
 		setPageComplete( isPageComplete( ) );
 	}
 
@@ -134,5 +134,11 @@ public class BRDProShortcutPage extends WizardPage implements
 	{
 		if ( ToolkitConstants.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
+	}
+
+	public void dispose( )
+	{
+		this.data.removeChangeListener( this );
+		super.dispose( );
 	}
 }

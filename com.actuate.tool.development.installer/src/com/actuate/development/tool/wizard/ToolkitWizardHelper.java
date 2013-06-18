@@ -16,6 +16,8 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Display;
 
 import com.actuate.development.tool.config.LocationConfig;
 import com.actuate.development.tool.config.PathConfig;
@@ -464,6 +466,10 @@ public class ToolkitWizardHelper
 
 	public void collectInstallationFiles( final IProgressMonitor monitor )
 	{
+		data.getBrdproMap( ).clear( );
+		data.getIportalViewMap( ).clear( );
+		data.getSyncBRDProResourcesData( ).setPluginVersions( new String[0] );
+
 		if ( LocationConfig.SHANGHAI.equals( LocationConfig.getLocation( ) ) )
 		{
 			String buildDir = PathConfig.getProperty( PathConfig.ACTUATE_BUILD_DIR,
@@ -651,6 +657,19 @@ public class ToolkitWizardHelper
 		Collections.reverse( versions );
 		data.getSyncBRDProResourcesData( )
 				.setPlatformVersions( versions.toArray( new Version[0] ) );
+
+		Display.getDefault( ).syncExec( new Runnable( ) {
+
+			public void run( )
+			{
+				PropertyChangeEvent event = new PropertyChangeEvent( data,
+						LocationConfig.LOCATION,
+						null,
+						LocationConfig.getLocation( ) );
+				data.firePropertyChangeEvent( event );
+			}
+		} );
+
 	}
 
 	protected void checkHqProjecViewerWarFile( File parent,

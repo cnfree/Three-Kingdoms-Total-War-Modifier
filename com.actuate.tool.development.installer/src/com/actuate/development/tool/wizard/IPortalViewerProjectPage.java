@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.development.tool.config.LocationConfig;
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.dialog.ChangelistDialog;
 import com.actuate.development.tool.dialog.CreateClientDialog;
@@ -209,12 +210,6 @@ public class IPortalViewerProjectPage extends WizardPage implements
 				}
 			}
 		} );
-
-		if ( !data.getIportalViewMap( ).isEmpty( ) )
-			comboProjects.setItems( data.getIportalViewMap( )
-					.keySet( )
-					.toArray( new String[0] ) );
-		comboProjects.getParent( ).layout( );
 
 		Group connectionGroup = new Group( composite, SWT.NONE );
 		connectionGroup.setText( "P4 Connection Settings" );
@@ -944,6 +939,20 @@ public class IPortalViewerProjectPage extends WizardPage implements
 
 		setControl( scrollContent );
 
+		initProjects( );
+
+		initPage( );
+
+	}
+
+	private void initProjects( )
+	{
+		if ( !data.getIportalViewMap( ).isEmpty( ) )
+			comboProjects.setItems( data.getIportalViewMap( )
+					.keySet( )
+					.toArray( new String[0] ) );
+		comboProjects.getParent( ).layout( );
+
 		if ( data != null && data.getCurrentIVProject( ) != null )
 		{
 			int index = comboProjects.indexOf( data.getCurrentIVProject( ) );
@@ -952,10 +961,11 @@ public class IPortalViewerProjectPage extends WizardPage implements
 				comboProjects.setText( data.getCurrentIVProject( ) );
 				handleProjectSelection( );
 			}
+			else
+			{
+				comboFiles.removeAll( );
+			}
 		}
-
-		initPage( );
-
 	}
 
 	protected void enableSpecifyContainer( boolean enabled )
@@ -1429,10 +1439,9 @@ public class IPortalViewerProjectPage extends WizardPage implements
 		List<File> files = data.getIportalViewMap( )
 				.get( comboProjects.getText( ) );
 
-		FileSorter.sortFiles( files );
-
 		if ( files != null && !files.isEmpty( ) )
 		{
+			FileSorter.sortFiles( files );
 			for ( File file : files )
 			{
 				if ( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) != null
@@ -1573,6 +1582,8 @@ public class IPortalViewerProjectPage extends WizardPage implements
 	{
 		if ( ToolkitConstants.CURRENT_IV_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
+		if ( LocationConfig.LOCATION.equals( event.getProperty( ) ) )
+			initProjects( );
 	}
 
 	private void getClients( final List<String> clients, final boolean[] error )
@@ -2000,6 +2011,12 @@ public class IPortalViewerProjectPage extends WizardPage implements
 	{
 		choiceCombo.setEnabled( specifyRivision.getSelection( ) );
 		enableSpecifyContainer( specifyRivision.getSelection( ) );
+	}
+
+	public void dispose( )
+	{
+		this.data.removeChangeListener( this );
+		super.dispose( );
 	}
 
 }

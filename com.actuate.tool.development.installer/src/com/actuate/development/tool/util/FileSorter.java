@@ -27,7 +27,7 @@ public class FileSorter implements Comparator<File>
 		String first = file0.getName( );
 		String second = file1.getName( );
 
-		Pattern pattern = Pattern.compile( "\\d{3,10}",
+		Pattern pattern = Pattern.compile( "\\d{6,10}",
 				Pattern.CASE_INSENSITIVE | Pattern.DOTALL );
 		String number1 = null;
 		Matcher matcher = pattern.matcher( first );

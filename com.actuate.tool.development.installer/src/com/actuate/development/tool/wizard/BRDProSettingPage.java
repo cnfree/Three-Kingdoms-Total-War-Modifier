@@ -36,7 +36,8 @@ import com.actuate.development.tool.model.feature.ToolFeatureData;
 import com.actuate.development.tool.provider.ModuleContentProvider;
 import com.actuate.development.tool.provider.ModuleLabelProvider;
 
-public class BRDProSettingPage extends WizardPage implements IPropertyChangeListener
+public class BRDProSettingPage extends WizardPage implements
+		IPropertyChangeListener
 {
 
 	private Text txtDirectory;
@@ -286,7 +287,7 @@ public class BRDProSettingPage extends WizardPage implements IPropertyChangeList
 			closeButton.setSelection( !data.getCurrentInstallBRDProData( )
 					.isNotCloseBRDPro( ) );
 		}
-		
+
 		setPageComplete( isPageComplete( ) );
 	}
 
@@ -340,6 +341,12 @@ public class BRDProSettingPage extends WizardPage implements IPropertyChangeList
 	{
 		if ( ToolkitConstants.CURRENT_BRDPRO_PROJECT.equals( event.getProperty( ) ) )
 			initPage( );
+	}
+
+	public void dispose( )
+	{
+		this.data.removeChangeListener( this );
+		super.dispose( );
 	}
 
 }

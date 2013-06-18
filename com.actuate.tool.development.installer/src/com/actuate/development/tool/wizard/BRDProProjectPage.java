@@ -4,6 +4,8 @@ package com.actuate.development.tool.wizard;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -20,12 +22,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
+import com.actuate.development.tool.config.LocationConfig;
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.feature.ToolFeature;
 import com.actuate.development.tool.model.feature.ToolFeatureData;
 import com.actuate.development.tool.util.FileSorter;
 
-public class BRDProProjectPage extends WizardPage
+public class BRDProProjectPage extends WizardPage implements
+		IPropertyChangeListener
 {
 
 	private Combo comboProjects;
@@ -37,6 +41,7 @@ public class BRDProProjectPage extends WizardPage
 	{
 		super( "ProjectPage" );
 		this.data = data;
+		this.data.addChangeListener( this );
 		setTitle( "Select the BRDPro Project" );
 		setDescription( "Select the BRDPro installation file." );
 	}
@@ -116,10 +121,20 @@ public class BRDProProjectPage extends WizardPage
 			}
 		} );
 
+		initProjects( );
+
+		setControl( composite );
+
+	}
+
+	private void initProjects( )
+	{
 		if ( !data.getBrdproMap( ).isEmpty( ) )
 			comboProjects.setItems( data.getBrdproMap( )
 					.keySet( )
 					.toArray( new String[0] ) );
+		else
+			comboProjects.removeAll( );
 		comboProjects.getParent( ).layout( );
 		if ( data != null && data.getCurrentBRDProProject( ) != null )
 		{
@@ -129,10 +144,11 @@ public class BRDProProjectPage extends WizardPage
 				comboProjects.setText( data.getCurrentBRDProProject( ) );
 				handleProjectSelection( );
 			}
+			else
+			{
+				comboFiles.removeAll( );
+			}
 		}
-
-		setControl( composite );
-
 	}
 
 	private void checkStatus( )
@@ -171,10 +187,9 @@ public class BRDProProjectPage extends WizardPage
 		comboFiles.removeAll( );
 		List<File> files = data.getBrdproMap( ).get( comboProjects.getText( ) );
 
-		FileSorter.sortFiles( files );
-
 		if ( files != null && !files.isEmpty( ) )
 		{
+			FileSorter.sortFiles( files );
 			for ( File file : files )
 			{
 				if ( ( PathConfig.getProperty( PathConfig.HQ_PROJECT_ACTUATE_BUILD_DIR ) != null && file.getAbsolutePath( )
@@ -215,5 +230,17 @@ public class BRDProProjectPage extends WizardPage
 								.getAbsolutePath( ) );
 		}
 		setPageComplete( isPageComplete( ) );
+	}
+
+	public void propertyChange( PropertyChangeEvent event )
+	{
+		if ( LocationConfig.LOCATION.equals( event.getProperty( ) ) )
+			initProjects( );
+	}
+
+	public void dispose( )
+	{
+		this.data.removeChangeListener( this );
+		super.dispose( );
 	}
 }
