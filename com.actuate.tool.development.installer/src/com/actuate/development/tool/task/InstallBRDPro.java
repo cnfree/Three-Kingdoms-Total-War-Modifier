@@ -1640,9 +1640,10 @@ public class InstallBRDPro implements ITaskWithMonitor
 		sw = new StringWriter( );
 		template.merge( context, sw );
 
-		File linkFile = new File( data.getDirectory( ), "eclipse\\links\\"
-				+ module.getName( )
-				+ ".link" );
+		File linkDir = new File( data.getDirectory( ), "eclipse\\links" );
+		if ( !linkDir.exists( ) )
+			linkDir.mkdirs( );
+		File linkFile = new File( linkDir, module.getName( ) + ".link" );
 		FileUtil.writeToFile( linkFile, sw.toString( ).trim( ) );
 	}
 

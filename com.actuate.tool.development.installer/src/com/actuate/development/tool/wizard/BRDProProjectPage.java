@@ -177,10 +177,10 @@ public class BRDProProjectPage extends WizardPage
 		{
 			for ( File file : files )
 			{
-				if ( file.getAbsolutePath( )
-						.startsWith( PathConfig.getProperty( PathConfig.HQ_PROJECT_ACTUATE_BUILD_DIR ) )
-						|| file.getAbsolutePath( )
-								.startsWith( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) ) )
+				if ( ( PathConfig.getProperty( PathConfig.HQ_PROJECT_ACTUATE_BUILD_DIR ) != null && file.getAbsolutePath( )
+						.startsWith( PathConfig.getProperty( PathConfig.HQ_PROJECT_ACTUATE_BUILD_DIR ) ) )
+						|| ( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) != null && file.getAbsolutePath( )
+								.startsWith( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) ) ) )
 				{
 					String path = file.getAbsolutePath( );
 					String[] tokens = path.split( "\\\\" );

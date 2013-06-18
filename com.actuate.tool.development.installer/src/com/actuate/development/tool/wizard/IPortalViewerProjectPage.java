@@ -1435,16 +1435,18 @@ public class IPortalViewerProjectPage extends WizardPage implements
 		{
 			for ( File file : files )
 			{
-				if ( file.getAbsolutePath( )
-						.startsWith( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) ) )
+				if ( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) != null
+						&& file.getAbsolutePath( )
+								.startsWith( PathConfig.getProperty( PathConfig.HQ_RELEASE_ACTUATE_BUILD_DIR ) ) )
 				{
 					String path = file.getAbsolutePath( );
 					String[] tokens = path.split( "\\\\" );
 					if ( tokens.length > 3 )
 						comboFiles.add( tokens[tokens.length - 3] );
 				}
-				else if ( file.getAbsolutePath( )
-						.startsWith( PathConfig.getProperty( PathConfig.HQ_PROJECT_VIEWER_WAR_DIR ) ) )
+				else if ( PathConfig.getProperty( PathConfig.HQ_PROJECT_VIEWER_WAR_DIR ) != null
+						&& file.getAbsolutePath( )
+								.startsWith( PathConfig.getProperty( PathConfig.HQ_PROJECT_VIEWER_WAR_DIR ) ) )
 				{
 					String path = file.getAbsolutePath( );
 					String[] tokens = path.split( "\\\\" );
