@@ -236,6 +236,8 @@ public class ToolkitWizard extends Wizard
 			return null;
 		else if ( index == 4 )
 			return null;
+		else if ( index == 5 )
+			return null;
 		else
 			return (IWizardPage) pages.get( index + 1 );
 	}
