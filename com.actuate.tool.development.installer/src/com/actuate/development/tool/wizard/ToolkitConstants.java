@@ -63,4 +63,6 @@ public class ToolkitConstants
 	public static final String BRDPRO_SYNC_TARGETDIRECTORY = "BRDProSyncTargetDirectory";
 	
 	public static final String BRDPRO_SYNC_MINIMIZETOOLKIT = "BRDProSyncMinimizeToolkit";
+	
+	public static final String USING_LOCAL_RESOURCES = "UsingLocalResources";
 }

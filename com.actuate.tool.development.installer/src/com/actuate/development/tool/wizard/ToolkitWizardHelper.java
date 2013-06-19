@@ -36,6 +36,12 @@ public class ToolkitWizardHelper
 {
 
 	private ToolkitWizard wizard;
+	
+	public ToolkitWizard getWizard( )
+	{
+		return wizard;
+	}
+
 	private ToolFeatureData data;
 
 	public ToolkitWizardHelper( ToolkitWizard wizard, ToolFeatureData data )
@@ -80,6 +86,10 @@ public class ToolkitWizardHelper
 
 	private void saveBRDProResourcesSyncSettings( )
 	{
+		wizard.getDialogSettings( )
+				.put( ToolkitConstants.USING_LOCAL_RESOURCES,
+						data.isUsingLocalResources( ) );
+
 		IDialogSettings syncBRDProResourcesSetting = wizard.getDialogSettings( )
 				.getSection( ToolFeature.syncBRDProResources.name( ) );
 		if ( syncBRDProResourcesSetting == null )
@@ -257,6 +267,13 @@ public class ToolkitWizardHelper
 		{
 			data.setCurrentIVProject( wizard.getDialogSettings( )
 					.get( ToolkitConstants.CURRENT_IV_PROJECT ) );
+		}
+
+		if ( wizard.getDialogSettings( )
+				.get( ToolkitConstants.USING_LOCAL_RESOURCES ) != null )
+		{
+			data.setUsingLocalResources( wizard.getDialogSettings( )
+					.getBoolean( ToolkitConstants.USING_LOCAL_RESOURCES ) );
 		}
 
 	}
