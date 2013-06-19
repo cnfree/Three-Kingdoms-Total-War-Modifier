@@ -85,7 +85,7 @@ public class SyncBRDProResources implements ITaskWithMonitor
 
 		startMonitorProcess( monitor );
 
-		monitor.beginTask( "Synchronizing file", 10000 );
+		monitor.beginTask( "Synchronizing files", 10000 );
 
 		Version[] versions = data.getPlatformVersions( );
 		List<String> ignoreVersions = new ArrayList<String>( );

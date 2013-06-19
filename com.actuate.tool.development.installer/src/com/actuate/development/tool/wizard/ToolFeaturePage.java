@@ -36,6 +36,7 @@ public class ToolFeaturePage extends WizardPage
 	private Button iportalSyncButton;
 	private Button syncResourceButton;
 	private ToolkitWizardHelper helper;
+	private Button useLocalDataButton;
 
 	ToolFeaturePage( ToolkitWizardHelper helper, ToolFeatureData data )
 	{
@@ -49,10 +50,11 @@ public class ToolFeaturePage extends WizardPage
 	public void createControl( Composite parent )
 	{
 		Composite composite = new Composite( parent, SWT.NULL );
-		GridLayout gridLayout = new GridLayout( 2, false );
+		GridLayout gridLayout = new GridLayout( 3, false );
 		gridLayout.marginWidth = 10;
 		gridLayout.marginHeight = 20;
 		gridLayout.verticalSpacing = 20;
+		gridLayout.horizontalSpacing = 10;
 		composite.setLayout( gridLayout );
 
 		Label locationLabel = new Label( composite, SWT.NONE );
@@ -88,6 +90,8 @@ public class ToolFeaturePage extends WizardPage
 						change = true;
 					LocationConfig.setLocation( LocationConfig.SHANGHAI );
 				}
+
+				updateSyncButtonStatus( );
 
 				if ( change )
 				{
@@ -133,7 +137,7 @@ public class ToolFeaturePage extends WizardPage
 						LogUtil.recordErrorMsg( e1, false );
 					}
 				}
-				updateSyncButtonStatus( );
+
 				setPageComplete( isPageComplete( ) );
 			}
 		} );
@@ -144,12 +148,19 @@ public class ToolFeaturePage extends WizardPage
 		// gd.exclude = true;
 		locationCombo.setLayoutData( gd );
 
+		useLocalDataButton = new Button( composite, SWT.CHECK );
+		useLocalDataButton.setText( "Use local resources" );
+
+		gd = new GridData( );
+		useLocalDataButton.setVisible( false );
+		useLocalDataButton.setLayoutData( gd );
+
 		Group group = new Group( composite, SWT.NONE );
 		group.setText( "Installation Feature" );
 		gridLayout = new GridLayout( 2, false );
 		group.setLayout( gridLayout );
-		gd = new GridData( );
-		gd.horizontalSpan = 2;
+		gd = new GridData( GridData.FILL_HORIZONTAL );
+		gd.horizontalSpan = 3;
 		group.setLayoutData( gd );
 
 		brdproButton = new Button( group, SWT.RADIO );
@@ -239,16 +250,22 @@ public class ToolFeaturePage extends WizardPage
 	private void updateSyncButtonStatus( )
 	{
 		GridData gd = (GridData) syncResourceButton.getLayoutData( );
+		GridData gd1 = (GridData) useLocalDataButton.getLayoutData( );
 		if ( !LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) ) )
 		{
 			gd.exclude = true;
 			syncResourceButton.setVisible( false );
+			gd1.exclude = true;
+			useLocalDataButton.setVisible( false );
 		}
 		else
 		{
 			gd.exclude = false;
 			syncResourceButton.setVisible( true );
+			gd1.exclude = false;
+			useLocalDataButton.setVisible( true );
 		}
+
 		syncResourceButton.getParent( ).layout( );
 		syncResourceButton.getParent( ).getParent( ).layout( );
 	}
