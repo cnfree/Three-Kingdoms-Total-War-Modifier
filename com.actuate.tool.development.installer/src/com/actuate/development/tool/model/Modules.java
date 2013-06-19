@@ -4,6 +4,7 @@ package com.actuate.development.tool.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -147,8 +148,10 @@ public class Modules
 				.toArray( new IPortalConfig[0] );
 		for ( int i = 0; i < configs.length; i++ )
 		{
-			views.add( configs[i].getDefaultView( ) );
+			if ( !views.contains( configs[i].getDefaultView( ) ) )
+				views.add( configs[i].getDefaultView( ) );
 		}
+		Collections.sort( views );
 		return views.toArray( new String[0] );
 	}
 
@@ -161,6 +164,7 @@ public class Modules
 		{
 			projects.add( configs[i].getProject( ) );
 		}
+		Collections.sort( projects );
 		return projects;
 	}
 

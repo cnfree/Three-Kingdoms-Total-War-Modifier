@@ -2,6 +2,7 @@
 package com.actuate.development.tool.wizard;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -130,9 +131,13 @@ public class BRDProProjectPage extends WizardPage implements
 	private void initProjects( )
 	{
 		if ( !data.getBrdproMap( ).isEmpty( ) )
-			comboProjects.setItems( data.getBrdproMap( )
+		{
+			String[] projects = data.getBrdproMap( )
 					.keySet( )
-					.toArray( new String[0] ) );
+					.toArray( new String[0] );
+			Arrays.sort( projects );
+			comboProjects.setItems( projects );
+		}
 		else
 			comboProjects.removeAll( );
 		comboProjects.getParent( ).layout( );

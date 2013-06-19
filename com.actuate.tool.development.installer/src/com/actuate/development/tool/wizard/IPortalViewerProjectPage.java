@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -948,9 +949,13 @@ public class IPortalViewerProjectPage extends WizardPage implements
 	private void initProjects( )
 	{
 		if ( !data.getIportalViewMap( ).isEmpty( ) )
-			comboProjects.setItems( data.getIportalViewMap( )
+		{
+			String[] projects = data.getIportalViewMap( )
 					.keySet( )
-					.toArray( new String[0] ) );
+					.toArray( new String[0] );
+			Arrays.sort( projects );
+			comboProjects.setItems( projects );
+		}
 		comboProjects.getParent( ).layout( );
 
 		if ( data != null && data.getCurrentIVProject( ) != null )
