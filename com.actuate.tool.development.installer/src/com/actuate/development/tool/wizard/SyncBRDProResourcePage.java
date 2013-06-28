@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Version;
 import com.actuate.development.tool.model.VersionType;
@@ -150,7 +151,8 @@ public class SyncBRDProResourcePage extends WizardPage
 
 		} );
 
-		txtDirectory.setText( "\\\\qaant\\QA\\Toolkit\\platform" );
+		txtDirectory.setText( new File( PathConfig.getProperty( PathConfig.PLUGINS ) ).getParentFile( )
+				.getAbsolutePath( ) );
 
 		Point size = composite.computeSize( SWT.DEFAULT, SWT.DEFAULT );
 		composite.setSize( size );

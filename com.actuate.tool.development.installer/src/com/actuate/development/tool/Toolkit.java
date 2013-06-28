@@ -61,12 +61,12 @@ public class Toolkit
 
 		if ( HOST == null )
 		{
-			String server = PathConfig.getProperty( PathConfig.SERVER, "Qaant" );
 			MessageDialog dialog = new MessageDialog( null,
 					"Error",
 					null,
-					"Can't connect to server "
-							+ server
+					"Can't visit the Toolkit plugin directory "
+							+ PathConfig.getProperty( PathConfig.PLUGINS,
+									"\\\\qaant\\qa\\Toolkit\\plugins" )
 							+ ". Please try it later or contact with administrator.",
 					SWT.ICON_ERROR,
 					new String[]{

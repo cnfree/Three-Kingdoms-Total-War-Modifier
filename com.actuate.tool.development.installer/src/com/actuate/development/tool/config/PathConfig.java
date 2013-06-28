@@ -23,9 +23,6 @@ public class PathConfig
 
 	private static final String PATH_HQ_INI = "path_hq.ini";
 
-	// Toolkit server
-	public final static String SERVER = "server";
-
 	// Toolkit plugins directory
 	public final static String PLUGINS = "plugins";
 
