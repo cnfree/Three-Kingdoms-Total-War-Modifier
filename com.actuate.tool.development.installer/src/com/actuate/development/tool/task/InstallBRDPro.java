@@ -41,6 +41,7 @@ import org.sf.feeling.swt.win32.extension.system.Kernel;
 import org.sf.feeling.swt.win32.extension.system.ProcessEntry;
 
 import com.actuate.development.tool.Toolkit;
+import com.actuate.development.tool.config.LocationConfig;
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.ModuleType;
@@ -232,6 +233,13 @@ public class InstallBRDPro implements ITaskWithMonitor
 				String eclipseOutputDir = PathConfig.getProperty( PathConfig.PLATFORM,
 						"\\\\qa-build\\BIRTOutput\\platform\\{0}_Release_platform" )
 						.replace( "{0}", eclipseVersion );
+				if ( LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) ) )
+				{
+					eclipseOutputDir = new File( PathConfig.getProperty( PathConfig.PLUGINS ) ).getParentFile( )
+							.getAbsolutePath( )
+							+ "\\platform\\"
+							+ eclipseOutputDir;
+				}
 				String pluginOutputDir = Toolkit.HOST
 						+ "\\"
 						+ eclipseBigVersion
