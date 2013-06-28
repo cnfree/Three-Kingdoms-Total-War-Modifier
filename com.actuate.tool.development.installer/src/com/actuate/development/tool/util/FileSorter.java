@@ -30,14 +30,14 @@ public class FileSorter implements Comparator<File>
 		Pattern pattern = Pattern.compile( "\\d{6,10}",
 				Pattern.CASE_INSENSITIVE | Pattern.DOTALL );
 		String number1 = null;
-		Matcher matcher = pattern.matcher( first );
+		Matcher matcher = pattern.matcher( file0.getAbsolutePath( ) );
 		if ( matcher.find( ) )
 		{
 			number1 = matcher.group( );
 		}
 
 		String number2 = null;
-		matcher = pattern.matcher( second );
+		matcher = pattern.matcher( file1.getAbsolutePath( ) );
 		if ( matcher.find( ) )
 		{
 			number2 = matcher.group( );
