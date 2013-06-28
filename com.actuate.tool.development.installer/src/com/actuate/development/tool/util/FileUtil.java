@@ -28,8 +28,10 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -557,5 +559,47 @@ public class FileUtil
 					e );
 		}
 		return props;
+	}
+
+	public static List<File> listFiles( File directory, String[] extensions,
+			int depth )
+	{
+		List<File> files = new ArrayList<File>( );
+		File[] children = directory.listFiles( );
+		if ( children != null )
+		{
+			for ( int i = 0; i < children.length; i++ )
+			{
+				if ( children[i].isDirectory( ) )
+				{
+					if ( depth > 0 )
+						files.addAll( listFiles( children[i],
+								extensions,
+								depth - 1 ) );
+				}
+				else
+				{
+					String suffix = children[i].getName( );
+					if ( suffix.lastIndexOf( '.' ) == -1 )
+						continue;
+					suffix = suffix.substring( suffix.lastIndexOf( '.' ) + 1 );
+					if ( extensions != null )
+					{
+						for ( int j = 0; j < extensions.length; j++ )
+						{
+							if ( extensions[j].equalsIgnoreCase( suffix ) )
+							{
+								files.add( children[i] );
+							}
+						}
+					}
+					else
+					{
+						files.add( children[i] );
+					}
+				}
+			}
+		}
+		return files;
 	}
 }

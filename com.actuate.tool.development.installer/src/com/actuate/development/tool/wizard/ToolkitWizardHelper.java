@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -30,13 +29,14 @@ import com.actuate.development.tool.model.feature.InstallBRDProData;
 import com.actuate.development.tool.model.feature.SyncBRDProResourcesData;
 import com.actuate.development.tool.model.feature.ToolFeature;
 import com.actuate.development.tool.model.feature.ToolFeatureData;
+import com.actuate.development.tool.util.FileUtil;
 import com.actuate.development.tool.util.LogUtil;
 
 public class ToolkitWizardHelper
 {
 
 	private ToolkitWizard wizard;
-	
+
 	public ToolkitWizard getWizard( )
 	{
 		return wizard;
@@ -586,6 +586,8 @@ public class ToolkitWizardHelper
 				public boolean accept( File dir, String name )
 				{
 					File file = new File( dir, name );
+					if ( file.isFile( ) )
+						return false;
 					monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
 					List<File> brdproFiles = new ArrayList<File>( );
 
@@ -614,6 +616,8 @@ public class ToolkitWizardHelper
 				public boolean accept( File dir, String name )
 				{
 					File file = new File( dir, name );
+					if ( file.isFile( ) )
+						return false;
 					monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
 					List<File> iportalViewerFiles = new ArrayList<File>( );
 
@@ -739,9 +743,9 @@ public class ToolkitWizardHelper
 	protected void checkHqProjectActuateBuildFile( File parent,
 			List<File> brdproFiles )
 	{
-		Collection<File> files = FileUtils.listFiles( parent, new String[]{
+		Collection<File> files = FileUtil.listFiles( parent, new String[]{
 			"zip"
-		}, true );
+		}, 3 );
 		if ( files != null )
 		{
 			Iterator<File> iter = files.iterator( );
