@@ -86,10 +86,6 @@ public class ToolkitWizardHelper
 
 	private void saveBRDProResourcesSyncSettings( )
 	{
-		wizard.getDialogSettings( )
-				.put( ToolkitConstants.USING_LOCAL_RESOURCES,
-						data.isUsingLocalResources( ) );
-
 		IDialogSettings syncBRDProResourcesSetting = wizard.getDialogSettings( )
 				.getSection( ToolFeature.syncBRDProResources.name( ) );
 		if ( syncBRDProResourcesSetting == null )
@@ -267,13 +263,6 @@ public class ToolkitWizardHelper
 		{
 			data.setCurrentIVProject( wizard.getDialogSettings( )
 					.get( ToolkitConstants.CURRENT_IV_PROJECT ) );
-		}
-
-		if ( wizard.getDialogSettings( )
-				.get( ToolkitConstants.USING_LOCAL_RESOURCES ) != null )
-		{
-			data.setUsingLocalResources( wizard.getDialogSettings( )
-					.getBoolean( ToolkitConstants.USING_LOCAL_RESOURCES ) );
 		}
 
 	}
@@ -644,40 +633,44 @@ public class ToolkitWizardHelper
 			} );
 		}
 
-		File platformDir = new File( PathConfig.getProperty( PathConfig.PLATFORM_VERSION_DIR,
-				"\\\\QA-BUILD\\BIRTOutput\\platform" ) );
-		final List<Version> versions = new ArrayList<Version>( );
-		platformDir.list( new FilenameFilter( ) {
+		if ( data.isServer( ) )
+		{
+			File platformDir = new File( PathConfig.getProperty( PathConfig.PLATFORM_VERSION_DIR,
+					"\\\\QA-BUILD\\BIRTOutput\\platform" ) );
+			final List<Version> versions = new ArrayList<Version>( );
+			platformDir.list( new FilenameFilter( ) {
 
-			public boolean accept( File dir, String name )
-			{
-				File file = new File( dir, name );
-				monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
-				if ( file.isDirectory( )
-						&& file.getName( ).matches( "(?i).+?_platform" ) )
+				public boolean accept( File dir, String name )
 				{
-					String version = file.getName( ).split( "_" )[0];
-					if ( version.compareTo( "3.6" ) >= 0 )
-						versions.add( new Version( version,
-								version,
-								VersionType.platform,
-								"/icons/version_platform.gif" ) );
+					File file = new File( dir, name );
+					monitor.subTask( "Scanning " + file.getAbsolutePath( ) );
+					if ( file.isDirectory( )
+							&& file.getName( ).matches( "(?i).+?_platform" ) )
+					{
+						String version = file.getName( ).split( "_" )[0];
+						if ( version.compareTo( "3.6" ) >= 0 )
+							versions.add( new Version( version,
+									version,
+									VersionType.platform,
+									"/icons/version_platform.gif" ) );
+					}
+					return false;
 				}
-				return false;
-			}
 
-		} );
+			} );
 
-		Collections.sort( versions, new Comparator<Version>( ) {
+			Collections.sort( versions, new Comparator<Version>( ) {
 
-			public int compare( Version o1, Version o2 )
-			{
-				return o1.getName( ).compareToIgnoreCase( o2.getName( ) );
-			}
-		} );
-		Collections.reverse( versions );
-		data.getSyncBRDProResourcesData( )
-				.setPlatformVersions( versions.toArray( new Version[0] ) );
+				public int compare( Version o1, Version o2 )
+				{
+					return o1.getName( ).compareToIgnoreCase( o2.getName( ) );
+				}
+			} );
+			Collections.reverse( versions );
+			data.getSyncBRDProResourcesData( )
+					.setPlatformVersions( versions.toArray( new Version[0] ) );
+
+		}
 
 		Display.getDefault( ).syncExec( new Runnable( ) {
 

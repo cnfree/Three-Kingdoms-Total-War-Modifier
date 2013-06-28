@@ -11,14 +11,14 @@ public class SyncBRDProResourcesData
 	private String targetDirectory;
 	private boolean minimizeToolkit;
 	private Version[] platformVersions;
-	
-	
+
 	public Version[] getPlatformVersions( )
 	{
+		if ( platformVersions == null )
+			return new Version[0];
 		return platformVersions;
 	}
 
-	
 	public void setPlatformVersions( Version[] platformVersions )
 	{
 		this.platformVersions = platformVersions;

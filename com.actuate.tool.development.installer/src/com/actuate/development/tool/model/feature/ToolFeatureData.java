@@ -25,16 +25,16 @@ public class ToolFeatureData
 			"AugustaR1" );
 	private String currentIVProject = UserDataConfig.getProperty( UserDataConfig.DEFAULT_IPORTAL_PROJECT,
 			"AugustaR1" );
-	private boolean usingLocalResources = false;
+	private boolean isServer = false;
 
-	public boolean isUsingLocalResources( )
+	public boolean isServer( )
 	{
-		return usingLocalResources;
+		return isServer;
 	}
 
-	public void setUsingLocalResources( boolean usingLocalResources )
+	public void setServer( boolean isServer )
 	{
-		this.usingLocalResources = usingLocalResources;
+		this.isServer = isServer;
 	}
 
 	public String getCurrentIVProject( )

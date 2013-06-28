@@ -25,7 +25,7 @@ public class Toolkit
 
 	public static String HOST;
 
-	public Toolkit( )
+	public Toolkit( boolean isServer )
 	{
 		Display display = new Display( );
 
@@ -90,7 +90,7 @@ public class Toolkit
 			return;
 		}
 
-		ToolkitWizard wizard = new ToolkitWizard( );
+		ToolkitWizard wizard = new ToolkitWizard( isServer );
 		WizardDialog dialog = new WizardDialog( null, wizard );
 		dialog.open( );
 		display.dispose( );
@@ -103,7 +103,12 @@ public class Toolkit
 				&& "-uac".equalsIgnoreCase( args[0] ) )
 		{
 			ClassPathUpdater.loadClasspath( );
-			new Toolkit( );
+			if ( args.length > 1 && "-server".equalsIgnoreCase( args[1] ) )
+			{
+				new Toolkit( true );
+			}
+			else
+				new Toolkit( false );
 		}
 		else
 		{
@@ -116,7 +121,7 @@ public class Toolkit
 						+ "\\Toolkit.exe";
 				info.lpVerb = "runas";
 				info.lpDirectory = null;
-				info.lpParameters = "-uac";
+				info.lpParameters = "-uac -server";
 				Shell32.ShellExecuteEx( info );
 			}
 			catch ( Exception e )

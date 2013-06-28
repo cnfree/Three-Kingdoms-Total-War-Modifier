@@ -1,11 +1,9 @@
 
 package com.actuate.development.tool.wizard;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardPage;
@@ -28,7 +26,6 @@ import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.feature.ToolFeature;
 import com.actuate.development.tool.model.feature.ToolFeatureData;
 import com.actuate.development.tool.util.LogUtil;
-import com.actuate.development.tool.util.UIUtil;
 
 public class ToolFeaturePage extends WizardPage
 {
@@ -39,7 +36,6 @@ public class ToolFeaturePage extends WizardPage
 	private Button iportalSyncButton;
 	private Button syncResourceButton;
 	private ToolkitWizardHelper helper;
-	private Button usingLocalDataButton;
 
 	ToolFeaturePage( ToolkitWizardHelper helper, ToolFeatureData data )
 	{
@@ -63,7 +59,8 @@ public class ToolFeaturePage extends WizardPage
 		Label locationLabel = new Label( composite, SWT.NONE );
 		locationLabel.setText( "&Location: " );
 		GridData gd = new GridData( );
-		// gd.exclude = true;
+		if ( !data.isServer( ) )
+			gd.exclude = true;
 		locationLabel.setLayoutData( gd );
 		final Combo locationCombo = new Combo( composite, SWT.READ_ONLY
 				| SWT.BORDER
@@ -148,71 +145,9 @@ public class ToolFeaturePage extends WizardPage
 		gd = new GridData( );
 		gd.widthHint = 250;
 		gd.horizontalAlignment = SWT.FILL;
-		// gd.exclude = true;
+		if ( !data.isServer( ) )
+			gd.exclude = true;
 		locationCombo.setLayoutData( gd );
-
-		usingLocalDataButton = new Button( composite, SWT.CHECK );
-		usingLocalDataButton.setText( "&Use local resources" );
-
-		checkUsingLocalDataButton( );
-
-		gd = new GridData( );
-		usingLocalDataButton.setVisible( false );
-		usingLocalDataButton.setLayoutData( gd );
-
-		usingLocalDataButton.addSelectionListener( new SelectionAdapter( ) {
-
-			public void widgetSelected( SelectionEvent e )
-			{
-				if ( !usingLocalDataButton.getSelection( ) )
-				{
-					data.setUsingLocalResources( false );
-				}
-				else
-				{
-					if ( data.getSyncBRDProResourcesData( ) != null
-							&& data.getSyncBRDProResourcesData( )
-									.getTargetDirectory( ) != null )
-					{
-						File pluginFile = new File( data.getSyncBRDProResourcesData( )
-								.getTargetDirectory( ),
-								"plugins\\toolkit.xml" );
-						if ( pluginFile.exists( ) )
-						{
-							data.setUsingLocalResources( true );
-							return;
-						}
-					}
-
-					if ( !data.isUsingLocalResources( ) )
-					{
-						MessageDialog syncDialog = new MessageDialog( UIUtil.getShell( ),
-								"Warning",
-								null,
-								"The local resources don't exist, do you want to synchronize the BRDPro resources from Shanghai server to the local environment now?",
-								MessageDialog.WARNING,
-								new String[]{
-										"Yes", "No"
-								},
-								0 );//$NON-NLS-1$
-						if ( syncDialog.open( ) == 0 )
-						{
-							syncResourceButton.setSelection( true );
-							brdproButton.setSelection( false );
-							iportalSyncButton.setSelection( false );
-							workspaceCloneButton.setSelection( false );
-							setPageComplete( isPageComplete( ) );
-							helper.getWizard( )
-									.getContainer( )
-									.showPage( helper.getWizard( )
-											.getNextPage( ToolFeaturePage.this ) );
-						}
-						usingLocalDataButton.setSelection( false );
-					}
-				}
-			}
-
-		} );
 
 		Group group = new Group( composite, SWT.NONE );
 		group.setText( "Installation Feature" );
@@ -284,6 +219,8 @@ public class ToolFeaturePage extends WizardPage
 		syncResourceButton = new Button( group, SWT.RADIO );
 		syncResourceButton.setText( "Synchronize BRDPro &resources from Shanghai server to the local environment" );
 		gd = new GridData( );
+		if ( !data.isServer( ) )
+			gd.exclude = true;
 		gd.horizontalSpan = 2;
 		syncResourceButton.setLayoutData( gd );
 		syncResourceButton.addSelectionListener( new SelectionAdapter( ) {
@@ -306,56 +243,20 @@ public class ToolFeaturePage extends WizardPage
 		setControl( composite );
 	}
 
-	private void checkUsingLocalDataButton( )
-	{
-		if ( data.isUsingLocalResources( ) )
-		{
-			boolean shouldSelection = false;
-			if ( data.getSyncBRDProResourcesData( ) != null
-					&& data.getSyncBRDProResourcesData( ).getTargetDirectory( ) != null )
-			{
-				File pluginFile = new File( data.getSyncBRDProResourcesData( )
-						.getTargetDirectory( ), "plugins\\toolkit.xml" );
-				if ( pluginFile.exists( ) )
-				{
-					usingLocalDataButton.setSelection( true );
-					shouldSelection = true;
-				}
-			}
-			if ( !usingLocalDataButton.getSelection( ) )
-			{
-				data.setUsingLocalResources( false );
-			}
-			else if ( !shouldSelection )
-			{
-				data.setUsingLocalResources( false );
-				usingLocalDataButton.setSelection( false );
-			}
-		}
-		else
-		{
-			usingLocalDataButton.setSelection( false );
-			data.setUsingLocalResources( false );
-		}
-	}
-
 	private void updateSyncButtonStatus( )
 	{
 		GridData gd = (GridData) syncResourceButton.getLayoutData( );
-		GridData gd1 = (GridData) usingLocalDataButton.getLayoutData( );
-		if ( !LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) ) )
+
+		if ( !LocationConfig.HEADQUARTER.equals( LocationConfig.getLocation( ) )
+				|| !data.isServer( ) )
 		{
 			gd.exclude = true;
 			syncResourceButton.setVisible( false );
-			gd1.exclude = true;
-			usingLocalDataButton.setVisible( false );
 		}
 		else
 		{
 			gd.exclude = false;
 			syncResourceButton.setVisible( true );
-			gd1.exclude = false;
-			usingLocalDataButton.setVisible( true );
 		}
 
 		syncResourceButton.getParent( ).layout( );
@@ -395,8 +296,6 @@ public class ToolFeaturePage extends WizardPage
 						&& !syncResourceButton.isVisible( ) )
 					data.setToolFeature( null );
 			}
-
-			checkUsingLocalDataButton( );
 		}
 	}
 

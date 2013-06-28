@@ -38,10 +38,11 @@ public class ToolkitWizard extends Wizard
 	private ToolFeatureData data = new ToolFeatureData( );
 	private ToolkitWizardHelper helper;
 
-	public ToolkitWizard( )
+	public ToolkitWizard( boolean isServer )
 	{
 		setWindowTitle( "Actuate BRDPro Development Toolkit" );
 		setNeedsProgressMonitor( true );
+		data.setServer( isServer );
 		helper = new ToolkitWizardHelper( this, data );
 		helper.initWizardDialogSettings( );
 		helper.initToolkitConfig( );
