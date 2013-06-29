@@ -204,8 +204,16 @@ public class BRDProProjectPage extends WizardPage implements
 				{
 					String path = file.getAbsolutePath( );
 					String[] tokens = path.split( "\\\\" );
-					if ( tokens.length > 3 )
-						comboFiles.add( tokens[tokens.length - 3] );
+					if ( file.isFile( ) )
+					{
+						if ( tokens.length > 3 )
+							comboFiles.add( tokens[tokens.length - 3] );
+					}
+					else
+					{
+						if ( tokens.length > 2 )
+							comboFiles.add( tokens[tokens.length - 2] );
+					}
 				}
 				else
 				{

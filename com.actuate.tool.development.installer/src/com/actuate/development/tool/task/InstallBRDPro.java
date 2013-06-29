@@ -14,7 +14,9 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -122,8 +124,14 @@ public class InstallBRDPro implements ITaskWithMonitor
 
 		startMonitorProcess( monitor );
 
+		int baseStep = 5;
+		File downloadFile = new File( data.getBrdproFile( ) );
+		if ( downloadFile.isFile( ) )
+		{
+			baseStep++;
+		}
 		monitor.beginTask( "Total "
-				+ ( 6 + ( data.getModules( ) == null ? 0
+				+ ( baseStep + ( data.getModules( ) == null ? 0
 						: data.getModules( ).length ) ) + " steps",
 				IProgressMonitor.UNKNOWN );
 
@@ -193,13 +201,17 @@ public class InstallBRDPro implements ITaskWithMonitor
 
 			if ( !monitor.isCanceled( ) )
 			{
-				extractBRDPro( monitor,
-						p,
-						helper,
-						consoleLogger,
-						unzipFlag,
-						step,
-						stepDetail );
+				File installFile = new File( data.getBrdproFile( ) );
+				if ( installFile.isFile( ) )
+				{
+					extractBRDPro( monitor,
+							p,
+							helper,
+							consoleLogger,
+							unzipFlag,
+							step,
+							stepDetail );
+				}
 			}
 			unzipFlag[0] = true;
 
@@ -925,19 +937,55 @@ public class InstallBRDPro implements ITaskWithMonitor
 				+ ++step[0]
 				+ "] Downloading the BRDPro archive file...";
 
-		monitorDownload( monitor,
-				downloadFlag,
-				defaultTaskName,
-				new File( data.getTempDir( ) + "\\brdpro\\zip",
-						brdproFile.getName( ) ),
-				fileLength );
+		File downloadFile = null;
 
-		monitor.subTask( defaultTaskName
-				+ "\t[ Size: "
-				+ FileUtils.byteCountToDisplaySize( fileLength )
-				+ " ] " );
-		stepDetail[0] = "Download the BRDPro archive file";
-		File downloadFile = getAntFile( "/templates/Download.xml", true );
+		if ( brdproFile.isFile( ) )
+		{
+			monitorDownload( monitor,
+					downloadFlag,
+					defaultTaskName,
+					new File( data.getTempDir( ) + "\\brdpro\\zip",
+							brdproFile.getName( ) ),
+					fileLength );
+
+			monitor.subTask( defaultTaskName
+					+ "\t[ Size: "
+					+ FileUtils.byteCountToDisplaySize( fileLength )
+					+ " ] " );
+			stepDetail[0] = "Download the BRDPro archive file";
+			downloadFile = getAntFile( "/templates/Download.xml", true );
+		}
+		else
+		{
+			defaultTaskName = "[Step "
+					+ ++step[0]
+					+ "] Downloading the BRDPro installation files...";
+
+			Collection<File> targetFiles = FileUtils.listFiles( brdproFile,
+					new String[]{
+						"cab"
+					},
+					true );
+
+			Iterator<File> fileIter = targetFiles.iterator( );
+			while ( fileIter.hasNext( ) )
+			{
+				fileLength += fileIter.next( ).length( );
+			}
+
+			monitorDownload( monitor,
+					downloadFlag,
+					defaultTaskName,
+					new File( data.getTempDir( ) + "\\brdpro\\install" ),
+					fileLength );
+
+			monitor.subTask( defaultTaskName
+					+ "\t[ Size: "
+					+ FileUtils.byteCountToDisplaySize( fileLength )
+					+ " ] " );
+			stepDetail[0] = "Download the BRDPro installation files";
+			downloadFile = getAntFile( "/templates/Download_II.xml", true );
+		}
 
 		antProcess = Runtime.getRuntime( ).exec( new String[]{
 				System.getProperty( "java.home" ) + "/bin/java",
@@ -1402,6 +1450,19 @@ public class InstallBRDPro implements ITaskWithMonitor
 			public void run( )
 			{
 				long donwloadSize = file.length( );
+				if ( file.isDirectory( ) )
+				{
+					Collection<File> targetFiles = FileUtils.listFiles( file,
+							new String[]{
+								"cab"
+							},
+							true );
+					Iterator<File> fileIter = targetFiles.iterator( );
+					while ( fileIter.hasNext( ) )
+					{
+						donwloadSize += fileIter.next( ).length( );
+					}
+				}
 				long time = System.currentTimeMillis( );
 				final Module module = current[0];
 				while ( !flag[0] )
@@ -1847,62 +1908,83 @@ public class InstallBRDPro implements ITaskWithMonitor
 
 	private void checkBRDProVersion( IProgressMonitor monitor )
 	{
-		String brdproFile = new File( data.getTempDir( ), "brdpro\\zip\\"
-				+ data.getBrdproFile( ).substring( data.getBrdproFile( )
-						.lastIndexOf( '\\' ) ) ).getAbsolutePath( );
-		try
+		File downloadFile = new File( data.getBrdproFile( ) );
+		if ( downloadFile.isFile( ) )
 		{
-			ZipFile zipFile = new ZipFile( brdproFile );
-			Enumeration enumeration = zipFile.getEntries( );
-			ZipEntry zipEntry = (ZipEntry) enumeration.nextElement( );
-			data.setInstallShield( true );
-			if ( zipEntry.getName( ).toLowerCase( ).startsWith( "brdpro" ) )
+			String brdproFile = new File( data.getTempDir( ), "brdpro\\zip\\"
+					+ data.getBrdproFile( ).substring( data.getBrdproFile( )
+							.lastIndexOf( '\\' ) ) ).getAbsolutePath( );
+			try
 			{
-				data.setInstallShield( false );
-			}
-			if ( data.isInstallShield( ) )
-			{
-				while ( enumeration.hasMoreElements( ) )
+				ZipFile zipFile = new ZipFile( brdproFile );
+				Enumeration enumeration = zipFile.getEntries( );
+				ZipEntry zipEntry = (ZipEntry) enumeration.nextElement( );
+				data.setInstallShield( true );
+				if ( zipEntry.getName( ).toLowerCase( ).startsWith( "brdpro" ) )
 				{
-					zipEntry = (ZipEntry) enumeration.nextElement( );
-					if ( zipEntry.getName( ).matches( "(?i)Report Files/.+txt" ) )
+					data.setInstallShield( false );
+				}
+				if ( data.isInstallShield( ) )
+				{
+					while ( enumeration.hasMoreElements( ) )
 					{
-						String filePath = System.getProperty( "java.io.tmpdir" )
-								+ "\\log"
-								+ System.currentTimeMillis( )
-								+ ".txt";
-						File tempFile = new File( filePath );
-						if ( !tempFile.exists( ) )
+						zipEntry = (ZipEntry) enumeration.nextElement( );
+						if ( zipEntry.getName( )
+								.matches( "(?i)Report Files/.+txt" ) )
 						{
-							if ( !tempFile.getParentFile( ).exists( ) )
+							String filePath = System.getProperty( "java.io.tmpdir" )
+									+ "\\log"
+									+ System.currentTimeMillis( )
+									+ ".txt";
+							File tempFile = new File( filePath );
+							if ( !tempFile.exists( ) )
 							{
-								tempFile.getParentFile( ).mkdirs( );
+								if ( !tempFile.getParentFile( ).exists( ) )
+								{
+									tempFile.getParentFile( ).mkdirs( );
+								}
+								tempFile.createNewFile( );
 							}
-							tempFile.createNewFile( );
+							FileUtil.writeToBinarayFile( tempFile,
+									zipFile.getInputStream( zipEntry ),
+									true );
+							data.setModuleVersion( checkModuleVersion( tempFile ) );
+							break;
 						}
-						FileUtil.writeToBinarayFile( tempFile,
-								zipFile.getInputStream( zipEntry ),
-								true );
-						data.setModuleVersion( checkModuleVersion( tempFile ) );
-						break;
 					}
 				}
-			}
-			else
-			{
-				data.setModuleVersion( new ModuleVersion( ) );
-				while ( enumeration.hasMoreElements( ) )
+				else
 				{
-					zipEntry = (ZipEntry) enumeration.nextElement( );
-					String entryName = zipEntry.getName( ).replace( '/', '\\' );
-					checkVersion( entryName, data.getModuleVersion( ) );
+					data.setModuleVersion( new ModuleVersion( ) );
+					while ( enumeration.hasMoreElements( ) )
+					{
+						zipEntry = (ZipEntry) enumeration.nextElement( );
+						String entryName = zipEntry.getName( ).replace( '/',
+								'\\' );
+						checkVersion( entryName, data.getModuleVersion( ) );
+					}
 				}
+				zipFile.close( );
 			}
-			zipFile.close( );
+			catch ( IOException e )
+			{
+				e.printStackTrace( );
+			}
 		}
-		catch ( IOException e )
+		else
 		{
-			e.printStackTrace( );
+			try
+			{
+				data.setInstallShield( true );
+				File reportFile = new File( data.getTempDir( ),
+						"brdpro\\install\\Report Files" );
+				File tempFile = reportFile.listFiles( )[0];
+				data.setModuleVersion( checkModuleVersion( tempFile ) );
+			}
+			catch ( IOException e )
+			{
+				e.printStackTrace( );
+			}
 		}
 	}
 

@@ -720,7 +720,7 @@ public class ToolkitWizardHelper
 
 				if ( brdProFile.exists( ) )
 				{
-					brdproFiles.add( brdProFile );
+					brdproFiles.add( brdProFile.getParentFile( ) );
 				}
 			}
 

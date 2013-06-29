@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Download">
+	<target name="init">
+		<property name="build.temp" value="$tempDir" />
+		<property name="build.path" value="$installPath" />
+		<property name="brdpro.zip" value="$brdproFile" />
+	</target>
+
+	<target name="download" depends="init">
+		<copy todir="${build.temp}\brdpro\install">
+			<fileset dir="${brdpro.zip}" />
+		</copy>
+	</target>
+</project>
