@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.sf.feeling.swt.win32.internal.extension.util.ImageCache;
 
+import com.actuate.development.tool.Toolkit;
 import com.actuate.development.tool.config.LocationConfig;
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.feature.ToolFeature;
@@ -237,10 +238,9 @@ public class ToolFeaturePage extends WizardPage
 			}
 		} );
 
-		updateSyncButtonStatus( );
-
-		checkToolFeature( );
 		setControl( composite );
+		updateSyncButtonStatus( );
+		checkToolFeature( );
 	}
 
 	private void updateSyncButtonStatus( )
@@ -257,6 +257,20 @@ public class ToolFeaturePage extends WizardPage
 		{
 			gd.exclude = false;
 			syncResourceButton.setVisible( true );
+
+			if ( Toolkit.HOST == null )
+			{
+				brdproButton.setEnabled( false );
+				brdproButton.setSelection( false );
+				iportalSyncButton.setEnabled( false );
+				iportalSyncButton.setSelection( false );
+				syncResourceButton.setSelection( true );
+			}
+			else
+			{
+				brdproButton.setEnabled( true );
+				iportalSyncButton.setEnabled( true );
+			}
 		}
 
 		syncResourceButton.getParent( ).layout( );
@@ -267,6 +281,7 @@ public class ToolFeaturePage extends WizardPage
 	{
 		if ( data != null )
 		{
+			updateSyncButtonStatus( );
 			checkToolFeature( );
 			return data.getToolFeature( ) != null;
 		}

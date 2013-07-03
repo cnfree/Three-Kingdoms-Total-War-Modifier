@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.actuate.development.tool.Toolkit;
 import com.actuate.development.tool.config.PathConfig;
 import com.actuate.development.tool.model.Module;
 import com.actuate.development.tool.model.Version;
@@ -125,6 +126,9 @@ public class SyncBRDProResourcePage extends WizardPage
 		gd = new GridData( GridData.FILL_HORIZONTAL );
 		txtDirectory.setLayoutData( gd );
 
+		txtDirectory.setText( new File( PathConfig.getProperty( PathConfig.PLUGINS ) ).getParentFile( )
+				.getAbsolutePath( ) );
+
 		txtDirectory.addModifyListener( new ModifyListener( ) {
 
 			public void modifyText( ModifyEvent e )
@@ -150,9 +154,6 @@ public class SyncBRDProResourcePage extends WizardPage
 			}
 
 		} );
-
-		txtDirectory.setText( new File( PathConfig.getProperty( PathConfig.PLUGINS ) ).getParentFile( )
-				.getAbsolutePath( ) );
 
 		Point size = composite.computeSize( SWT.DEFAULT, SWT.DEFAULT );
 		composite.setSize( size );
@@ -194,11 +195,6 @@ public class SyncBRDProResourcePage extends WizardPage
 	{
 		if ( data != null && data.getSyncBRDProResourcesData( ) != null )
 		{
-			if ( data.getSyncBRDProResourcesData( ).getTargetDirectory( ) != null )
-			{
-				txtDirectory.setText( data.getSyncBRDProResourcesData( )
-						.getTargetDirectory( ) );
-			}
 
 			if ( data.getSyncBRDProResourcesData( ).getIgnorePlatformVersions( ) != null
 					&& data.getSyncBRDProResourcesData( )
@@ -215,6 +211,12 @@ public class SyncBRDProResourcePage extends WizardPage
 				checkCheckStatus( platformViewer,
 						provider,
 						VersionType.platform );
+			}
+
+			if ( data.getSyncBRDProResourcesData( ).getTargetDirectory( ) != null )
+			{
+				txtDirectory.setText( data.getSyncBRDProResourcesData( )
+						.getTargetDirectory( ) );
 			}
 
 			bgButton.setSelection( data.getSyncBRDProResourcesData( )
@@ -238,6 +240,17 @@ public class SyncBRDProResourcePage extends WizardPage
 			if ( data.getToolFeature( ) != ToolFeature.syncBRDProResources )
 				return true;
 			checkStatus( );
+
+			String plugins = PathConfig.getProperty( PathConfig.PLUGINS,
+					"\\\\qaant\\qa\\Toolkit\\plugins" );
+			if ( new File( plugins ).exists( ) )
+			{
+				Toolkit.HOST = plugins;
+			}
+			else
+			{
+				Toolkit.HOST = null;
+			}
 			return getErrorMessage( ) == null;
 
 		}
@@ -248,10 +261,15 @@ public class SyncBRDProResourcePage extends WizardPage
 	{
 		if ( data != null )
 		{
-			data.getSyncBRDProResourcesData( )
-					.setTargetDirectory( txtDirectory.getText( ) );
-			PathConfig.setProperty( PathConfig.PLUGINS, txtDirectory.getText( )
-					+ "\\plugins" );
+			if ( !data.getSyncBRDProResourcesData( )
+					.getTargetDirectory( )
+					.equals( txtDirectory.getText( ) ) )
+			{
+				data.getSyncBRDProResourcesData( )
+						.setTargetDirectory( txtDirectory.getText( ) );
+				PathConfig.setProperty( PathConfig.PLUGINS,
+						txtDirectory.getText( ) + "\\plugins" );
+			}
 			Object[] children = provider.getChildren( VersionType.platform );
 			List<String> uncheckList = new ArrayList<String>( );
 			List<String> versionList = new ArrayList<String>( );
