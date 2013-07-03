@@ -28,7 +28,7 @@ public class Sync
 				info.fMask = SHELLEXECUTEINFO.SEE_MASK_NOCLOSEPROCESS
 						| SHELLEXECUTEINFO.SEE_MASK_FLAG_NO_UI;
 				info.lpFile = FileSystem.getCurrentDirectory( )
-						+ "\\Toolkit.exe";
+						+ "\\Sync.exe";
 				info.lpVerb = "runas";
 				info.lpDirectory = null;
 				info.lpParameters = "-uac";
