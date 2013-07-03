@@ -104,7 +104,13 @@ public class SyncBRDProResources implements ITaskWithMonitor
 		allLength = 0L;
 		File platformDir = new File( "\\\\QA-BUILD\\BIRTOutput\\platform" );
 		final Map<String, List<File>> sdkFiles = new HashMap<String, List<File>>( );
-		listSDKFiles( syncVersions, platformDir, sdkFiles );
+		listSDKFiles( syncVersions, platformDir, sdkFiles, monitor );
+
+		if ( monitor.isCanceled( ) )
+		{
+			cancelTask( monitor );
+			return;
+		}
 
 		final List<String> pluginVersions = new ArrayList<String>( );
 		if ( data.getPluginVersions( ) != null )
@@ -114,7 +120,14 @@ public class SyncBRDProResources implements ITaskWithMonitor
 
 		File pluginDir = new File( "\\\\qaant\\QA\\Toolkit\\plugins" );
 		final File[] pluginFiles = listToolkitPlugins( pluginVersions,
-				pluginDir );
+				pluginDir,
+				monitor );
+
+		if ( monitor.isCanceled( ) )
+		{
+			cancelTask( monitor );
+			return;
+		}
 
 		File targetDir = new File( data.getTargetDirectory( ) );
 		if ( !targetDir.exists( ) )
@@ -247,6 +260,8 @@ public class SyncBRDProResources implements ITaskWithMonitor
 	private void copyToolkitPluginFiles( File pluginDir,
 			final File[] pluginFiles, IProgressMonitor monitor )
 	{
+		if ( monitor.isCanceled( ) )
+			return;
 		File targetPlugins = new File( data.getTargetDirectory( ), "plugins" );
 
 		List<File> movePluginFiles = new ArrayList<File>( );
@@ -642,12 +657,14 @@ public class SyncBRDProResources implements ITaskWithMonitor
 	}
 
 	private File[] listToolkitPlugins( final List<String> pluginVersions,
-			File pluginDir )
+			File pluginDir, final IProgressMonitor monitor )
 	{
 		return pluginDir.listFiles( new FileFilter( ) {
 
 			public boolean accept( File file )
 			{
+				monitor.subTask( "Scanning Toolkit plugin files: "
+						+ file.getAbsolutePath( ) );
 				if ( file.isDirectory( )
 						&& file.getName( ).matches( "\\d+\\.\\d+" ) )
 				{
@@ -670,56 +687,56 @@ public class SyncBRDProResources implements ITaskWithMonitor
 					}
 					return true;
 				}
-
 			}
 		} );
 	}
 
 	private void listSDKFiles( final List<String> syncVersions,
-			File platformDir, final Map<String, List<File>> sdkFiles )
+			File platformDir, final Map<String, List<File>> sdkFiles,
+			final IProgressMonitor monitor )
 	{
-		platformDir.listFiles( new FileFilter( ) {
-
-			public boolean accept( File file )
+		Version[] versions = data.getPlatformVersions( );
+		for ( int i = 0; i < syncVersions.size( ); i++ )
+		{
+			String version = syncVersions.get( i );
+			for ( int j = 0; j < versions.length; j++ )
 			{
-				if ( file.isDirectory( )
-						&& file.getName( ).matches( "(?i).+?_platform" ) )
+				if ( versions[j].getValue( ).equals( version ) )
 				{
-					String version = file.getName( ).split( "_" )[0];
-					if ( syncVersions.contains( version ) )
-					{
-						file.listFiles( new FileFilter( ) {
+					monitor.subTask( "Scanning platform: "
+							+ versions[j].getVersionFile( ).getAbsolutePath( ) );
 
-							public boolean accept( File file )
+					final String parentFileName = versions[j].getVersionFile( )
+							.getName( );
+					versions[j].getVersionFile( ).listFiles( new FileFilter( ) {
+
+						public boolean accept( File file )
+						{
+							if ( file.isFile( ) )
 							{
-								if ( file.isFile( ) )
+								String fileName = file.getName( );
+								if ( fileName.matches( ECLIPSE_SDK )
+										|| fileName.matches( EMF_SDK )
+										|| fileName.matches( GEF_SDK )
+										|| fileName.matches( WTP_SDK ) )
 								{
-									String fileName = file.getName( );
-									if ( fileName.matches( ECLIPSE_SDK )
-											|| fileName.matches( EMF_SDK )
-											|| fileName.matches( GEF_SDK )
-											|| fileName.matches( WTP_SDK ) )
+									if ( !sdkFiles.containsKey( parentFileName ) )
 									{
-										String parentFileName = file.getParentFile( )
-												.getName( );
-										if ( !sdkFiles.containsKey( parentFileName ) )
-										{
-											sdkFiles.put( parentFileName,
-													new ArrayList<File>( ) );
-										}
-										sdkFiles.get( parentFileName )
-												.add( file );
-										allLength += file.length( );
+										sdkFiles.put( parentFileName,
+												new ArrayList<File>( ) );
 									}
+									sdkFiles.get( parentFileName ).add( file );
+									allLength += file.length( );
 								}
-								return false;
 							}
-						} );
-					}
+							return false;
+						}
+					} );
+					break;
 				}
-				return false;
+
 			}
-		} );
+		}
 	}
 
 	private void updateTooltip( )

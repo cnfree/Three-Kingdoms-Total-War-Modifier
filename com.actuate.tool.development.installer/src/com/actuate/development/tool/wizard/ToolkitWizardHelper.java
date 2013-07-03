@@ -651,6 +651,7 @@ public class ToolkitWizardHelper
 						if ( version.compareTo( "3.6" ) >= 0 )
 							versions.add( new Version( version,
 									version,
+									file,
 									VersionType.platform,
 									"/icons/version_platform.gif" ) );
 					}

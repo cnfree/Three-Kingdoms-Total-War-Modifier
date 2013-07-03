@@ -59,7 +59,7 @@ public class Toolkit
 			}
 		}
 
-		if ( HOST == null )
+		if ( HOST == null && !isServer )
 		{
 			MessageDialog dialog = new MessageDialog( null,
 					"Error",

@@ -1,6 +1,8 @@
 
 package com.actuate.development.tool.model;
 
+import java.io.File;
+
 public class Version
 {
 
@@ -8,19 +10,31 @@ public class Version
 	private VersionType type;
 	private String imagePath;
 	private String name;
+	private File versionFile;
+
+	public File getVersionFile( )
+	{
+		return versionFile;
+	}
+
+	public void setVersionFile( File versionFile )
+	{
+		this.versionFile = versionFile;
+	}
 
 	public String getName( )
 	{
 		return name;
 	}
 
-	public Version( String name, String value, VersionType type,
-			String imagePath )
+	public Version( String name, String value, File versionFile,
+			VersionType type, String imagePath )
 	{
 		this.name = name;
 		this.value = value;
 		this.type = type;
 		this.imagePath = imagePath;
+		this.versionFile = versionFile;
 	}
 
 	public String getImagePath( )

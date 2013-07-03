@@ -79,6 +79,10 @@ public class Tool
 
 	public static void init( )
 	{
+		if ( Toolkit.HOST == null )
+		{
+			return;
+		}
 		String xmlpath = Toolkit.HOST + "\\toolkit.xml";
 		Serializer serializer = new Persister( );
 		File source = new File( xmlpath );
