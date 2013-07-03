@@ -3,6 +3,8 @@ package com.actuate.development.tool.config;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -13,6 +15,7 @@ import java.util.logging.Logger;
 import org.sf.feeling.swt.win32.extension.io.FileSystem;
 
 import com.actuate.development.tool.util.FileUtil;
+import com.actuate.development.tool.util.LogUtil;
 
 public class PathConfig
 {
@@ -140,4 +143,27 @@ public class PathConfig
 		return props.getProperty( property );
 	}
 
+	public static void setProperty( String property, String value )
+	{
+		props.setProperty( property, value );
+		String location = LocationConfig.getLocation( );
+		if ( LocationConfig.HEADQUARTER.equals( location ) )
+		{
+			String path = PATH_HQ_INI;
+			File config = new File( FileSystem.getCurrentDirectory( )
+					+ PATH_CONF
+					+ path );
+			try
+			{
+				FileOutputStream fos = new FileOutputStream( config );
+				props.store( fos, null );
+				fos.close( );
+			}
+			catch ( IOException e )
+			{
+				LogUtil.recordErrorMsg( e, true );
+			}
+		}
+
+	}
 }

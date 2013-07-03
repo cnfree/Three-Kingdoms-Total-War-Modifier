@@ -250,7 +250,8 @@ public class SyncBRDProResourcePage extends WizardPage
 		{
 			data.getSyncBRDProResourcesData( )
 					.setTargetDirectory( txtDirectory.getText( ) );
-
+			PathConfig.setProperty( PathConfig.PLUGINS, txtDirectory.getText( )
+					+ "\\plugins" );
 			Object[] children = provider.getChildren( VersionType.platform );
 			List<String> uncheckList = new ArrayList<String>( );
 			List<String> versionList = new ArrayList<String>( );
