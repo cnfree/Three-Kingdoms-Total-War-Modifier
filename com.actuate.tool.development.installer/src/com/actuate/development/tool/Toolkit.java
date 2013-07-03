@@ -103,7 +103,7 @@ public class Toolkit
 				&& "-uac".equalsIgnoreCase( args[0] ) )
 		{
 			ClassPathUpdater.loadClasspath( );
-			if ( args.length > 1 && "-server".equalsIgnoreCase( args[1] ) )
+			if ( args.length > 1 && "-sync".equalsIgnoreCase( args[1] ) )
 			{
 				new Toolkit( true );
 			}
@@ -121,7 +121,14 @@ public class Toolkit
 						+ "\\Toolkit.exe";
 				info.lpVerb = "runas";
 				info.lpDirectory = null;
-				info.lpParameters = "-uac -server";
+				StringBuffer buffer = new StringBuffer( );
+				buffer.append( "-uac" );
+				for ( int i = 0; i < args.length; i++ )
+				{
+					buffer.append( " " );
+					buffer.append( args[i] );
+				}
+				info.lpParameters = buffer.toString( );
 				Shell32.ShellExecuteEx( info );
 			}
 			catch ( Exception e )
