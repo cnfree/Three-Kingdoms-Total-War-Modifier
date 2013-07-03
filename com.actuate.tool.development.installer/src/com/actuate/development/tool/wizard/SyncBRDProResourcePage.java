@@ -261,9 +261,9 @@ public class SyncBRDProResourcePage extends WizardPage
 	{
 		if ( data != null )
 		{
-			if ( !data.getSyncBRDProResourcesData( )
-					.getTargetDirectory( )
-					.equals( txtDirectory.getText( ) ) )
+			if ( !txtDirectory.getText( )
+					.equals( data.getSyncBRDProResourcesData( )
+							.getTargetDirectory( ) ) )
 			{
 				data.getSyncBRDProResourcesData( )
 						.setTargetDirectory( txtDirectory.getText( ) );
